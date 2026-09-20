@@ -57,6 +57,61 @@ type ToastState = { text: string; type: 'success' | 'error' }
 
 const DESCRIPTION_MAX = 100
 
+const DATE_PICKER_OVERFLOW = {
+  adjustX: true,
+  adjustY: true,
+  shiftX: true,
+  shiftY: true,
+} as const
+
+const DATE_PICKER_PLACEMENTS = {
+  bottomLeft: {
+    points: ['tl', 'bl'],
+    offset: [0, 4],
+    overflow: DATE_PICKER_OVERFLOW,
+    htmlRegion: 'visible' as const,
+  },
+  bottomRight: {
+    points: ['tr', 'br'],
+    offset: [0, 4],
+    overflow: DATE_PICKER_OVERFLOW,
+    htmlRegion: 'visible' as const,
+  },
+  topLeft: {
+    points: ['bl', 'tl'],
+    offset: [0, -4],
+    overflow: DATE_PICKER_OVERFLOW,
+    htmlRegion: 'visible' as const,
+  },
+  topRight: {
+    points: ['br', 'tr'],
+    offset: [0, -4],
+    overflow: DATE_PICKER_OVERFLOW,
+    htmlRegion: 'visible' as const,
+  },
+}
+
+const DATE_PICKER_POPUP = {
+  getPopupContainer: () => document.body,
+  placement: 'bottomLeft' as const,
+  transitionName: '',
+  builtinPlacements: DATE_PICKER_PLACEMENTS,
+  styles: {
+    popup: {
+      root: { zIndex: 2200 },
+    },
+  },
+  onOpenChange: (open: boolean) => {
+    if (!open) return
+    const panel = document.querySelector('.modal-backdrop .modal-panel')
+    if (!(panel instanceof HTMLElement)) return
+    const top = panel.scrollTop
+    requestAnimationFrame(() => {
+      panel.scrollTop = top
+    })
+  },
+}
+
 function ActionIcon({ icon }: { icon: IconSvgElement }) {
   return <HugeiconsIcon icon={icon} size={16} color="currentColor" strokeWidth={1.5} />
 }
@@ -1032,6 +1087,7 @@ export default function MasterDataItems() {
                             allowClear
                             format="YYYY-MM-DD"
                             placeholder="Select start date"
+                            {...DATE_PICKER_POPUP}
                             value={toDayjs(form.startDate)}
                             disabledDate={(current) =>
                               Boolean(form.endDate && current.isAfter(dayjs(form.endDate), 'day'))
@@ -1047,6 +1103,7 @@ export default function MasterDataItems() {
                             allowClear
                             format="YYYY-MM-DD"
                             placeholder="Select end date"
+                            {...DATE_PICKER_POPUP}
                             value={toDayjs(form.endDate)}
                             disabledDate={(current) =>
                               Boolean(form.startDate && current.isBefore(dayjs(form.startDate), 'day'))
