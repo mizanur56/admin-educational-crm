@@ -166,7 +166,7 @@ export default function ActivityHistory() {
   const [logNotes, setLogNotes] = useState('')
   const [saving, setSaving] = useState(false)
   const syncedSearch = useRef(false)
-  const searchDebounce = useRef<ReturnType<typeof setTimeout>>()
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   function applySearch(next: string) {
     setSearch(next)
