@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { getMe, login } from '../api/client'
+import { isAuthSession } from '../lib/auth-session'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import PageLoader from '../components/PageLoader'
@@ -22,7 +23,7 @@ export default function Login() {
     getMe()
       .then((result) => {
         if (!cancelled) {
-          setSession(result.ok ? 'authenticated' : 'anonymous')
+          setSession(result.ok && isAuthSession(result.data) ? 'authenticated' : 'anonymous')
         }
       })
       .catch(() => {
@@ -52,7 +53,7 @@ export default function Login() {
     try {
       const result = await login(identifier.trim(), password, rememberMe)
 
-      if (result.ok) {
+      if (result.ok && isAuthSession(result.data)) {
         navigate('/dashboard', { replace: true })
         return
       }

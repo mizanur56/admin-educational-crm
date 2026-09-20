@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { getMe } from '../api/client'
 import PageLoader from '../components/PageLoader'
-import { AUTH_USER_PATCH_EVENT } from '../lib/auth-session'
+import { AUTH_USER_PATCH_EVENT, isAuthSession } from '../lib/auth-session'
 import type { AuthSession, AuthUser } from '../types'
 
 type RouteState =
@@ -23,7 +23,7 @@ export default function ProtectedRoute() {
           return
         }
 
-        if (result.ok) {
+        if (result.ok && isAuthSession(result.data)) {
           setState({ status: 'authenticated', auth: result.data })
           return
         }

@@ -52,6 +52,14 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   const payload: unknown = response.status === 204 ? null : await response.json().catch(() => null)
 
   if (response.ok) {
+    if (response.status !== 204 && payload == null) {
+      return {
+        ok: false,
+        status: response.status,
+        data: { error: 'Invalid response from server.' },
+      }
+    }
+
     return {
       ok: true,
       status: response.status,

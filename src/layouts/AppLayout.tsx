@@ -10,6 +10,7 @@ import ThemeToggle from '../components/ThemeToggle'
 import UserAvatar from '../components/UserAvatar'
 import { APP_NAV_GROUPS, type NavItem } from '../config/navigation'
 import { hasPermission } from '../lib/access'
+import PageLoader from '../components/PageLoader'
 import type { AuthSession } from '../types'
 
 function displayName(auth: AuthSession | null | undefined) {
@@ -58,6 +59,7 @@ export default function AppLayout() {
     ),
   )
   const name = useMemo(() => displayName(auth), [auth])
+  const user = auth?.user
   const navGroups = useMemo(
     () =>
       APP_NAV_GROUPS.map((group) => ({
@@ -195,6 +197,10 @@ export default function AppLayout() {
     )
   }
 
+  if (!user) {
+    return <PageLoader />
+  }
+
   return (
     <div
       className={`app-shell${collapsed ? ' sidebar-collapsed' : ''}${mobileNavOpen ? ' mobile-nav-open' : ''}`}
@@ -250,15 +256,15 @@ export default function AppLayout() {
 
             <div className="user-menu">
               <button type="button" className="user-chip" onClick={() => setMenuOpen((open) => !open)}>
-                <UserAvatar key={auth.user.photoUrl || auth.user.id} name={name} photoUrl={auth.user.photoUrl} className="user-avatar" />
+                <UserAvatar key={user.photoUrl || user.id} name={name} photoUrl={user.photoUrl} className="user-avatar" />
               </button>
               {menuOpen ? (
                 <div className="user-dropdown">
                   <div className="user-dropdown-identity">
-                    <UserAvatar key={auth.user.photoUrl || `${auth.user.id}-menu`} name={name} photoUrl={auth.user.photoUrl} className="user-avatar user-dropdown-avatar" />
+                    <UserAvatar key={user.photoUrl || `${user.id}-menu`} name={name} photoUrl={user.photoUrl} className="user-avatar user-dropdown-avatar" />
                     <div>
                       <p className="user-dropdown-name">{name}</p>
-                      <p className="user-dropdown-email">{auth.user.email}</p>
+                      <p className="user-dropdown-email">{user.email}</p>
                     </div>
                   </div>
                   <Button
