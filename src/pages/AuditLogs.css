@@ -18,9 +18,8 @@
 
 .audit-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 16px;
-  align-items: start;
+  min-width: 0;
 }
 
 .audit-main {
@@ -112,7 +111,7 @@
 
 .audit-filters {
   display: grid;
-  grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(120px, 0.9fr)) minmax(220px, 1.2fr) auto;
+  grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(120px, 0.9fr)) minmax(220px, 1.2fr);
   gap: 10px 12px;
   align-items: end;
   padding: 14px 16px;
@@ -171,26 +170,6 @@
   line-height: 1.2;
 }
 
-.audit-filter-actions-label {
-  visibility: hidden;
-}
-
-.audit-filter-buttons {
-  display: flex;
-  align-items: stretch;
-  gap: 8px;
-  height: var(--control-height);
-}
-
-.audit-filter-buttons .ui-btn {
-  height: var(--control-height);
-  min-height: var(--control-height);
-  max-height: var(--control-height);
-  padding-top: 0;
-  padding-bottom: 0;
-  box-sizing: border-box;
-  box-shadow: none;
-}
 
 .audit-table-card {
   padding: 0;
@@ -230,6 +209,10 @@
   width: 44px;
   text-align: right;
   padding-right: 12px;
+}
+
+.audit-table tbody tr {
+  cursor: pointer;
 }
 
 .audit-table tbody tr.is-active {
@@ -408,25 +391,24 @@
   width: 84px;
 }
 
-.audit-details {
-  position: sticky;
-  top: 12px;
+.audit-details-modal {
   display: grid;
   align-content: start;
   gap: 16px;
-  min-height: 640px;
-  padding: 18px 18px 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: var(--shadow-soft);
+  width: min(100%, 560px);
+}
+
+.audit-details-modal .modal-header {
+  margin-bottom: 0;
 }
 
 .audit-details-head {
   display: flex;
+  flex: 1;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  min-width: 0;
 }
 
 .audit-details-head h3 {
@@ -552,7 +534,7 @@
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  margin-top: auto;
+  margin-top: 4px;
   padding: 12px;
   border-radius: 12px;
   background: #eef2ff;
@@ -574,11 +556,6 @@
   font-size: 0.72rem;
 }
 
-.audit-empty-details {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
 [data-theme='dark'] .audit-page-btn.is-active {
   background: var(--color-primary);
   color: var(--color-on-primary);
@@ -594,16 +571,6 @@
 }
 
 @media (max-width: 1280px) {
-  .audit-body {
-    grid-template-columns: 1fr;
-  }
-
-  .audit-details {
-    position: static;
-    min-height: 0;
-    order: -1;
-  }
-
   .audit-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -612,14 +579,6 @@
 @media (max-width: 860px) {
   .audit-filters {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .audit-filter-actions {
-    grid-column: 1 / -1;
-  }
-
-  .audit-filter-buttons {
-    justify-content: flex-end;
   }
 
   .audit-stats,

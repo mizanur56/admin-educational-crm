@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { DatePicker, Dropdown, Spin } from 'antd'
 import type { MenuProps } from 'antd'
 import type { Dayjs } from 'dayjs'
@@ -8,6 +9,7 @@ import {
   Alert02Icon,
   ArrowDown01Icon,
   ArrowRight01Icon,
+  Cancel01Icon,
   DashboardSquare01Icon,
   File01Icon,
   UserMultiple02Icon,
@@ -312,8 +314,7 @@ export default function AuditLogs() {
   const location = useLocation()
   const urlQuery = readUrlSearchQuery(location.search)
   const [logs, setLogs] = useState<AuditLog[]>([])
-  const [draft, setDraft] = useState<Filters>({ ...EMPTY_FILTERS, search: urlQuery })
-  const [applied, setApplied] = useState<Filters>({ ...EMPTY_FILTERS, search: urlQuery })
+  const [filters, setFilters] = useState<Filters>({ ...EMPTY_FILTERS, search: urlQuery })
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -327,7 +328,6 @@ export default function AuditLogs() {
     if (result.ok) {
       setLogs(result.data.logs)
       setMessage('')
-      setActiveId((current) => current || result.data.logs[0]?.id || null)
     } else {
       setMessage(result.data?.error || 'You do not have permission to perform this action.')
     }
@@ -340,9 +340,9 @@ export default function AuditLogs() {
 
   useEffect(() => {
     const next = readUrlSearchQuery(location.search)
-    setDraft((current) => ({ ...current, search: next }))
-    setApplied((current) => ({ ...current, search: next }))
+    setFilters((current) => ({ ...current, search: next }))
     setPage(1)
+    setSelectedIds([])
   }, [location.search])
 
   const moduleOptions = useMemo(() => {
@@ -368,31 +368,31 @@ export default function AuditLogs() {
   const filtered = useMemo(
     () =>
       logs.filter((log) => {
-        if (!matchesSearch(log, applied.search.trim())) {
+        if (!matchesSearch(log, filters.search.trim())) {
           return false
         }
-        if (applied.module && log.entityType !== applied.module) {
+        if (filters.module && log.entityType !== filters.module) {
           return false
         }
-        if (applied.action && log.action !== applied.action) {
+        if (filters.action && log.action !== filters.action) {
           return false
         }
-        if (applied.userId && log.user?.id !== applied.userId) {
+        if (filters.userId && log.user?.id !== filters.userId) {
           return false
         }
-        return inRange(log.createdAt, applied.from, applied.to)
+        return inRange(log.createdAt, filters.from, filters.to)
       }),
-    [logs, applied],
+    [logs, filters],
   )
 
   const stats = useMemo(() => {
     const nonDateMatch = (log: AuditLog) =>
-      matchesSearch(log, applied.search.trim()) &&
-      (!applied.module || log.entityType === applied.module) &&
-      (!applied.action || log.action === applied.action) &&
-      (!applied.userId || log.user?.id === applied.userId)
-    const end = applied.to ? dayjs(applied.to).endOf('day') : dayjs()
-    const start = applied.from ? dayjs(applied.from).startOf('day') : end.subtract(6, 'day').startOf('day')
+      matchesSearch(log, filters.search.trim()) &&
+      (!filters.module || log.entityType === filters.module) &&
+      (!filters.action || log.action === filters.action) &&
+      (!filters.userId || log.user?.id === filters.userId)
+    const end = filters.to ? dayjs(filters.to).endOf('day') : dayjs()
+    const start = filters.from ? dayjs(filters.from).startOf('day') : end.subtract(6, 'day').startOf('day')
     const duration = Math.max(1, end.diff(start, 'day') + 1)
     const prevEnd = start.subtract(1, 'day').endOf('day')
     const prevStart = start.subtract(duration, 'day').startOf('day')
@@ -402,7 +402,7 @@ export default function AuditLogs() {
     const previous = logs.filter(
       (log) => nonDateMatch(log) && inRange(log.createdAt, prevStart.format('YYYY-MM-DD'), prevEnd.format('YYYY-MM-DD')),
     )
-    const current = applied.from || applied.to ? currentWindow : logs.filter(nonDateMatch)
+    const current = filters.from || filters.to ? currentWindow : logs.filter(nonDateMatch)
     const compare = (pick: (items: AuditLog[]) => number) => percentChange(pick(currentWindow), pick(previous))
     return {
       total: { value: current.length, change: compare((items) => items.length) },
@@ -419,24 +419,24 @@ export default function AuditLogs() {
         change: compare((items) => items.filter((log) => isCritical(log.action)).length),
       },
     }
-  }, [logs, applied])
+  }, [logs, filters])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
   const safePage = Math.min(page, totalPages)
   const pageRows = filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
-  const activeLog = filtered.find((log) => log.id === activeId) || pageRows[0] || null
+  const activeLog = filtered.find((log) => log.id === activeId) || null
   const pageSelectedCount = pageRows.filter((log) => selectedIds.includes(log.id)).length
 
-  function applyFilters(next = draft) {
-    setApplied(next)
+  function updateFilters(patch: Partial<Filters>) {
+    setFilters((current) => ({ ...current, ...patch }))
     setPage(1)
     setSelectedIds([])
-    setActiveId(null)
   }
 
   function clearFilters() {
-    setDraft(EMPTY_FILTERS)
-    applyFilters(EMPTY_FILTERS)
+    setFilters(EMPTY_FILTERS)
+    setPage(1)
+    setSelectedIds([])
   }
 
   function toggleSelected(id: string) {
@@ -551,9 +551,8 @@ export default function AuditLogs() {
               <Input
                 allowClear
                 placeholder="User, action, record ID..."
-                value={draft.search}
-                onChange={(event) => setDraft((current) => ({ ...current, search: event.target.value }))}
-                onPressEnter={() => applyFilters()}
+                value={filters.search}
+                onChange={(event) => updateFilters({ search: event.target.value })}
               />
             </div>
             <div className="audit-filter-field">
@@ -561,9 +560,9 @@ export default function AuditLogs() {
               <Select
                 allowClear
                 placeholder="All Modules"
-                value={draft.module || undefined}
+                value={filters.module || undefined}
                 options={moduleOptions}
-                onChange={(value) => setDraft((current) => ({ ...current, module: String(value || '') }))}
+                onChange={(value) => updateFilters({ module: String(value || '') })}
               />
             </div>
             <div className="audit-filter-field">
@@ -571,9 +570,9 @@ export default function AuditLogs() {
               <Select
                 allowClear
                 placeholder="All Actions"
-                value={draft.action || undefined}
+                value={filters.action || undefined}
                 options={actionOptions}
-                onChange={(value) => setDraft((current) => ({ ...current, action: String(value || '') }))}
+                onChange={(value) => updateFilters({ action: String(value || '') })}
               />
             </div>
             <div className="audit-filter-field">
@@ -581,36 +580,24 @@ export default function AuditLogs() {
               <Select
                 allowClear
                 placeholder="All Users"
-                value={draft.userId || undefined}
+                value={filters.userId || undefined}
                 options={userOptions}
-                onChange={(value) => setDraft((current) => ({ ...current, userId: String(value || '') }))}
+                onChange={(value) => updateFilters({ userId: String(value || '') })}
               />
             </div>
             <div className="audit-filter-field">
               <span>Date Range</span>
               <DatePicker.RangePicker
                 allowClear
-                value={draft.from && draft.to ? [toDayjs(draft.from), toDayjs(draft.to)] : null}
+                value={filters.from && filters.to ? [toDayjs(filters.from), toDayjs(filters.to)] : null}
                 format="D MMM YYYY"
                 onChange={(value) =>
-                  setDraft((current) => ({
-                    ...current,
+                  updateFilters({
                     from: toDateString(value?.[0] || null),
                     to: toDateString(value?.[1] || null),
-                  }))
+                  })
                 }
               />
-            </div>
-            <div className="audit-filter-field audit-filter-actions">
-              <span className="audit-filter-actions-label" aria-hidden="true">
-                Actions
-              </span>
-              <div className="audit-filter-buttons">
-                <Button variant="secondary" onClick={clearFilters}>
-                  Clear
-                </Button>
-                <Button onClick={() => applyFilters()}>Apply</Button>
-              </div>
             </div>
           </section>
 
@@ -742,94 +729,106 @@ export default function AuditLogs() {
             </div>
           </section>
         </div>
+      </div>
 
-        <aside className="audit-details">
-          <div className="audit-details-head">
-            <h3>Log Details</h3>
-            {activeLog ? <span className="audit-details-id">{logCode(activeLog.id)}</span> : null}
-          </div>
-          {activeLog ? (
-            <>
-              <div className="audit-details-title">
-                <span className={`audit-pill ${actionClass(activeLog.action)}`}>{humanize(activeLog.action)}</span>
-                <h4>{humanize(activeLog.action)}</h4>
-                <p>{summaryText(activeLog)}</p>
-              </div>
-              <dl className="audit-details-list">
-                <div>
-                  <dt>Date & Time</dt>
-                  <dd>{formatDateTime(activeLog.createdAt)}</dd>
+      {activeLog
+        ? createPortal(
+            <div className="modal-backdrop" onClick={() => setActiveId(null)}>
+              <div
+                className="modal-panel audit-details-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="audit-details-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="modal-header">
+                  <div className="audit-details-head">
+                    <h3 id="audit-details-title">Log Details</h3>
+                    <span className="audit-details-id">{logCode(activeLog.id)}</span>
+                  </div>
+                  <button type="button" className="modal-close" aria-label="Close" onClick={() => setActiveId(null)}>
+                    <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
+                  </button>
                 </div>
-                <div>
-                  <dt>User</dt>
-                  <dd>
-                    <div className="audit-user-cell">
-                      <span>{activeLog.user?.fullName || 'System'}</span>
-                      {activeLog.user?.email ? <small>{activeLog.user.email}</small> : null}
-                    </div>
-                  </dd>
+                <div className="audit-details-title">
+                  <span className={`audit-pill ${actionClass(activeLog.action)}`}>{humanize(activeLog.action)}</span>
+                  <h4>{humanize(activeLog.action)}</h4>
+                  <p>{summaryText(activeLog)}</p>
                 </div>
-                <div>
-                  <dt>Module</dt>
-                  <dd>
-                    <span className={`audit-pill ${moduleClass(activeLog.entityType)}`}>
-                      {moduleLabel(activeLog.entityType)}
-                    </span>
-                  </dd>
-                </div>
-                <div>
-                  <dt>Record ID</dt>
-                  <dd>{recordCode(activeLog.entityType, activeLog.entityId)}</dd>
-                </div>
-                <div>
-                  <dt>IP Address</dt>
-                  <dd>{activeLog.ipAddress || '—'}</dd>
-                </div>
-                <div>
-                  <dt>Device</dt>
-                  <dd>{parseDevice(activeLog.userAgent)}</dd>
-                </div>
-              </dl>
-              {changePairs(activeLog.metadata).length ? (
-                <>
-                  <h4 className="audit-section-title">Change Details</h4>
-                  {changePairs(activeLog.metadata).map((change) => (
-                    <div key={change.label} className="audit-change">
-                      <span className="audit-change-label">{change.label}</span>
-                      <span className="audit-pill action-rejected">{change.from}</span>
-                      <span className="audit-arrow">→</span>
-                      <span className="audit-pill action-created">{change.to}</span>
-                      <div className="audit-change-hint">
-                        <span>Previous Value</span>
-                        <span>New Value</span>
+                <dl className="audit-details-list">
+                  <div>
+                    <dt>Date & Time</dt>
+                    <dd>{formatDateTime(activeLog.createdAt)}</dd>
+                  </div>
+                  <div>
+                    <dt>User</dt>
+                    <dd>
+                      <div className="audit-user-cell">
+                        <span>{activeLog.user?.fullName || 'System'}</span>
+                        {activeLog.user?.email ? <small>{activeLog.user.email}</small> : null}
                       </div>
-                    </div>
-                  ))}
-                </>
-              ) : null}
-              {extraMetadata(activeLog.metadata).length ? (
-                <>
-                  <h4 className="audit-section-title">Additional Info</h4>
-                  <dl className="audit-extra">
-                    {extraMetadata(activeLog.metadata).map(([key, value]) => (
-                      <div key={key}>
-                        <dt>{humanize(key)}</dt>
-                        <dd>{stringifyMeta(value)}</dd>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Module</dt>
+                    <dd>
+                      <span className={`audit-pill ${moduleClass(activeLog.entityType)}`}>
+                        {moduleLabel(activeLog.entityType)}
+                      </span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Record ID</dt>
+                    <dd>{recordCode(activeLog.entityType, activeLog.entityId)}</dd>
+                  </div>
+                  <div>
+                    <dt>IP Address</dt>
+                    <dd>{activeLog.ipAddress || '—'}</dd>
+                  </div>
+                  <div>
+                    <dt>Device</dt>
+                    <dd>{parseDevice(activeLog.userAgent)}</dd>
+                  </div>
+                </dl>
+                {changePairs(activeLog.metadata).length ? (
+                  <>
+                    <h4 className="audit-section-title">Change Details</h4>
+                    {changePairs(activeLog.metadata).map((change) => (
+                      <div key={change.label} className="audit-change">
+                        <span className="audit-change-label">{change.label}</span>
+                        <span className="audit-pill action-rejected">{change.from}</span>
+                        <span className="audit-arrow">→</span>
+                        <span className="audit-pill action-created">{change.to}</span>
+                        <div className="audit-change-hint">
+                          <span>Previous Value</span>
+                          <span>New Value</span>
+                        </div>
                       </div>
                     ))}
-                  </dl>
-                </>
-              ) : null}
-              <div className="audit-note">
-                <span className="audit-note-icon">i</span>
-                This log is immutable and cannot be edited or deleted by regular users.
+                  </>
+                ) : null}
+                {extraMetadata(activeLog.metadata).length ? (
+                  <>
+                    <h4 className="audit-section-title">Additional Info</h4>
+                    <dl className="audit-extra">
+                      {extraMetadata(activeLog.metadata).map(([key, value]) => (
+                        <div key={key}>
+                          <dt>{humanize(key)}</dt>
+                          <dd>{stringifyMeta(value)}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </>
+                ) : null}
+                <div className="audit-note">
+                  <span className="audit-note-icon">i</span>
+                  This log is immutable and cannot be edited or deleted by regular users.
+                </div>
               </div>
-            </>
-          ) : (
-            <p className="audit-empty-details">Select a log from the table to inspect its details.</p>
-          )}
-        </aside>
-      </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }
