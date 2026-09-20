@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>Education CRM</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('educonsult-theme')
+          var theme =
+            stored === 'dark' || stored === 'light'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light'
+          document.documentElement.setAttribute('data-theme', theme)
+          document.documentElement.style.colorScheme = theme
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light')
+          document.documentElement.style.colorScheme = 'light'
+        }
+      })()
+    </script>
+    <style>
+      @keyframes loading-ui-wave {
+        0%,
+        100% {
+          transform: scaleY(1);
+        }
+        50% {
+          transform: scaleY(0.6);
+        }
+      }
+
+      #boot-loader {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        background: #fcfbf8;
+        color: #12786f;
+      }
+
+      html[data-theme='dark'] #boot-loader {
+        background: #101418;
+        color: #2aa89c;
+      }
+
+      #boot-loader .loading-ui-wave {
+        display: inline-flex;
+        align-items: center;
+        gap: 2.5%;
+        height: 3rem;
+        width: 6rem;
+      }
+
+      #boot-loader .loading-ui-wave-bar {
+        display: inline-block;
+        width: 12.5%;
+        border-radius: 999px;
+        background: currentColor;
+        transform-origin: center;
+        animation: loading-ui-wave 1s ease-in-out infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="boot-loader" role="status" aria-label="Loading">
+        <span class="loading-ui-wave">
+          <span class="loading-ui-wave-bar" style="height: 50%; animation-delay: 0ms"></span>
+          <span class="loading-ui-wave-bar" style="height: 75%; animation-delay: 100ms"></span>
+          <span class="loading-ui-wave-bar" style="height: 100%; animation-delay: 200ms"></span>
+          <span class="loading-ui-wave-bar" style="height: 75%; animation-delay: 300ms"></span>
+          <span class="loading-ui-wave-bar" style="height: 50%; animation-delay: 400ms"></span>
+        </span>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
