@@ -1168,7 +1168,13 @@ export default function Users() {
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user.id} className={statusFlashId === user.id ? 'is-status-updated' : undefined}>
+                  <tr
+                    key={user.id}
+                    className={statusFlashId === user.id ? 'is-status-updated' : undefined}
+                    onClick={() => {
+                      void openUser(user, 'view')
+                    }}
+                  >
                     <td>
                       <div className="user-table-person">
                         <UserAvatar name={user.fullName} photoUrl={user.photoUrl} className="user-table-avatar" />
@@ -1181,7 +1187,7 @@ export default function Users() {
                     <td>{user.role?.name || '—'}</td>
                     <td>{user.department?.name || '—'}</td>
                     <td>{user.team?.name || '—'}</td>
-                    <td>
+                    <td onClick={(event) => event.stopPropagation()}>
                       <Switch
                         checked={user.status === 'ACTIVE'}
                         checkedChildren="Active"
@@ -1193,7 +1199,7 @@ export default function Users() {
                         }}
                       />
                     </td>
-                    <td className="row-actions">
+                    <td className="row-actions" onClick={(event) => event.stopPropagation()}>
                       <RowActionMenu
                         items={(
                           [

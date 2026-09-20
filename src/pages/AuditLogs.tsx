@@ -751,7 +751,6 @@ export default function AuditLogs() {
                   </button>
                 </div>
                 <div className="audit-details-title">
-                  <span className={`audit-pill ${actionClass(activeLog.action)}`}>{humanize(activeLog.action)}</span>
                   <h4>{humanize(activeLog.action)}</h4>
                   <p>{summaryText(activeLog)}</p>
                 </div>
