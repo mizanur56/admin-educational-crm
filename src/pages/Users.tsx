@@ -1129,7 +1129,8 @@ export default function Users() {
         />
         <Select
           allowClear
-          placeholder="All teams"
+          disabled={!filters.departmentId}
+          placeholder={filters.departmentId ? 'All teams' : 'Select department first'}
           value={filters.teamId || undefined}
           options={filterTeams.map((item) => ({ value: item.id, label: item.name }))}
           onChange={(value) => setFilters((current) => ({ ...current, teamId: asSelectString(value) }))}
@@ -1457,7 +1458,8 @@ export default function Users() {
                 <FieldLabel>Team</FieldLabel>
                 <Select
                   allowClear
-                  placeholder="None"
+                  disabled={!form.departmentId}
+                  placeholder={form.departmentId ? 'None' : 'Select department first'}
                   value={form.teamId || undefined}
                   options={formTeams.map((item) => ({ value: item.id, label: item.name }))}
                   onChange={(value) => setForm((current) => ({ ...current, teamId: asSelectString(value) }))}

@@ -1045,7 +1045,8 @@ export default function EmployeeCreate() {
             <Select
               id="teamId"
               allowClear
-              placeholder="Select team"
+              disabled={!form.departmentId}
+              placeholder={form.departmentId ? 'Select team' : 'Select department first'}
               value={form.teamId || undefined}
               options={teams.map((item) => ({ value: item.id, label: item.name }))}
               onChange={(value) => update('teamId', asSelectString(value))}
