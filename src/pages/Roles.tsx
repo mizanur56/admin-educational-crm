@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { useOutletContext, useLocation } from 'react-router-dom'
 import {
@@ -16,7 +16,6 @@ import {
   Cancel01Icon,
   Delete02Icon,
   Key01Icon,
-  MoreVerticalIcon,
   PencilEdit02Icon,
   ViewIcon,
 } from '@hugeicons/core-free-icons'
@@ -25,6 +24,7 @@ import Button from '../components/Button'
 import Input from '../components/Input'
 import Select from '../components/Select'
 import PageHeader from '../components/PageHeader'
+import RowActionMenu, { type RowActionItem } from '../components/RowActionMenu'
 import { hasPermission } from '../lib/access'
 import { readUrlSearchQuery } from '../lib/url-search'
 import type { AuthSession, PermissionRecord, RecordStatus, RoleRecord } from '../types'
@@ -33,113 +33,8 @@ import './admin.css'
 type FormMode = 'create' | 'view' | 'edit'
 type ToastState = { text: string; type: 'success' | 'error' }
 
-type RowActionItem = {
-  key: string
-  label: string
-  icon: ReactNode
-  danger?: boolean
-  onSelect: () => void
-}
-
 function ActionIcon({ icon }: { icon: IconSvgElement }) {
   return <HugeiconsIcon icon={icon} size={16} color="currentColor" strokeWidth={1.5} />
-}
-
-function RowActionMenu({ items }: { items: RowActionItem[] }) {
-  const [open, setOpen] = useState(false)
-  const buttonRef = useRef<HTMLButtonElement>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const [coords, setCoords] = useState({ top: 0, left: 0 })
-
-  function placeMenu() {
-    const rect = buttonRef.current?.getBoundingClientRect()
-    if (!rect) {
-      return
-    }
-    const width = 200
-    const left = Math.min(Math.max(8, rect.right - width), window.innerWidth - width - 8)
-    setCoords({ top: rect.bottom + 6, left })
-  }
-
-  useEffect(() => {
-    if (!open) {
-      return undefined
-    }
-
-    function onPointerDown(event: MouseEvent) {
-      const target = event.target as Node
-      if (buttonRef.current?.contains(target) || menuRef.current?.contains(target)) {
-        return
-      }
-      setOpen(false)
-    }
-
-    function onReposition() {
-      placeMenu()
-    }
-
-    document.addEventListener('mousedown', onPointerDown)
-    window.addEventListener('resize', onReposition)
-    window.addEventListener('scroll', onReposition, true)
-    return () => {
-      document.removeEventListener('mousedown', onPointerDown)
-      window.removeEventListener('resize', onReposition)
-      window.removeEventListener('scroll', onReposition, true)
-    }
-  }, [open])
-
-  return (
-    <>
-      <button
-        ref={buttonRef}
-        type="button"
-        className="row-action-btn ui-btn ui-btn-ghost ui-btn-sm"
-        title="Actions"
-        aria-label="Actions"
-        aria-expanded={open}
-        onClick={(event) => {
-          event.stopPropagation()
-          if (open) {
-            setOpen(false)
-            return
-          }
-          placeMenu()
-          setOpen(true)
-        }}
-      >
-        <span className="ui-btn-icon">
-          <ActionIcon icon={MoreVerticalIcon} />
-        </span>
-      </button>
-      {open
-        ? createPortal(
-            <div
-              ref={menuRef}
-              className="row-action-menu"
-              style={{ top: coords.top, left: coords.left }}
-              role="menu"
-            >
-              {items.map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  role="menuitem"
-                  className={item.danger ? 'is-danger' : undefined}
-                  onClick={() => {
-                    setOpen(false)
-                    item.onSelect()
-                  }}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </div>,
-            document.body,
-          )
-        : null}
-    </>
-  )
 }
 
 type RoleForm = {
