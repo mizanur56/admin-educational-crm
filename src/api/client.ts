@@ -19,8 +19,6 @@ import type {
   EmployeeOptions,
   EmployeeRecord,
   GlobalSearchHit,
-  LeadOptions,
-  LeadRecord,
 } from '../types'
 
 const API_BASE = '/api'
@@ -514,41 +512,6 @@ export async function fetchEmployeeDocumentBlob(employeeId: string, documentId: 
     blob,
     mimeType: response.headers.get('content-type') || blob.type,
   }
-}
-
-export type LeadListParams = {
-  search?: string
-  countryId?: string
-  sourceId?: string
-  statusId?: string
-}
-
-export type LeadPayload = Record<string, unknown>
-
-export function listLeads(params: LeadListParams = {}) {
-  return apiRequest<{ leads: LeadRecord[] }>(withQuery('/leads', params))
-}
-
-export function listLeadOptions() {
-  return apiRequest<LeadOptions>('/leads/options')
-}
-
-export function getLead(id: string) {
-  return apiRequest<{ lead: LeadRecord }>(`/leads/${id}`)
-}
-
-export function createLead(body: LeadPayload) {
-  return apiRequest<{ lead: LeadRecord }>('/leads', { method: 'POST', body })
-}
-
-export function updateLead(id: string, body: LeadPayload) {
-  return apiRequest<{ lead: LeadRecord }>(`/leads/${id}`, { method: 'PATCH', body })
-}
-
-export function checkLeadDuplicate(phoneCountryCode: string, phoneNumber: string, excludeId?: string) {
-  return apiRequest<{
-    lead: { id: string; leadCode: string; fullName: string; phoneE164: string; visible: boolean } | null
-  }>(withQuery('/leads/duplicates', { phoneCountryCode, phoneNumber, excludeId }))
 }
 
 export function updateEmployeeStatus(

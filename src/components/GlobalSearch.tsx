@@ -5,7 +5,7 @@ import { APP_NAV_GROUPS, flattenSearchablePages, type NavItem } from '../config/
 import { hasPermission } from '../lib/access'
 import type { AuthSession, GlobalSearchHit } from '../types'
 
-const GROUP_ORDER = ['Pages', 'Leads', 'Users', 'Employees', 'Roles', 'Master Data', 'Activity', 'Audit Log', 'Account']
+const GROUP_ORDER = ['Pages', 'Users', 'Employees', 'Roles', 'Master Data', 'Activity', 'Audit Log', 'Account']
 
 type Props = {
   auth: AuthSession

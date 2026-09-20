@@ -6,8 +6,6 @@ import Profile from './pages/Profile'
 import AuditLogs from './pages/AuditLogs'
 import ActivityHistory from './pages/ActivityHistory'
 import ComingSoon from './pages/ComingSoon'
-import LeadCreate from './pages/LeadCreate'
-import Leads from './pages/Leads'
 import Dashboard from './pages/Dashboard'
 import EmployeeCreate from './pages/EmployeeCreate'
 import EmployeeProfile from './pages/EmployeeProfile'
@@ -36,12 +34,8 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/account" element={<Account />} />
-          <Route element={<PermissionRoute permission="lead:create" />}>
-            <Route path="/leads/new" element={<LeadCreate />} />
-          </Route>
           <Route element={<PermissionRoute permission="lead:view" />}>
-            <Route path="/leads" element={<Leads />} />
-            <Route path="/leads/:id" element={<LeadCreate />} />
+            <Route path="/leads" element={<ComingSoon title="Leads" />} />
           </Route>
           <Route element={<PermissionRoute permission="lead:convert" />}>
             <Route path="/applications" element={<ComingSoon title="Applications" />} />
