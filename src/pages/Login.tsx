@@ -53,8 +53,13 @@ export default function Login() {
     try {
       const result = await login(identifier.trim(), password, rememberMe)
 
-      if (result.ok && isAuthSession(result.data)) {
-        navigate('/dashboard', { replace: true })
+      if (result.ok) {
+        if (isAuthSession(result.data)) {
+          navigate('/dashboard', { replace: true })
+          return
+        }
+
+        setMessage('Could not sign in.')
         return
       }
 
