@@ -274,6 +274,7 @@
   width: min(100%, 720px);
   max-height: min(90vh, 860px);
   overflow: auto;
+  overflow-anchor: none;
   background: var(--surface);
   border-radius: 16px;
   padding: 24px;

@@ -24,6 +24,7 @@ function ThemedApp() {
       theme={{
         algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
         token: {
+          zIndexPopupBase: 2000,
           colorPrimary: '#35AD0B',
           borderRadius: 10,
           fontFamily: 'Inter, Segoe UI, system-ui, sans-serif',

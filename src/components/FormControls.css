@@ -60,10 +60,26 @@
   outline: none !important;
 }
 
-.ant-picker {
+.ant-picker:not(.ant-picker-dropdown) {
   width: 100%;
   height: var(--control-height);
   min-height: var(--control-height);
+}
+
+.ant-picker-dropdown {
+  z-index: 2200 !important;
+  max-height: calc(100vh - 16px);
+}
+
+.ant-picker-dropdown .ant-picker-panel-container {
+  max-height: calc(100vh - 16px);
+  overflow: auto;
+}
+
+.ant-picker-header {
+  display: flex !important;
+  align-items: center;
+  min-height: 40px;
 }
 
 .ant-select-single .ant-select-selection-item,
