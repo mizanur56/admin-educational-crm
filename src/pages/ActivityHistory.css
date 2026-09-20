@@ -51,21 +51,29 @@
   gap: 10px;
 }
 
-.ah-header-actions .ant-picker {
-  min-width: 260px;
-  height: var(--control-height);
-  border-radius: 12px;
-}
-
 .ah-filters-bar {
   display: grid;
-  grid-template-columns: minmax(200px, 1.4fr) minmax(160px, 280px) auto auto;
+  grid-template-columns: minmax(240px, 280px) minmax(200px, 1.4fr) minmax(160px, 280px);
   gap: 10px;
   align-items: center;
   padding: 12px 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
+}
+
+.ah-filters-bar .ant-picker,
+.ah-filters-bar .ui-input,
+.ah-filters-bar .ant-input-affix-wrapper,
+.ah-filters-bar .ui-select,
+.ah-filters-bar .ant-select {
+  width: 100%;
+  min-width: 0;
+}
+
+.ah-filters-bar .ant-picker {
+  height: var(--control-height);
+  border-radius: 12px;
 }
 
 .ah-stats {
@@ -293,11 +301,6 @@
 .ah-table-head span {
   color: var(--text-muted);
   font-size: 0.8rem;
-}
-
-.ah-table-head .ui-input,
-.ah-table-head .ant-input-affix-wrapper {
-  width: min(280px, 100%);
 }
 
 .ah-table-wrap {

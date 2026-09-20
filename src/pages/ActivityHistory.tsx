@@ -9,7 +9,6 @@ import {
   ArrowDown01Icon,
   Calendar03Icon,
   Call02Icon,
-  FilterIcon,
   File01Icon,
   Mail01Icon,
   Message01Icon,
@@ -144,7 +143,6 @@ export default function ActivityHistory() {
   const [category, setCategory] = useState<'all' | ActivityFeedCategory>('all')
   const [search, setSearch] = useState(() => readUrlSearchQuery(location.search))
   const [userId, setUserId] = useState('')
-  const [filtersOpen, setFiltersOpen] = useState(false)
   const [items, setItems] = useState<ActivityFeedItem[]>([])
   const [counts, setCounts] = useState(EMPTY_COUNTS)
   const [summary, setSummary] = useState<ActivityFeedResponse['summary']>({
@@ -168,6 +166,16 @@ export default function ActivityHistory() {
   const [logNotes, setLogNotes] = useState('')
   const [saving, setSaving] = useState(false)
   const syncedSearch = useRef(false)
+  const searchDebounce = useRef<ReturnType<typeof setTimeout>>()
+
+  function applySearch(next: string) {
+    setSearch(next)
+    window.clearTimeout(searchDebounce.current)
+    searchDebounce.current = setTimeout(() => {
+      setPage(1)
+      void load({ from, to, category, search: next, userId })
+    }, 350)
+  }
 
   async function load(next = { from, to, category, search, userId }) {
     setLoading(true)
@@ -324,12 +332,6 @@ export default function ActivityHistory() {
           </div>
         </div>
         <div className="ah-header-actions">
-          <DatePicker.RangePicker
-            allowClear={false}
-            value={[dayjs(from), dayjs(to)]}
-            format="D MMM YYYY"
-            onChange={(value) => applyRange(toDateString(value?.[0] || null), toDateString(value?.[1] || null))}
-          />
           <Dropdown menu={{ items: exportItems }} trigger={['click']}>
             <span>
               <Button variant="secondary">
@@ -338,58 +340,35 @@ export default function ActivityHistory() {
               </Button>
             </span>
           </Dropdown>
-          <Button variant="secondary" onClick={() => setFiltersOpen((open) => !open)}>
-            <HugeiconsIcon icon={FilterIcon} size={16} />
-            Filters
-          </Button>
         </div>
       </header>
 
-      {filtersOpen ? (
-        <section className="ah-filters-bar">
-          <Input
-            allowClear
-            placeholder="Search activities..."
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            onPressEnter={() => {
-              setPage(1)
-              void load({ from, to, category, search, userId })
-            }}
-          />
-          <Select
-            allowClear
-            placeholder="All users"
-            value={userId || undefined}
-            options={userOptions}
-            onChange={(value) => {
-              const next = String(value || '')
-              setUserId(next)
-              setPage(1)
-              void load({ from, to, category, search, userId: next })
-            }}
-          />
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setSearch('')
-              setUserId('')
-              setPage(1)
-              void load({ from, to, category, search: '', userId: '' })
-            }}
-          >
-            Clear
-          </Button>
-          <Button
-            onClick={() => {
-              setPage(1)
-              void load({ from, to, category, search, userId })
-            }}
-          >
-            Apply
-          </Button>
-        </section>
-      ) : null}
+      <section className="ah-filters-bar">
+        <DatePicker.RangePicker
+          allowClear={false}
+          value={[dayjs(from), dayjs(to)]}
+          format="D MMM YYYY"
+          onChange={(value) => applyRange(toDateString(value?.[0] || null), toDateString(value?.[1] || null))}
+        />
+        <Input
+          allowClear
+          placeholder="Search activities..."
+          value={search}
+          onChange={(event) => applySearch(event.target.value)}
+        />
+        <Select
+          allowClear
+          placeholder="All users"
+          value={userId || undefined}
+          options={userOptions}
+          onChange={(value) => {
+            const next = String(value || '')
+            setUserId(next)
+            setPage(1)
+            void load({ from, to, category, search, userId: next })
+          }}
+        />
+      </section>
 
       {message ? <p className="admin-banner">{message}</p> : null}
 
@@ -447,16 +426,6 @@ export default function ActivityHistory() {
               <h3>All Activities</h3>
               <span>{items.length.toLocaleString()} events</span>
             </div>
-            <Input
-              allowClear
-              placeholder="Search activities..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              onPressEnter={() => {
-                setPage(1)
-                void load({ from, to, category, search, userId })
-              }}
-            />
           </div>
           <Spin spinning={loading}>
             {!loading && items.length === 0 ? (
