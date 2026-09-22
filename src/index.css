@@ -210,4 +210,119 @@
   .ant-checkbox:hover .ant-checkbox-inner {
     border-color: var(--color-primary) !important;
   }
+
+  /* Ant Design control sizing (cannot be inlined on TSX) */
+  :root {
+    --control-height: 42px;
+  }
+
+  .ant-input,
+  .ant-input-affix-wrapper,
+  .ant-select-single .ant-select-selector,
+  .ant-input-search .ant-input-search-button.ant-btn,
+  .ant-input-group-wrapper .ant-input-group-addon .ant-btn {
+    height: var(--control-height);
+    min-height: var(--control-height);
+    box-sizing: border-box;
+  }
+
+  .ant-input-affix-wrapper .ant-input,
+  .ant-input-group .ant-input,
+  .ant-input-search .ant-input {
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    padding-block: 0;
+  }
+
+  .ant-input:-webkit-autofill,
+  .ant-input-affix-wrapper .ant-input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--surface) inset !important;
+    box-shadow: 0 0 0 1000px var(--surface) inset !important;
+    -webkit-text-fill-color: var(--text) !important;
+    caret-color: var(--text);
+    transition: background-color 9999s ease-out 0s;
+  }
+
+  .ant-input-affix-wrapper {
+    background-color: var(--surface);
+  }
+
+  .ant-input[readonly],
+  .ant-input-affix-wrapper-readonly,
+  .ant-input-affix-wrapper-readonly .ant-input {
+    background-color: var(--surface) !important;
+    cursor: text;
+  }
+
+  .ant-select-single .ant-select-selector {
+    display: flex;
+    align-items: center;
+  }
+
+  .ant-select input,
+  .ant-picker input {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .ant-picker:not(.ant-picker-dropdown) {
+    width: 100%;
+    height: var(--control-height);
+    min-height: var(--control-height);
+  }
+
+  .ant-picker-dropdown {
+    z-index: 2200 !important;
+    max-height: calc(100vh - 16px);
+  }
+
+  .ant-picker-dropdown .ant-picker-panel-container {
+    max-height: calc(100vh - 16px);
+    overflow: auto;
+  }
+
+  .ant-picker-header {
+    display: flex !important;
+    align-items: center;
+    min-height: 40px;
+  }
+
+  .ant-select-single .ant-select-selection-item,
+  .ant-select-single .ant-select-selection-placeholder {
+    line-height: 1.2;
+  }
+
+  [data-theme='dark'] .ant-input,
+  [data-theme='dark'] .ant-input-affix-wrapper,
+  [data-theme='dark'] .ant-select-selector {
+    background-color: var(--input-bg) !important;
+  }
+
+  [data-theme='dark'] .ant-input:-webkit-autofill,
+  [data-theme='dark'] .ant-input-affix-wrapper .ant-input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
+    box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
+    -webkit-text-fill-color: var(--text) !important;
+  }
+}
+
+@keyframes status-pill-flash {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
