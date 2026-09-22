@@ -39,6 +39,19 @@ function isPathActive(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(`${to}/`)
 }
 
+function menuItemClass(active: boolean) {
+  return [
+    'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-text-strong no-underline transition-[background,color] duration-150 ease-in-out',
+    '[&_svg]:shrink-0 [&_svg]:text-text-muted [&_svg]:transition-colors [&_svg]:duration-150 [&_svg]:ease-in-out',
+    'hover:text-nav-active hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:[&_svg]:text-nav-active',
+    active
+      ? 'bg-nav-active-bg text-nav-active [&_svg]:text-nav-active hover:bg-nav-active-bg'
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+}
+
 export default function UserDropdown({
   auth,
   displayName,
@@ -117,10 +130,18 @@ export default function UserDropdown({
   }
 
   return (
-    <div className="user-menu" ref={rootRef}>
+    <div className="relative" ref={rootRef}>
       <button
         type="button"
-        className={`user-chip dropdown-toggle${isOpen ? ' is-open' : ''}`}
+        className={[
+          'grid size-11 cursor-pointer place-items-center rounded-full border border-border bg-surface p-0 transition-[border-color,background,box-shadow] duration-200 ease-in-out',
+          'hover:border-input-border hover:bg-hover-bg',
+          isOpen
+            ? 'border-primary shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]'
+            : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         aria-expanded={isOpen}
         aria-label="User menu"
         onClick={() => setIsOpen((open) => !open)}
@@ -129,31 +150,38 @@ export default function UserDropdown({
           key={user.photoUrl || user.id}
           name={displayName}
           photoUrl={user.photoUrl}
-          className="user-avatar"
+          className="grid size-8 place-items-center overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-primary)_16%,white)] text-[0.72rem] font-bold text-primary-active dark:bg-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:text-nav-active [&_img]:size-full [&_img]:object-cover"
         />
       </button>
 
       {shouldRender ? (
         <div
-          className={`user-dropdown${isVisible ? ' is-visible' : ''}`}
+          className={[
+            'absolute top-[calc(100%+10px)] right-0 z-40 flex max-h-[min(70vh,480px)] w-[260px] origin-top-right flex-col overflow-hidden rounded-[10px] border border-border bg-surface p-0 shadow-card transition-[opacity,transform] ease-out',
+            isVisible
+              ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
+              : 'pointer-events-none -translate-y-1.5 scale-[0.97] opacity-0',
+          ].join(' ')}
           style={{ transitionDuration: `${CLOSE_MS}ms` }}
         >
-          <div className="user-dropdown-header">
-            <p className="user-dropdown-name">
+          <div className="shrink-0 border-b border-border-subtle px-3 py-2">
+            <p className="m-0 overflow-hidden text-[13px] leading-tight font-semibold text-ellipsis whitespace-nowrap text-text-strong">
               {displayName}
-              {roleName ? <span className="user-dropdown-role"> ({roleName})</span> : null}
+              {roleName ? <span className="font-normal text-text-muted"> ({roleName})</span> : null}
             </p>
-            <p className="user-dropdown-email">{user.email}</p>
+            <p className="mt-0.5 mb-0 overflow-hidden text-[11px] leading-tight text-ellipsis whitespace-nowrap text-text-muted">
+              {user.email}
+            </p>
           </div>
 
-          <ul className="user-dropdown-list">
+          <ul className="m-0 flex list-none flex-col gap-px p-1.5">
             {ACCOUNT_MENUS.map((item) => {
               const active = isPathActive(location.pathname, item.to)
               return (
                 <li key={item.key}>
                   <NavLink
                     to={item.to}
-                    className={`user-dropdown-item${active ? ' is-active' : ''}`}
+                    className={menuItemClass(active)}
                     onClick={() => setIsOpen(false)}
                   >
                     {'navIcon' in item && item.navIcon ? (
@@ -175,17 +203,17 @@ export default function UserDropdown({
 
           {quickMenus.length > 0 ? (
             <>
-              <div className="user-dropdown-section">
-                <p className="user-dropdown-section-label">Quick</p>
+              <div className="shrink-0 px-3 pt-0.5">
+                <p className="m-0 text-[10px] font-semibold tracking-[0.06em] text-text-faint uppercase">Quick</p>
               </div>
-              <ul className="user-dropdown-list user-dropdown-list-quick">
+              <ul className="m-0 flex min-h-0 flex-[1_1_auto] list-none flex-col gap-px overflow-y-auto p-1.5 pt-0">
                 {quickMenus.map((item) => {
                   const active = isPathActive(location.pathname, item.to)
                   return (
                     <li key={item.key}>
                       <NavLink
                         to={item.to}
-                        className={`user-dropdown-item${active ? ' is-active' : ''}`}
+                        className={menuItemClass(active)}
                         onClick={() => setIsOpen(false)}
                       >
                         <NavIcon name={item.icon} size={15} />
@@ -198,10 +226,10 @@ export default function UserDropdown({
             </>
           ) : null}
 
-          <div className="user-dropdown-footer">
+          <div className="border-t border-border-subtle p-1.5">
             <button
               type="button"
-              className="user-dropdown-logout"
+              className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-2 py-1.5 font-[inherit] text-[13px] font-medium text-red-600 transition-colors duration-150 ease-in-out hover:bg-[color-mix(in_srgb,#dc2626_8%,transparent)] disabled:cursor-wait disabled:opacity-70 dark:text-red-400 dark:hover:bg-[color-mix(in_srgb,#f87171_12%,transparent)]"
               onClick={() => void handleLogout()}
               disabled={pending}
             >

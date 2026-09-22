@@ -5,8 +5,6 @@ import { ConfigProvider, theme as antdTheme } from 'antd'
 import App from './App'
 import { ThemeProvider, useTheme } from './theme/ThemeProvider'
 import './index.css'
-import './components/Button.css'
-import './components/FormControls.css'
 
 const root = document.getElementById('root')
 

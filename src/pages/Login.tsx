@@ -72,10 +72,13 @@ export default function Login() {
   }
 
   return (
-    <form className="card" onSubmit={handleSubmit}>
-      <p className="eyebrow">Education CRM</p>
-      <h1>Welcome back</h1>
-      <p className="subtitle">Sign in to continue to your dashboard</p>
+    <form
+      className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"
+      onSubmit={handleSubmit}
+    >
+      <p className="mb-2 text-[0.85rem] font-bold tracking-[0.04em] text-link uppercase">Education CRM</p>
+      <h1 className="mb-2">Welcome back</h1>
+      <p className="mb-6 text-text-muted">Sign in to continue to your dashboard</p>
 
       <label htmlFor="identifier">Email or Username</label>
       <Input
@@ -98,23 +101,24 @@ export default function Login() {
         required
       />
 
-      <label className="remember-me" htmlFor="rememberMe">
+      <label className="mb-4 flex items-center gap-2 font-medium" htmlFor="rememberMe">
         <input
           id="rememberMe"
           type="checkbox"
+          className="m-0 w-auto"
           checked={rememberMe}
           onChange={(event) => setRememberMe(event.target.checked)}
         />
         Remember me
       </label>
 
-      {message ? <p className="error">{message}</p> : null}
+      {message ? <p className="mb-4 text-danger">{message}</p> : null}
 
       <Button type="submit" fullWidth disabled={pending}>
         {pending ? 'Signing in…' : 'Sign In'}
       </Button>
 
-      <p className="hint">
+      <p className="mt-4 mb-0 text-[0.85rem] text-text-muted">
         <Link to="/forgot-password">Forgot password?</Link>
       </p>
     </form>

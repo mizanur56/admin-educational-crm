@@ -53,7 +53,13 @@ function Highlight({ text, query }: { text: string; query: string }) {
   return (
     <>
       {parts.map((part, index) =>
-        part.toLowerCase() === query.toLowerCase() ? <mark key={`${part}-${index}`}>{part}</mark> : part,
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark key={`${part}-${index}`} className="rounded-sm bg-primary/22 p-0 text-inherit">
+            {part}
+          </mark>
+        ) : (
+          part
+        ),
       )}
     </>
   )
@@ -240,7 +246,18 @@ export default function GlobalSearch({ auth }: Props) {
   const showPanel = open && (query.trim().length > 0 || pageHits.length > 0)
 
   return (
-    <div ref={rootRef} className={`top-search${open ? ' is-open' : ''}`}>
+    <div
+      ref={rootRef}
+      className={[
+        'relative flex w-full min-w-[180px] max-w-search flex-[1_1_280px] items-center gap-2.5 rounded-search border border-search-border bg-search-bg px-3 text-text-muted shadow-soft',
+        'max-[1100px]:min-w-0 max-[960px]:order-3 max-[960px]:mx-4 max-[960px]:mb-3 max-[960px]:w-auto max-[960px]:min-w-0 max-[960px]:max-w-none max-[960px]:flex-[1_1_100%] max-[640px]:mx-3 max-[640px]:mb-3',
+        open
+          ? 'border-[color-mix(in_srgb,var(--color-primary)_45%,var(--color-search-border))] shadow-[0_10px_28px_rgb(22_50_79_/_0.08)]'
+          : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <span className="sr-only">Search</span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <circle cx="11" cy="11" r="7" />
@@ -248,7 +265,7 @@ export default function GlobalSearch({ auth }: Props) {
       </svg>
       <input
         ref={inputRef}
-        className="header-search-input"
+        className="header-search-input m-0 w-full border-0 bg-transparent py-2.5 text-text outline-none placeholder:text-text-faint focus:outline-none"
         value={query}
         role="combobox"
         aria-expanded={showPanel}
@@ -264,49 +281,65 @@ export default function GlobalSearch({ auth }: Props) {
         onKeyDown={onKeyDown}
         placeholder="Search anything..."
       />
-      <kbd>{isMac ? '⌘K' : 'Ctrl K'}</kbd>
+      <kbd className="rounded-[calc(var(--radius-search)-4px)] border border-header-border bg-page-bg px-2 py-0.5 text-[0.72rem] whitespace-nowrap max-[960px]:hidden">
+        {isMac ? '⌘K' : 'Ctrl K'}
+      </kbd>
 
       {showPanel ? (
-        <div id="global-search-results" className="global-search-panel" role="listbox">
-          {loading ? <p className="global-search-status">Searching…</p> : null}
+        <div
+          id="global-search-results"
+          className="absolute top-[calc(100%+8px)] right-0 left-0 z-60 max-h-[min(70vh,520px)] overflow-auto rounded-[14px] border border-card-border bg-surface py-1 shadow-card"
+          role="listbox"
+        >
+          {loading ? <p className="m-0 px-3.5 py-2.5 text-[0.82rem] text-text-muted">Searching…</p> : null}
           {!loading && query.trim() && results.length === 0 ? (
-            <p className="global-search-status">No matches for “{query.trim()}”.</p>
+            <p className="m-0 px-3.5 py-2.5 text-[0.82rem] text-text-muted">No matches for “{query.trim()}”.</p>
           ) : null}
           {grouped.map((section, sectionIndex) => {
             const offset = grouped.slice(0, sectionIndex).reduce((sum, item) => sum + item.items.length, 0)
             return (
-              <section key={section.group} className="global-search-group">
-                <h3>{section.group}</h3>
+              <section key={section.group}>
+                <h3 className="mx-3.5 mt-1 mb-1.5 text-[0.68rem] font-bold tracking-[0.08em] text-text-faint uppercase">
+                  {section.group}
+                </h3>
                 {section.items.map((hit, itemIndex) => {
                   const index = offset + itemIndex
+                  const active = index === activeIndex
                   return (
                     <button
                       key={hit.id}
                       type="button"
                       role="option"
-                      aria-selected={index === activeIndex}
-                      className={`global-search-item${index === activeIndex ? ' is-active' : ''}`}
+                      aria-selected={active}
+                      className={[
+                        'flex w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-3.5 py-2 text-left text-text',
+                        active ? 'bg-hover-bg' : 'hover:bg-hover-bg',
+                      ].join(' ')}
                       onMouseEnter={() => setActiveIndex(index)}
                       onClick={() => goTo(hit)}
                     >
-                      <span className="global-search-item-copy">
-                        <strong>
+                      <span className="grid min-w-0 gap-0.5">
+                        <strong className="overflow-hidden text-[0.9rem] font-semibold text-ellipsis whitespace-nowrap text-text-strong">
                           <Highlight text={hit.title} query={query} />
                         </strong>
                         {hit.subtitle ? (
-                          <small>
+                          <small className="overflow-hidden text-[0.75rem] text-ellipsis whitespace-nowrap text-text-muted">
                             <Highlight text={hit.subtitle} query={query} />
                           </small>
                         ) : null}
                       </span>
-                      <em>{hit.type === 'page' ? 'Page' : hit.group}</em>
+                      <em className="shrink-0 text-[0.7rem] text-text-faint not-italic">
+                        {hit.type === 'page' ? 'Page' : hit.group}
+                      </em>
                     </button>
                   )
                 })}
               </section>
             )
           })}
-          <p className="global-search-hint">↑↓ to move · Enter to open · Esc to close</p>
+          <p className="m-0 border-t border-border-subtle px-3.5 py-2.5 text-[0.72rem] text-text-faint">
+            ↑↓ to move · Enter to open · Esc to close
+          </p>
         </div>
       ) : null}
     </div>

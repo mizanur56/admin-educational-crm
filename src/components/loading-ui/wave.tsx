@@ -23,14 +23,14 @@ export function Wave({ className = '', ...props }: WaveProps) {
       </style>
       <span
         role="status"
-        className={`loading-ui-wave${className ? ` ${className}` : ''}`}
+        className={`inline-flex items-center gap-[2.5%] text-current${className ? ` ${className}` : ''}`}
         {...props}
       >
         {WAVE_BAR_HEIGHTS.map((height, index) => (
           <span
             key={index}
             aria-hidden="true"
-            className="loading-ui-wave-bar"
+            className="inline-block origin-center rounded-full bg-current"
             style={{
               width: '12.5%',
               height,
