@@ -25,6 +25,7 @@ import {
   statusConfirmMeta,
   statusConfirmPanel,
   tableWrap,
+  adminTableRowStatusUpdated,
 } from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
@@ -514,7 +515,7 @@ export default function Employees() {
                 {employees.map((employee) => (
                   <tr
                     key={employee.id}
-                    className={statusFlashId === employee.id ? 'is-status-updated' : undefined}
+                    className={statusFlashId === employee.id ? adminTableRowStatusUpdated : undefined}
                     onClick={() => openEmployee(employee)}
                   >
                     <td>

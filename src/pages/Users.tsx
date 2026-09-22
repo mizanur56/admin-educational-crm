@@ -38,6 +38,7 @@ import {
   userViewPanel,
   userViewScopeBase,
   userViewScopeTone,
+  adminTableRowStatusUpdated,
 } from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
@@ -1211,7 +1212,7 @@ export default function Users() {
                 users.map((user) => (
                   <tr
                     key={user.id}
-                    className={statusFlashId === user.id ? 'is-status-updated' : undefined}
+                    className={statusFlashId === user.id ? adminTableRowStatusUpdated : undefined}
                     onClick={() => {
                       void openUser(user, 'view')
                     }}
