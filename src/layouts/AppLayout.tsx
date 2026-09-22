@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { ArrowDown01Icon, ArrowRight01Icon, Cancel01Icon, Logout03Icon, Menu01Icon } from '@hugeicons/core-free-icons'
+import { ArrowRight01Icon, Cancel01Icon, Logout03Icon, Menu01Icon } from '@hugeicons/core-free-icons'
 import { logout } from '../api/client'
 import GlobalSearch from '../components/GlobalSearch'
 import NavIcon from '../components/NavIcon'
-import Button from '../components/Button'
 import ThemeToggle from '../components/ThemeToggle'
-import UserAvatar from '../components/UserAvatar'
+import UserDropdown from '../components/UserDropdown'
 import { APP_NAV_GROUPS, type NavItem } from '../config/navigation'
 import { hasPermission } from '../lib/access'
 import PageLoader from '../components/PageLoader'
@@ -45,7 +44,6 @@ export default function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [pending, setPending] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
@@ -86,7 +84,6 @@ export default function AppLayout() {
 
   useEffect(() => {
     setMobileNavOpen(false)
-    setMenuOpen(false)
   }, [location.pathname])
 
   useEffect(() => {
@@ -174,25 +171,29 @@ export default function AppLayout() {
       <div key={item.to} className="nav-branch">
         <button
           type="button"
-          className={`nav-link nav-link-toggle${childActive ? ' is-current' : ''}`}
+          className={`nav-link nav-link-toggle${childActive ? ' is-current' : ''}${isOpen ? ' is-open' : ''}`}
+          aria-expanded={isOpen}
           onClick={() => toggleMenu(item.to)}
         >
           <NavIcon name={item.icon} />
           <span>{item.label}</span>
           <HugeiconsIcon
-            icon={isOpen ? ArrowDown01Icon : ArrowRight01Icon}
+            className="nav-chevron"
+            icon={ArrowRight01Icon}
             size={12}
             color="currentColor"
             strokeWidth={1.5}
           />
         </button>
-        {isOpen
-          ? children.map((child) => (
+        <div className={`nav-collapse${isOpen ? ' is-open' : ''}`}>
+          <div className="nav-collapse-inner">
+            {children.map((child) => (
               <NavLink key={child.to} to={child.to} className="nav-link nav-link-sub" title={child.label}>
                 <span>{child.label}</span>
               </NavLink>
-            ))
-          : null}
+            ))}
+          </div>
+        </div>
       </div>
     )
   }
@@ -254,44 +255,7 @@ export default function AppLayout() {
               <i className="notify-dot" />
             </button>
 
-            <div className="user-menu">
-              <button type="button" className="user-chip" onClick={() => setMenuOpen((open) => !open)}>
-                <UserAvatar key={user.photoUrl || user.id} name={name} photoUrl={user.photoUrl} className="user-avatar" />
-              </button>
-              {menuOpen ? (
-                <div className="user-dropdown">
-                  <div className="user-dropdown-identity">
-                    <UserAvatar key={user.photoUrl || `${user.id}-menu`} name={name} photoUrl={user.photoUrl} className="user-avatar user-dropdown-avatar" />
-                    <div>
-                      <p className="user-dropdown-name">{name}</p>
-                      <p className="user-dropdown-email">{user.email}</p>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    fullWidth
-                    onClick={() => {
-                      setMenuOpen(false)
-                      navigate('/profile')
-                    }}
-                  >
-                    Profile
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    fullWidth
-                    onClick={() => {
-                      setMenuOpen(false)
-                      navigate('/account')
-                    }}
-                  >
-                    Change password
-                  </Button>
-                </div>
-              ) : null}
-            </div>
+            <UserDropdown auth={auth} displayName={name} />
           </div>
         </div>
       </header>
@@ -314,19 +278,25 @@ export default function AppLayout() {
               <section key={group.id} className="nav-group">
                 <button
                   type="button"
-                  className="nav-group-title"
+                  className={`nav-group-title${isOpen ? ' is-open' : ''}`}
+                  aria-expanded={isOpen}
                   onClick={() => !collapsed && toggleGroup(group.id)}
                 >
                   <span>{group.label}</span>
                   <HugeiconsIcon
-                    icon={isOpen ? ArrowDown01Icon : ArrowRight01Icon}
+                    className="nav-chevron"
+                    icon={ArrowRight01Icon}
                     size={12}
                     color="currentColor"
                     strokeWidth={1.5}
                   />
                 </button>
 
-                {isOpen ? group.items.map((item) => renderNavItem(item)) : null}
+                <div className={`nav-collapse${isOpen ? ' is-open' : ''}`}>
+                  <div className="nav-collapse-inner nav-group-items">
+                    {group.items.map((item) => renderNavItem(item))}
+                  </div>
+                </div>
               </section>
             )
           })}
