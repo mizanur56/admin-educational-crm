@@ -19,6 +19,7 @@ import { readUrlSearchQuery } from '../lib/url-search'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import Select from '../components/Select'
 import type { AuditLog } from '../types'
 import { useLocation } from 'react-router-dom'
@@ -551,6 +552,10 @@ export default function AuditLogs() {
 
   return (
     <div className={cx(adminPage, 'gap-[18px]')}>
+      <PageMeta
+        title="Audit Log"
+        description="Track all important actions, data changes and system events across the CRM."
+      />
       <PageHeader
         title="Audit Log"
         subtitle="Track all important actions, data changes and system events across the CRM."

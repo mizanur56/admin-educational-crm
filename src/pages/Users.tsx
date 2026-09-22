@@ -93,6 +93,7 @@ import RowActionMenu, { type RowActionItem } from '../components/RowActionMenu'
 import Input from '../components/Input'
 import Select from '../components/Select'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import { hasPermission } from '../lib/access'
 import { readUrlSearchQuery } from '../lib/url-search'
 import type {
@@ -1135,6 +1136,7 @@ export default function Users() {
 
   return (
     <div className={`${adminPage}`}>
+      <PageMeta title="Users" description="Create users, assign roles, and control login access." />
       <PageHeader
         title="Users"
         subtitle="Create users, assign roles, and control login access."

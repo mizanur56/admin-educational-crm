@@ -25,6 +25,7 @@ import Button from '../components/Button'
 import Input from '../components/Input'
 import Select from '../components/Select'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import RowActionMenu, { type RowActionItem } from '../components/RowActionMenu'
 import { hasPermission } from '../lib/access'
 import { readUrlSearchQuery } from '../lib/url-search'
@@ -239,6 +240,10 @@ export default function Roles() {
 
   return (
     <div className={`${adminPage}`}>
+      <PageMeta
+        title="Roles & Permissions"
+        description="Configure role-wise, module-wise, and action-level access."
+      />
       <PageHeader
         title="Roles & Permissions"
         subtitle="Configure role-wise, module-wise, and action-level access."
