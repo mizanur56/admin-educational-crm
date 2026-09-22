@@ -529,7 +529,7 @@ export default function ActivityHistory() {
               </div>
             ) : (
               <div className="overflow-auto">
-                <table className={cx(adminTable, 'min-w-[860px]')}>
+                <table className={cx(adminTable, 'min-w-[860px] [&_th]:align-middle [&_th]:whitespace-nowrap [&_th]:text-[0.82rem] [&_td]:align-middle [&_td]:whitespace-nowrap [&_td]:text-[0.82rem]')}>
                   <thead>
                     <tr>
                       <th>Date & Time</th>
