@@ -8,4 +8,5 @@ export {
   setSession,
   patchUser,
   clearSession,
+  setHydrated,
 } from './features/auth/authSlice'
