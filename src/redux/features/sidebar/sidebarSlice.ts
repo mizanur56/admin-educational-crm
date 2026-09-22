@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 type SidebarState = {
   isActive: boolean
@@ -23,7 +23,7 @@ const sidebarSlice = createSlice({
     openSidebar: (state) => {
       state.isActive = true
     },
-    setCollapsed: (state, action: { payload: boolean }) => {
+    setCollapsed: (state, action: PayloadAction<boolean>) => {
       state.collapsed = action.payload
     },
     toggleCollapsed: (state) => {

@@ -1,27 +1,29 @@
 import { accountForm, adminBanner, adminCard, adminForm, adminPage } from '../styles/admin'
 import { useState, type FormEvent } from 'react'
-import { changePassword } from '../api/client'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import PageHeader from '../components/PageHeader'
 import PageMeta from '../components/PageMeta'
+import { useChangePasswordMutation } from '../redux/features/auth/authApi'
 
 export default function Account() {
+  const [changePassword, { isLoading }] = useChangePasswordMutation()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [message, setMessage] = useState('')
-  const [pending, setPending] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setPending(true)
     setMessage('')
-    const result = await changePassword(currentPassword, newPassword)
-    setMessage(result.ok ? result.data.message || 'Password updated.' : result.data?.error || 'Unable to update password.')
-    setPending(false)
-    if (result.ok) {
+
+    try {
+      const data = await changePassword({ currentPassword, newPassword }).unwrap()
+      setMessage(data?.message || 'Password updated.')
       setCurrentPassword('')
       setNewPassword('')
+    } catch (error) {
+      const err = error as { data?: { error?: string } }
+      setMessage(err?.data?.error || 'Unable to update password.')
     }
   }
 
@@ -59,8 +61,8 @@ export default function Account() {
           />
         </label>
         {message ? <p className={`${adminBanner}`}>{message}</p> : null}
-        <Button type="submit" disabled={pending}>
-          {pending ? 'Saving…' : 'Change password'}
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? 'Saving…' : 'Change password'}
         </Button>
       </form>
     </div>
