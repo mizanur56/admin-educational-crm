@@ -786,6 +786,7 @@ export default function MasterDataItems() {
     }
     return (
       <div className={`${adminPage}`}>
+        <PageMeta title="Master Data" description="Category not found." />
         <PageHeader
           title="Master Data"
           subtitle="Category not found."
@@ -807,6 +808,7 @@ export default function MasterDataItems() {
   if (!category && !metaLoading) {
     return (
       <div className={`${adminPage}`}>
+        <PageMeta title="Master Data" description="Category not found." />
         <PageHeader
           title="Master Data"
           subtitle="Category not found."
@@ -823,6 +825,14 @@ export default function MasterDataItems() {
 
   return (
     <div className={`${adminPage}`}>
+      <PageMeta
+        title={navGroup.name}
+        description={
+          category
+            ? `Manage ${category.name} values.`
+            : 'Create, edit, activate, and import reusable reference values.'
+        }
+      />
       <PageHeader
         title={navGroup.name}
         subtitle={

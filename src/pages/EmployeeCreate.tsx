@@ -800,6 +800,12 @@ export default function EmployeeCreate() {
   if (!allowed) {
     return (
       <div className={`${adminPage}`}>
+        <PageMeta
+          title={pageTitle}
+          description={
+            isEdit ? 'You do not have permission to edit employees.' : 'You do not have permission to create employees.'
+          }
+        />
         <PageHeader
           title={pageTitle}
           subtitle={
