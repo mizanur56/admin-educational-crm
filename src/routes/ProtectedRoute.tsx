@@ -1,14 +1,11 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { getMe } from '../api/client'
 import PageLoader from '../components/PageLoader'
-import { AUTH_USER_PATCH_EVENT, isAuthSession } from '../lib/auth-session'
-import type { AuthSession, AuthUser } from '../types'
-
-type RouteState =
-  | { status: 'loading'; auth: null }
-  | { status: 'authenticated'; auth: AuthSession }
-  | { status: 'unauthenticated'; auth: null }
+import { AUTH_USER_PATCH_EVENT } from '../lib/auth-session'
+import { useAuth } from '../hooks/useAuth'
+import { useLazyGetMeQuery } from '../redux/features/auth/authApi'
+import { isAuthSession } from '../lib/auth-session'
+import type { AuthUser } from '../types'
 
 type ProtectedRouteProps = {
   /** Login / forgot / reset: redirect away if already signed in. */
@@ -18,75 +15,69 @@ type ProtectedRouteProps = {
 
 export default function ProtectedRoute({ guestOnly = false, children }: ProtectedRouteProps) {
   const location = useLocation()
-  const [state, setState] = useState<RouteState>({ status: 'loading', auth: null })
+  const { session, hydrated, applySession, updateUser, logout } = useAuth()
+  const [fetchMe] = useLazyGetMeQuery()
+  const [checking, setChecking] = useState(!session)
 
   useEffect(() => {
+    if (!hydrated) return
+
     let cancelled = false
 
-    getMe()
-      .then((result) => {
-        if (cancelled) {
-          return
-        }
+    async function verify() {
+      setChecking(true)
+      try {
+        const result = await fetchMe()
+        if (cancelled) return
 
-        if (result.ok && isAuthSession(result.data)) {
-          setState({ status: 'authenticated', auth: result.data })
-          return
+        if (result.data && isAuthSession(result.data)) {
+          applySession(result.data)
+        } else {
+          await logout()
         }
-
-        setState({ status: 'unauthenticated', auth: null })
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) {
-          setState({ status: 'unauthenticated', auth: null })
+          await logout()
         }
-      })
+      } finally {
+        if (!cancelled) {
+          setChecking(false)
+        }
+      }
+    }
+
+    void verify()
 
     return () => {
       cancelled = true
     }
-  }, [location.key])
+  }, [hydrated, location.key, fetchMe, applySession, logout])
 
   useEffect(() => {
-    if (guestOnly) {
-      return
-    }
+    if (guestOnly) return undefined
 
     function onAuthUserPatch(event: Event) {
       const patch = (event as CustomEvent<Partial<AuthUser>>).detail
-      if (!patch) {
-        return
-      }
-      setState((current) => {
-        if (current.status !== 'authenticated') {
-          return current
-        }
-        return {
-          status: 'authenticated',
-          auth: {
-            ...current.auth,
-            user: { ...current.auth.user, ...patch },
-          },
-        }
-      })
+      if (!patch) return
+      updateUser(patch)
     }
 
     window.addEventListener(AUTH_USER_PATCH_EVENT, onAuthUserPatch)
     return () => window.removeEventListener(AUTH_USER_PATCH_EVENT, onAuthUserPatch)
-  }, [guestOnly])
+  }, [guestOnly, updateUser])
 
-  if (state.status === 'loading') {
+  if (!hydrated || checking) {
     return <PageLoader />
   }
 
   if (guestOnly) {
-    if (state.status === 'authenticated') {
+    if (session) {
       return <Navigate to="/dashboard" replace />
     }
     return children ? <>{children}</> : <Outlet />
   }
 
-  if (state.status === 'unauthenticated') {
+  if (!session) {
     return <Navigate to="/login" replace />
   }
 
@@ -94,5 +85,5 @@ export default function ProtectedRoute({ guestOnly = false, children }: Protecte
     return <>{children}</>
   }
 
-  return <Outlet context={state.auth} />
+  return <Outlet context={session} />
 }

@@ -1,42 +1,50 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../api/client'
-import { isAuthSession } from '../lib/auth-session'
+import { toast } from 'react-toastify'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import PageMeta from '../components/PageMeta'
+import { useAuth } from '../hooks/useAuth'
+import { useLoginMutation } from '../redux/features/auth/authApi'
+import { isAuthSession } from '../lib/auth-session'
 
 export default function Login() {
   const navigate = useNavigate()
+  const { applySession } = useAuth()
+  const [login, { isLoading }] = useLoginMutation()
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [message, setMessage] = useState('')
-  const [pending, setPending] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setPending(true)
     setMessage('')
 
     try {
-      const result = await login(identifier.trim(), password, rememberMe)
+      const data = await login({
+        identifier: identifier.trim(),
+        password,
+        rememberMe,
+      }).unwrap()
 
-      if (result.ok) {
-        if (isAuthSession(result.data)) {
-          navigate('/dashboard', { replace: true })
-          return
-        }
-
-        setMessage('Could not sign in.')
+      if (isAuthSession(data)) {
+        applySession(data)
+        toast.success('Signed in successfully')
+        navigate('/dashboard', { replace: true })
         return
       }
 
-      setMessage(result.data?.error || 'Could not sign in.')
-    } catch {
-      setMessage('Server is not reachable. Start server.educational.crm.')
-    } finally {
-      setPending(false)
+      setMessage('Could not sign in.')
+    } catch (error) {
+      const err = error as { data?: { error?: string; message?: string }; status?: string | number }
+      const text =
+        err?.data?.error ||
+        err?.data?.message ||
+        (err?.status === 'FETCH_ERROR'
+          ? 'Server is not reachable. Start campusly-crm-api.'
+          : 'Could not sign in.')
+      setMessage(text)
     }
   }
 
@@ -47,55 +55,57 @@ export default function Login() {
         description="Sign in to EduConsult CRM to manage leads, applications, students, and team operations."
       />
       <form
-      className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"
-      onSubmit={handleSubmit}
-    >
-      <p className="mb-2 text-[0.85rem] font-bold tracking-[0.04em] text-link uppercase">Education CRM</p>
-      <h1 className="mb-2">Welcome back</h1>
-      <p className="mb-6 text-text-muted">Sign in to continue to your dashboard</p>
+        className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"
+        onSubmit={handleSubmit}
+      >
+        <p className="mb-2 text-[0.85rem] font-bold tracking-[0.04em] text-link uppercase">
+          Education CRM
+        </p>
+        <h1 className="mb-2">Welcome back</h1>
+        <p className="mb-6 text-text-muted">Sign in to continue to your dashboard</p>
 
-      <label htmlFor="identifier">Email or Username</label>
-      <Input
-        id="identifier"
-        type="text"
-        autoComplete="username"
-        value={identifier}
-        onChange={(event) => setIdentifier(event.target.value)}
-        placeholder="Email or username"
-        required
-      />
-
-      <label htmlFor="password">Password</label>
-      <Input.Password
-        id="password"
-        autoComplete="current-password"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-        placeholder="Enter password"
-        required
-      />
-
-      <label className="mb-4 flex items-center gap-2 font-medium" htmlFor="rememberMe">
-        <input
-          id="rememberMe"
-          type="checkbox"
-          className="m-0 w-auto"
-          checked={rememberMe}
-          onChange={(event) => setRememberMe(event.target.checked)}
+        <label htmlFor="identifier">Email or Username</label>
+        <Input
+          id="identifier"
+          type="text"
+          autoComplete="username"
+          value={identifier}
+          onChange={(event) => setIdentifier(event.target.value)}
+          placeholder="Email or username"
+          required
         />
-        Remember me
-      </label>
 
-      {message ? <p className="mb-4 text-danger">{message}</p> : null}
+        <label htmlFor="password">Password</label>
+        <Input.Password
+          id="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          placeholder="Enter password"
+          required
+        />
 
-      <Button type="submit" fullWidth disabled={pending}>
-        {pending ? 'Signing in…' : 'Sign In'}
-      </Button>
+        <label className="mb-4 flex items-center gap-2 font-medium" htmlFor="rememberMe">
+          <input
+            id="rememberMe"
+            type="checkbox"
+            className="m-0 w-auto"
+            checked={rememberMe}
+            onChange={(event) => setRememberMe(event.target.checked)}
+          />
+          Remember me
+        </label>
 
-      <p className="mt-4 mb-0 text-[0.85rem] text-text-muted">
-        <Link to="/forgot-password">Forgot password?</Link>
-      </p>
-    </form>
+        {message ? <p className="mb-4 text-danger">{message}</p> : null}
+
+        <Button type="submit" fullWidth disabled={isLoading}>
+          {isLoading ? 'Signing in…' : 'Sign In'}
+        </Button>
+
+        <p className="mt-4 mb-0 text-[0.85rem] text-text-muted">
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
+      </form>
     </>
   )
 }
