@@ -1,6 +1,7 @@
 import { adminCard, adminPage } from '../styles/admin'
 import { Outlet, useOutletContext } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import { hasPermission } from '../lib/access'
 import type { AuthSession } from '../types'
 
@@ -14,6 +15,10 @@ export default function PermissionRoute({ permission }: PermissionRouteProps) {
   if (!hasPermission(auth, permission)) {
     return (
       <div className={`${adminPage}`}>
+        <PageMeta
+          title="Access denied"
+          description="You do not have permission to perform this action."
+        />
         <PageHeader
           title="Access denied"
           subtitle="You do not have permission to perform this action."

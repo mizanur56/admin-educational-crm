@@ -18,6 +18,7 @@ import { createActivity, listActivityFeed, recordActivityExport } from '../api/c
 import Button from '../components/Button'
 import Input from '../components/Input'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import Select from '../components/Select'
 import UserAvatar from '../components/UserAvatar'
 import { hasPermission } from '../lib/access'
@@ -377,6 +378,10 @@ export default function ActivityHistory() {
 
   return (
     <div className={adminPage}>
+      <PageMeta
+        title="Activity History"
+        description="View all activities, communications and actions performed by your team members."
+      />
       <PageHeader
         title="Activity History"
         subtitle="View all activities, communications and actions performed by your team members."

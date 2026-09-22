@@ -12,6 +12,7 @@ import {
 } from '../data/dashboardDemo'
 import Button from '../components/Button'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import type { AuthSession } from '../types'
 
 const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
