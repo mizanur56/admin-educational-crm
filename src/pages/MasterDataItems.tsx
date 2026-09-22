@@ -1,3 +1,4 @@
+import { adminCard, adminFilters, adminFiltersMaster, adminForm, adminFormFields, adminFormSpan, adminPage, adminTable, appToastClass, fieldLabelClass, formActions, modalBackdrop, modalClose, modalHeader, modalPanel, muted, rowActions, statusConfirmCopy, statusConfirmPanel, tableWrap } from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, Navigate, NavLink, useLocation, useOutletContext, useParams } from 'react-router-dom'
@@ -50,8 +51,6 @@ import type {
   MasterDataItem,
   RecordStatus,
 } from '../types'
-import './admin.css'
-
 type FormMode = 'create' | 'edit'
 type ToastState = { text: string; type: 'success' | 'error' }
 
@@ -170,7 +169,7 @@ function toDateString(value: Dayjs | null) {
 
 function FieldLabel({ children, required }: { children: ReactNode; required?: boolean }) {
   return (
-    <span className={required ? 'field-label is-required' : 'field-label'}>{children}</span>
+    <span className={fieldLabelClass(required)}>{children}</span>
   )
 }
 
@@ -374,20 +373,20 @@ function HistoryFieldList({
 }) {
   const showHead = valueKey === 'to'
   return (
-    <section className="md-history-card">
+    <section className="rounded-2xl border border-border bg-surface p-4 shadow-soft [&_h4]:mb-3 [&_h4]:mt-0 [&_h4]:text-[0.72rem] [&_h4]:font-bold [&_h4]:tracking-[0.04em] [&_h4]:text-[#8b97a8] [&_h4]:uppercase">
       <h4>{title}</h4>
       <div className="md-history-table">
         {showHead ? (
-          <div className="md-history-table-head">
+          <div className="grid grid-cols-3 gap-2 border-b border-border-subtle px-1 pb-2 text-[0.72rem] font-bold tracking-[0.04em] text-text-muted uppercase">
             <span>Field</span>
             <span>New Value</span>
           </div>
         ) : null}
         {rows.length === 0 ? (
-          <p className="md-history-empty-row">No field changes recorded.</p>
+          <p className="py-6 text-center text-text-muted">No field changes recorded.</p>
         ) : (
           rows.map((row) => (
-            <div key={`${title}-${row.key}`} className="md-history-table-row">
+            <div key={`${title}-${row.key}`} className="grid grid-cols-3 gap-2 border-b border-border-subtle px-1 py-2.5 last:border-b-0 [&_span]:text-[0.82rem] [&_span]:text-text-muted [&_strong]:text-[0.88rem] [&_strong]:text-text">
               <span>
                 <HugeiconsIcon icon={fieldIcon(row.key)} size={14} color="currentColor" strokeWidth={1.5} />
                 {row.label}
@@ -757,7 +756,7 @@ export default function MasterDataItems() {
       return <Navigate to={`/master-data/${mapped.slug}/${groupSlug}`} replace />
     }
     return (
-      <div className="admin-page">
+      <div className={`${adminPage}`}>
         <PageHeader title="Master Data" description="Category not found." />
         <Link to="/master-data">Back to Master Data</Link>
       </div>
@@ -770,7 +769,7 @@ export default function MasterDataItems() {
 
   if (!category && !metaLoading) {
     return (
-      <div className="admin-page">
+      <div className={`${adminPage}`}>
         <PageHeader title="Master Data" description="Category not found." />
         <Link to="/master-data">Back to categories</Link>
       </div>
@@ -778,7 +777,7 @@ export default function MasterDataItems() {
   }
 
   return (
-    <div className="admin-page">
+    <div className={`${adminPage}`}>
       <PageHeader
         title={navGroup.name}
         description={category ? `Manage ${category.name} values.` : 'Create, edit, activate, and import reusable reference values.'}
@@ -786,7 +785,7 @@ export default function MasterDataItems() {
         {canCreate ? <Button onClick={openCreate}>Add New</Button> : null}
       </PageHeader>
 
-      <nav className="md-tabs" aria-label="Master data categories">
+      <nav className="flex max-w-full gap-1 overflow-x-auto border-b border-border" aria-label="Master data categories">
         {navGroup.categories.map((tab) => (
           <NavLink
             key={tab.key}
@@ -798,7 +797,7 @@ export default function MasterDataItems() {
         ))}
       </nav>
 
-      <section className="admin-filters admin-filters-master">
+      <section className={`${adminFilters} ${adminFiltersMaster}`}>
         <Input.Search
           allowClear
           enterButton="Search"
@@ -868,8 +867,8 @@ export default function MasterDataItems() {
         />
       </section>
 
-      <div className="md-toolbar">
-        <div className="md-toolbar-end">
+      <div className="flex max-w-full min-w-0 flex-wrap items-center justify-end gap-2">
+        <div className="ml-auto flex min-w-0 flex-wrap justify-end gap-2">
           {canCreate ? (
             <>
               <input
@@ -899,9 +898,9 @@ export default function MasterDataItems() {
         </div>
       </div>
 
-      <section className="admin-card table-wrap">
+      <section className={`${adminCard} ${tableWrap}`}>
         <Spin spinning={loading}>
-          <table className="admin-table">
+          <table className={`${adminTable}`}>
             <thead>
               <tr>
                 <th>Name</th>
@@ -923,7 +922,7 @@ export default function MasterDataItems() {
                   <tr key={item.id}>
                     <td>
                       <strong>{item.name}</strong>
-                      {item.description ? <div className="muted">{item.description}</div> : null}
+                      {item.description ? <div className={`${muted}`}>{item.description}</div> : null}
                     </td>
                     <td>{item.code || '—'}</td>
                     {category?.parentCategoryKey ? <td>{item.parentName || '—'}</td> : null}
@@ -941,7 +940,7 @@ export default function MasterDataItems() {
                     </td>
                     <td>{item.sortOrder}</td>
                     <td>{item.usageCount > 0 ? `Used by: ${item.usageCount}` : '—'}</td>
-                    <td className="row-actions">
+                    <td className={`${rowActions}`}>
                       <RowActionMenu
                         items={(
                           [
@@ -986,21 +985,21 @@ export default function MasterDataItems() {
 
       {formOpen
         ? createPortal(
-            <div className="modal-backdrop" onClick={() => !formSaving && setFormOpen(false)}>
+            <div className={`${modalBackdrop}`} onClick={() => !formSaving && setFormOpen(false)}>
               <div
-                className="modal-panel"
+                className={`${modalPanel}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="md-modal-title"
                 onClick={(event) => event.stopPropagation()}
               >
-                <div className="modal-header">
+                <div className={`${modalHeader}`}>
                   <h3 id="md-modal-title">
                     {formMode === 'create' ? `Add ${category?.name || ''}` : `Edit ${category?.name || ''}`}
                   </h3>
                   <button
                     type="button"
-                    className="modal-close"
+                    className={`${modalClose}`}
                     aria-label="Close"
                     disabled={formSaving}
                     onClick={() => !formSaving && setFormOpen(false)}
@@ -1008,8 +1007,8 @@ export default function MasterDataItems() {
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
-                <form className="admin-form" onSubmit={(event) => void saveItem(event)}>
-                  <fieldset className="admin-form-fields" disabled={formSaving}>
+                <form className={`${adminForm}`} onSubmit={(event) => void saveItem(event)}>
+                  <fieldset className={`${adminFormFields}`} disabled={formSaving}>
                     <label>
                       <FieldLabel required>Name</FieldLabel>
                       <Input
@@ -1115,7 +1114,7 @@ export default function MasterDataItems() {
                         </label>
                       </>
                     ) : null}
-                    <label className="admin-form-span">
+                    <label className={`${adminFormSpan}`}>
                       Description
                       <Input
                         value={form.description}
@@ -1131,13 +1130,13 @@ export default function MasterDataItems() {
                     </label>
                   </fieldset>
                   {selected && formMode !== 'create' ? (
-                    <p className="muted">
+                    <p className={`${muted}`}>
                       Created {new Date(selected.createdAt).toLocaleString()}
                       {selected.createdBy ? ` by ${selected.createdBy.fullName}` : ''}
                       {selected.updatedBy ? ` · Updated by ${selected.updatedBy.fullName}` : ''}
                     </p>
                   ) : null}
-                  <div className="form-actions">
+                  <div className={`${formActions}`}>
                     <Button type="button" variant="secondary" onClick={() => setFormOpen(false)} disabled={formSaving}>
                       Cancel
                     </Button>
@@ -1156,17 +1155,17 @@ export default function MasterDataItems() {
 
       {historyOpen && selected
         ? createPortal(
-            <div className="modal-backdrop" onClick={closeHistory}>
+            <div className={`${modalBackdrop}`} onClick={closeHistory}>
               <div
-                className="modal-panel md-history-panel"
+                className={`${modalPanel} flex max-h-[min(92vh,760px)] w-[min(100%,980px)] flex-col overflow-hidden rounded-[18px] p-0`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="md-history-title"
                 onClick={(event) => event.stopPropagation()}
               >
-                <div className="md-history-header">
-                  <div className="md-history-title">
-                    <span className="md-history-title-icon" aria-hidden>
+                <div className="flex items-start justify-between gap-3 border-b border-border px-5 pt-[18px] pb-3.5">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="inline-flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-[#e8f1ff] text-[#2f6fed]" aria-hidden>
                       <HugeiconsIcon icon={HistoryIcon} size={18} color="currentColor" strokeWidth={1.8} />
                     </span>
                     <div>
@@ -1174,19 +1173,19 @@ export default function MasterDataItems() {
                       <p>Track the changes made to this record over time.</p>
                     </div>
                   </div>
-                  <button type="button" className="modal-close" aria-label="Close" onClick={closeHistory}>
+                  <button type="button" className={`${modalClose}`} aria-label="Close" onClick={closeHistory}>
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
                 {historyLoading ? (
-                  <div className="md-history-loading">
+                  <div className="m-0 flex min-h-60 items-center justify-center">
                     <Spin />
                   </div>
                 ) : history.length === 0 ? (
-                  <p className="muted md-history-empty">No history yet.</p>
+                  <p className={`${muted} m-0 flex min-h-60 items-center justify-center`}>No history yet.</p>
                 ) : (
-                  <div className="md-history-layout">
-                    <aside className="md-history-timeline" aria-label="Timeline">
+                  <div className="grid min-h-0 flex-1 grid-cols-1 min-[721px]:grid-cols-[250px_minmax(0,1fr)]">
+                    <aside className="overflow-auto border-r border-border px-3 py-4 pl-4 [&_h4]:mb-3 [&_h4]:mt-0 [&_h4]:text-[0.72rem] [&_h4]:font-bold [&_h4]:tracking-[0.04em] [&_h4]:text-[#8b97a8] [&_h4]:uppercase [&_ol]:m-0 [&_ol]:list-none [&_ol]:p-0 [&_li]:relative [&_li]:pb-2 [&_li:not(:last-child)]:before:absolute [&_li:not(:last-child)]:before:top-[38px] [&_li:not(:last-child)]:before:bottom-0 [&_li:not(:last-child)]:before:left-[19px] [&_li:not(:last-child)]:before:w-px [&_li:not(:last-child)]:before:bg-border-subtle [&_li:not(:last-child)]:before:content-[""]" aria-label="Timeline">
                       <h4>Timeline</h4>
                       <ol>
                         {history.map((entry) => {
@@ -1200,15 +1199,15 @@ export default function MasterDataItems() {
                                 className={`md-history-event is-${kind}${active ? ' is-active' : ''}`}
                                 onClick={() => setHistoryEntryId(entry.id)}
                               >
-                                <span className="md-history-dot" aria-hidden>
+                                <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#94a3b8]" aria-hidden>
                                   <HugeiconsIcon icon={historyKindIcon(kind)} size={12} color="currentColor" strokeWidth={2} />
                                 </span>
-                                <span className="md-history-event-copy">
+                                <span className="min-w-0 flex-1 [&_strong]:block [&_strong]:text-[0.88rem] [&_time]:text-[0.72rem] [&_time]:text-text-muted">
                                   <strong>{historyTitle(kind)}</strong>
                                   <time dateTime={new Date(entry.createdAt).toISOString()}>
                                     {formatHistoryDate(entry.createdAt)}
                                   </time>
-                                  <span className="md-history-event-user">
+                                  <span className="mt-1 flex items-center gap-1.5 text-[0.75rem] text-text-muted [&_em]:rounded-full [&_em]:bg-[color-mix(in_srgb,#2f6fed_12%,var(--color-surface))] [&_em]:px-1.5 [&_em]:py-0.5 [&_em]:text-[0.7rem] [&_em]:not-italic dark:[&_em]:bg-[color-mix(in_srgb,#2f6fed_18%,var(--color-surface))]">
                                     <HugeiconsIcon icon={UserIcon} size={12} color="currentColor" strokeWidth={1.8} />
                                     {entry.user?.fullName || 'System'}
                                     <em>{entry.user?.role || (entry.user ? 'User' : 'System')}</em>
@@ -1228,9 +1227,9 @@ export default function MasterDataItems() {
                       const isLatest = active.id === history[0]?.id
                       const roleLabel = active.user?.role || (active.user ? 'User' : 'System')
                       return (
-                        <div className="md-history-detail">
-                          <div className="md-history-detail-head">
-                            <div className="md-history-detail-title">
+                        <div className="flex min-h-0 flex-col overflow-auto p-4">
+                          <div className="mb-4 flex items-start justify-between gap-3">
+                            <div className="flex min-w-0 items-start gap-3 [&_strong]:block [&_strong]:text-[0.95rem] [&_p]:mt-1 [&_p]:mb-0 [&_p]:text-[0.8rem] [&_p]:text-text-muted [&_p_span]:text-text-faint">
                               <span className={`md-history-detail-icon is-${kind}`} aria-hidden>
                                 <HugeiconsIcon icon={historyKindIcon(kind)} size={16} color="currentColor" strokeWidth={1.8} />
                               </span>
@@ -1250,13 +1249,13 @@ export default function MasterDataItems() {
                                 </p>
                               </div>
                             </div>
-                            {isLatest ? <span className="md-history-latest">Latest</span> : null}
+                            {isLatest ? <span className="rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,var(--color-surface))] px-2 py-0.5 text-[0.72rem] font-semibold text-primary">Latest</span> : null}
                           </div>
                           <HistoryFieldList title="Changes Made" rows={rows} valueKey="to" />
                           {kind === 'created' ? null : (
                             <HistoryFieldList title="Previous Value" rows={rows} valueKey="from" />
                           )}
-                          <section className="md-history-card md-history-notes">
+                          <section className="rounded-2xl border border-border bg-surface p-4 shadow-soft [&_h4]:mb-3 [&_h4]:mt-0 [&_h4]:text-[0.72rem] [&_h4]:font-bold [&_h4]:tracking-[0.04em] [&_h4]:text-[#8b97a8] [&_h4]:uppercase [&_h4]:mb-2 [&_h4]:mt-0 [&_h4]:text-[0.72rem] [&_h4]:font-bold [&_h4]:tracking-[0.04em] [&_h4]:text-[#8b97a8] [&_h4]:uppercase [&_p]:m-0 [&_p]:text-[0.88rem] [&_p]:text-text">
                             <h4>
                               <HugeiconsIcon icon={Note01Icon} size={16} color="currentColor" strokeWidth={1.6} />
                               Additional Information
@@ -1268,7 +1267,7 @@ export default function MasterDataItems() {
                     })()}
                   </div>
                 )}
-                <div className="md-history-footer">
+                <div className="flex justify-end gap-2 border-t border-border px-5 py-3.5">
                   <Button type="button" variant="secondary" onClick={closeHistory}>
                     Close
                   </Button>
@@ -1282,7 +1281,7 @@ export default function MasterDataItems() {
       {deleteTarget
         ? createPortal(
             <div
-              className="modal-backdrop"
+              className={`${modalBackdrop}`}
               onClick={() => {
                 if (!deleteSaving) {
                   setDeleteTarget(null)
@@ -1290,17 +1289,17 @@ export default function MasterDataItems() {
               }}
             >
               <div
-                className="modal-panel status-confirm-panel"
+                className={`${modalPanel} ${statusConfirmPanel}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="md-delete-title"
                 onClick={(event) => event.stopPropagation()}
               >
-                <div className="modal-header">
+                <div className={`${modalHeader}`}>
                   <h3 id="md-delete-title">Delete {entityName}?</h3>
                   <button
                     type="button"
-                    className="modal-close"
+                    className={`${modalClose}`}
                     aria-label="Close"
                     disabled={deleteSaving}
                     onClick={() => setDeleteTarget(null)}
@@ -1308,11 +1307,11 @@ export default function MasterDataItems() {
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
-                <p className="status-confirm-copy">
+                <p className={`${statusConfirmCopy}`}>
                   Are you sure you want to delete <strong>{deleteTarget.name}</strong>? This action cannot be
                   undone.
                 </p>
-                <div className="form-actions">
+                <div className={`${formActions}`}>
                   <Button loading={deleteSaving} className="ui-btn-danger" onClick={() => void confirmDelete()}>
                     Delete
                   </Button>
@@ -1328,11 +1327,11 @@ export default function MasterDataItems() {
 
       {importOpen && importResult
         ? createPortal(
-            <div className="modal-backdrop" onClick={() => setImportOpen(false)}>
-              <div className="modal-panel" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-                <div className="modal-header">
+            <div className={`${modalBackdrop}`} onClick={() => setImportOpen(false)}>
+              <div className={`${modalPanel}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+                <div className={`${modalHeader}`}>
                   <h3>Import result</h3>
-                  <button type="button" className="modal-close" aria-label="Close" onClick={() => setImportOpen(false)}>
+                  <button type="button" className={`${modalClose}`} aria-label="Close" onClick={() => setImportOpen(false)}>
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
@@ -1340,7 +1339,7 @@ export default function MasterDataItems() {
                   Total {importResult.total}, Successful {importResult.successful}, Failed {importResult.failed}
                 </p>
                 {importResult.errors.length > 0 ? (
-                  <ul className="md-import-errors">
+                  <ul className="mb-3 mt-0 pl-[18px]">
                     {importResult.errors.slice(0, 8).map((item) => (
                       <li key={`${item.row}-${item.message}`}>
                         Row {item.row}: {item.message}
@@ -1348,7 +1347,7 @@ export default function MasterDataItems() {
                     ))}
                   </ul>
                 ) : null}
-                <div className="form-actions">
+                <div className={`${formActions}`}>
                   {importResult.errors.length > 0 ? (
                     <Button variant="secondary" onClick={downloadErrors}>
                       Export errors
@@ -1364,7 +1363,7 @@ export default function MasterDataItems() {
 
       {toast
         ? createPortal(
-            <div className={`app-toast app-toast-${toast.type}`} role="status">
+            <div className={appToastClass(toast.type)} role="status">
               {toast.text}
             </div>,
             document.body,

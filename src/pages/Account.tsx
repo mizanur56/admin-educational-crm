@@ -1,10 +1,9 @@
+import { accountForm, adminBanner, adminCard, adminForm, adminPage } from '../styles/admin'
 import { useState, type FormEvent } from 'react'
 import { changePassword } from '../api/client'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import PageHeader from '../components/PageHeader'
-import './admin.css'
-
 export default function Account() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -25,12 +24,12 @@ export default function Account() {
   }
 
   return (
-    <div className="admin-page">
+    <div className={`${adminPage}`}>
       <PageHeader
         title="Password"
         description="Set or change your password. Passwords are stored hashed, never as plain text."
       />
-      <form className="admin-card admin-form account-form" onSubmit={handleSubmit}>
+      <form className={`${adminCard} ${adminForm} ${accountForm}`} onSubmit={handleSubmit}>
         <label>
           Current password
           <Input.Password
@@ -48,7 +47,7 @@ export default function Account() {
             minLength={8}
           />
         </label>
-        {message ? <p className="admin-banner">{message}</p> : null}
+        {message ? <p className={`${adminBanner}`}>{message}</p> : null}
         <Button type="submit" disabled={pending}>
           {pending ? 'Saving…' : 'Change password'}
         </Button>

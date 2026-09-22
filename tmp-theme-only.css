@@ -1,0 +1,47 @@
+@import 'tailwindcss';
+@theme {
+  --font-sans: Inter, 'Segoe UI', system-ui, sans-serif;
+
+  --color-page-bg: #fcfbf8;
+  --color-sidebar-bg: #f8f7f3;
+  --color-surface: #ffffff;
+  --color-text: #16324f;
+  --color-text-strong: #2f3b46;
+  --color-text-muted: #51657a;
+  --color-text-faint: #8b97a1;
+  --color-primary: #35ad0b;
+  --color-primary-hover: #2b8e09;
+  --color-primary-active: #257908;
+  --color-on-primary: #ffffff;
+  --color-link: #2f6fed;
+  --color-header-border: #ece9e2;
+  --color-border: #e6edf5;
+  --color-border-subtle: #eef2f6;
+  --color-hover-bg: #efece6;
+  --color-nav-hover-bg: #e8e5de;
+  --color-nav-active-bg: #e4f6dc;
+  --color-nav-active: #2b8e09;
+  --color-nav: #3a4650;
+  --color-icon: #4a5560;
+  --color-nav-group: #5c6a75;
+  --color-search-bg: #ffffff;
+  --color-search-border: #e6edf5;
+  --color-input-bg: #f8fafc;
+  --color-input-border: #c8d4e0;
+  --color-card-border: #d7e0ea;
+  --color-collapse-bg: #ffffff;
+  --color-danger: #b42318;
+  --color-warn-bg: #fff6e5;
+  --color-warn-fg: #8a5a00;
+  --color-chart-track: #eef2f7;
+  --color-modal-backdrop: rgb(16 24 40 / 0.4);
+
+  --shadow-card: 0 12px 32px rgb(18 32 51 / 0.08);
+  --shadow-soft: 0 8px 20px rgb(22 50 79 / 0.04);
+
+  --radius-btn: 10px;
+  --radius-search: 10px;
+  --spacing-sidebar: 248px;
+  --spacing-sidebar-collapsed: 76px;
+  --max-width-search: 640px;
+}

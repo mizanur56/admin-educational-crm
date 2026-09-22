@@ -43,10 +43,10 @@ const sparkStroke: Record<string, string> = {
 }
 
 const actionBtnTone: Record<string, string> = {
-  blue: 'bg-[#eef5ff] dark:bg-blue-500/12',
+  blue: 'bg-[#eef5ff] dark:bg-blue-500/10',
   green: 'bg-[#eefaf3] dark:bg-green-500/10',
-  orange: 'bg-[#fff6eb] dark:bg-amber-500/12',
-  purple: 'bg-[#f4efff] dark:bg-violet-500/12',
+  orange: 'bg-[#fff6eb] dark:bg-amber-500/10',
+  purple: 'bg-[#f4efff] dark:bg-violet-500/10',
 }
 
 const followupBg: Record<string, string> = {
@@ -320,7 +320,7 @@ function LineChart({ points }: { points: TrendPoint[] }) {
           />
         )
       })}
-      <path d={area} className="fill-blue-500/12" />
+      <path d={area} className="fill-blue-500/10" />
       <path d={line} className="fill-none stroke-[#3b82f6]" strokeWidth={2.5} />
       {coords.map((point) => (
         <circle

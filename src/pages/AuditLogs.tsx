@@ -22,6 +22,17 @@ import PageHeader from '../components/PageHeader'
 import Select from '../components/Select'
 import type { AuditLog } from '../types'
 import { useLocation } from 'react-router-dom'
+import {
+  adminBanner,
+  adminCard,
+  adminEmpty,
+  adminPage,
+  adminTable,
+  modalBackdrop,
+  modalClose,
+  modalHeader,
+  modalPanel,
+} from '../styles/admin'
 
 type Filters = {
   search: string
@@ -47,26 +58,6 @@ const CRITICAL_RE = /fail|lock|deny|delete|reject|suspend|unauthor/i
 
 const surfaceCard =
   'bg-surface border border-border rounded-[18px] shadow-soft'
-
-const adminBanner =
-  'm-0 py-2.5 px-3 rounded-[10px] bg-warn-bg text-warn-fg'
-
-const adminEmpty =
-  'grid justify-items-center gap-2 min-h-60 py-12 px-4 text-center'
-
-const adminTable =
-  'w-full border-collapse [&_th]:text-left [&_th]:py-3 [&_th]:px-2.5 [&_th]:border-b [&_th]:border-border-subtle [&_td]:text-left [&_td]:py-3 [&_td]:px-2.5 [&_td]:border-b [&_td]:border-border-subtle'
-
-const modalBackdrop =
-  'fixed inset-0 bg-modal-backdrop flex items-center justify-center p-6 z-50'
-
-const modalPanel =
-  'w-full max-w-[720px] max-h-[min(90vh,860px)] overflow-auto bg-surface rounded-2xl p-6 shadow-card text-text'
-
-const modalHeader = 'flex items-start justify-between gap-3 mb-4'
-
-const modalClose =
-  'shrink-0 inline-flex items-center justify-center size-8 -mt-1 -mr-1.5 border-0 rounded-lg bg-transparent text-icon cursor-pointer hover:bg-hover-bg hover:text-text-strong'
 
 const auditPill =
   'inline-flex items-center px-[9px] py-[3px] rounded-full text-[0.72rem] font-bold leading-[1.4]'
@@ -559,7 +550,7 @@ export default function AuditLogs() {
   ]
 
   return (
-    <div className="grid gap-[18px] min-w-0 max-w-full overflow-x-hidden">
+    <div className={cx(adminPage, 'gap-[18px]')}>
       <PageHeader title="Audit Log" description="Track all important actions, data changes and system events across the CRM.">
         <div className="flex flex-wrap items-center justify-end gap-2.5 max-[860px]:grid max-[860px]:grid-cols-1">
           <Dropdown menu={{ items: exportItems }} trigger={['click']}>
@@ -659,7 +650,7 @@ export default function AuditLogs() {
             </div>
           </section>
 
-          <section className={cx(surfaceCard, 'p-0 overflow-hidden')}>
+          <section className={cx(adminCard, 'rounded-[18px] p-0 overflow-hidden')}>
             <div className="pt-3 px-4 text-text-muted text-[0.82rem]">
               Showing {filtered.length === 0 ? 0 : (safePage - 1) * pageSize + 1}–
               {Math.min(safePage * pageSize, filtered.length)} of {filtered.length.toLocaleString()} logs
@@ -667,8 +658,8 @@ export default function AuditLogs() {
             <Spin spinning={loading}>
               {!loading && filtered.length === 0 ? (
                 <div className={adminEmpty}>
-                  <strong className="text-[1.02rem]">{message ? 'Unable to load audit logs' : 'No matching audit events'}</strong>
-                  <p className="m-0 mb-2 text-text-muted">
+                  <strong>{message ? 'Unable to load audit logs' : 'No matching audit events'}</strong>
+                  <p>
                     {message
                       ? message
                       : 'Try a different search, module, user, or date range, or clear the current filters.'}
@@ -711,7 +702,7 @@ export default function AuditLogs() {
                             key={log.id}
                             className={cx(
                               'cursor-pointer',
-                              active && 'bg-indigo-500/[0.08]',
+                              active && 'bg-indigo-500/10',
                             )}
                             onClick={() => setActiveId(log.id)}
                           >
@@ -827,11 +818,11 @@ export default function AuditLogs() {
                 <dl className="grid gap-2.5 m-0">
                   <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
                     <dt className="m-0 text-text-muted">Date & Time</dt>
-                    <dd className="m-0 text-text font-semibold wrap-anywhere">{formatDateTime(activeLog.createdAt)}</dd>
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">{formatDateTime(activeLog.createdAt)}</dd>
                   </div>
                   <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
                     <dt className="m-0 text-text-muted">User</dt>
-                    <dd className="m-0 text-text font-semibold wrap-anywhere">
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
                       <div className="grid gap-px">
                         <span>{activeLog.user?.fullName || 'System'}</span>
                         {activeLog.user?.email ? (
@@ -842,7 +833,7 @@ export default function AuditLogs() {
                   </div>
                   <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
                     <dt className="m-0 text-text-muted">Module</dt>
-                    <dd className="m-0 text-text font-semibold wrap-anywhere">
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
                       <span className={cx(auditPill, moduleToneClass(activeLog.entityType))}>
                         {moduleLabel(activeLog.entityType)}
                       </span>
@@ -850,17 +841,17 @@ export default function AuditLogs() {
                   </div>
                   <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
                     <dt className="m-0 text-text-muted">Record ID</dt>
-                    <dd className="m-0 text-text font-semibold wrap-anywhere">
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
                       {recordCode(activeLog.entityType, activeLog.entityId)}
                     </dd>
                   </div>
                   <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
                     <dt className="m-0 text-text-muted">IP Address</dt>
-                    <dd className="m-0 text-text font-semibold wrap-anywhere">{activeLog.ipAddress || '—'}</dd>
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">{activeLog.ipAddress || '—'}</dd>
                   </div>
                   <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
                     <dt className="m-0 text-text-muted">Device</dt>
-                    <dd className="m-0 text-text font-semibold wrap-anywhere">{parseDevice(activeLog.userAgent)}</dd>
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">{parseDevice(activeLog.userAgent)}</dd>
                   </div>
                 </dl>
                 {changePairs(activeLog.metadata).length ? (
@@ -887,13 +878,13 @@ export default function AuditLogs() {
                       {extraMetadata(activeLog.metadata).map(([key, value]) => (
                         <div key={key} className="flex justify-between gap-3 text-[0.84rem]">
                           <dt className="m-0 text-text-muted">{humanize(key)}</dt>
-                          <dd className="m-0 font-semibold text-right wrap-anywhere">{stringifyMeta(value)}</dd>
+                          <dd className="m-0 font-semibold text-right [overflow-wrap:anywhere]">{stringifyMeta(value)}</dd>
                         </div>
                       ))}
                     </dl>
                   </>
                 ) : null}
-                <div className="flex gap-2.5 items-start mt-1 p-3 rounded-xl bg-[#eef2ff] text-[#4338ca] text-[0.8rem] leading-[1.45] dark:bg-indigo-500/[0.18] dark:text-[#c7d2fe]">
+                <div className="flex gap-2.5 items-start mt-1 p-3 rounded-xl bg-[#eef2ff] text-[#4338ca] text-[0.8rem] leading-[1.45] dark:bg-indigo-500/20 dark:text-[#c7d2fe]">
                   <span className="shrink-0 size-[18px] grid place-items-center mt-px rounded-full bg-[#c7d2fe] font-extrabold text-[0.72rem] dark:bg-indigo-500/40">
                     i
                   </span>

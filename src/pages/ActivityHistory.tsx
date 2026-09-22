@@ -23,8 +23,17 @@ import { hasPermission } from '../lib/access'
 import { readUrlSearchQuery } from '../lib/url-search'
 import type { ActivityFeedCategory, ActivityFeedItem, ActivityFeedResponse, ActivitySummaryStat, AuthSession } from '../types'
 import { useLocation, useOutletContext } from 'react-router-dom'
-import './admin.css'
-import './ActivityHistory.css'
+import {
+  adminBanner,
+  adminEmpty,
+  adminForm,
+  adminPage,
+  adminTable,
+  modalBackdrop,
+  modalClose,
+  modalHeader,
+  modalPanel,
+} from '../styles/admin'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
@@ -57,6 +66,52 @@ const FILTERS: Array<{ key: 'all' | ActivityFeedCategory; label: string; icon: t
   { key: 'file', label: 'File Actions', icon: File01Icon },
   { key: 'system', label: 'System Events', icon: Activity01Icon },
 ]
+
+const surfaceCard =
+  'bg-surface border border-border rounded-[18px] shadow-soft'
+
+const ahPill =
+  'inline-flex items-center px-2.5 py-[3px] rounded-full text-[0.72rem] font-bold'
+
+const pillTone: Record<string, string> = {
+  call: 'bg-[#e7f8ef] text-[#15803d]',
+  payment: 'bg-[#fde8ef] text-[#be123c]',
+  permission: 'bg-[#fde8ef] text-[#be123c]',
+  document: 'bg-[#fff1e6] text-[#c2410c]',
+  file: 'bg-[#fff1e6] text-[#c2410c]',
+  status: 'bg-[#fff1e6] text-[#c2410c]',
+  application: 'bg-[#e0f2fe] text-[#0369a1]',
+  user: 'bg-[#ece8ff] text-[#6d28d9]',
+  comm: 'bg-[#fff7d6] text-[#a16207]',
+  master: 'bg-[#eef2f6] text-[#475569]',
+  default: 'bg-[#eef2f6] text-[#475569]',
+}
+
+const avatarToneClass: Record<string, string> = {
+  blue: 'bg-[#dbeafe] text-[#1d4ed8]',
+  violet: 'bg-[#ede9fe] text-[#6d28d9]',
+  teal: 'bg-[#ccfbf1] text-[#0f766e]',
+  orange: 'bg-[#ffedd5] text-[#c2410c]',
+  rose: 'bg-[#ffe4e6] text-[#be123c]',
+  green: 'bg-[#dcfce7] text-[#15803d]',
+}
+
+const statTone: Record<string, { icon: string; bar: string }> = {
+  teal: { icon: 'bg-[#d8f4ea] text-[#1fa387]', bar: 'bg-[#1fa387]' },
+  lavender: { icon: 'bg-[#e7e8ff] text-[#6a6ef2]', bar: 'bg-[#6a6ef2]' },
+  plum: { icon: 'bg-[#ece6f6] text-[#5d4d86]', bar: 'bg-[#5d4d86]' },
+  magenta: { icon: 'bg-[#f4e5f8] text-[#a24dca]', bar: 'bg-[#a24dca]' },
+  sky: { icon: 'bg-[#dceeff] text-[#3d8fd9]', bar: 'bg-[#3d8fd9]' },
+}
+
+const pageBtn =
+  'min-w-8 h-8 border-0 rounded-lg bg-transparent text-text-muted font-semibold cursor-pointer'
+
+const pageBtnActive = 'bg-primary text-on-primary'
+
+function cx(...parts: Array<string | false | undefined | null>) {
+  return parts.filter(Boolean).join(' ')
+}
 
 function toDateString(value: Dayjs | null) {
   return value ? value.format('YYYY-MM-DD') : ''
@@ -98,21 +153,21 @@ function avatarTone(name: string) {
   return tones[hash]
 }
 
-function actionClass(action: string, category: string) {
+function actionPillClass(action: string, category: string) {
   const key = `${action} ${category}`.toLowerCase()
-  if (key.includes('call')) return 'ah-pill-call'
-  if (key.includes('payment') || key.includes('discount')) return 'ah-pill-payment'
-  if (key.includes('document')) return 'ah-pill-document'
-  if (key.includes('application')) return 'ah-pill-application'
-  if (key.includes('user') || key.includes('role')) return 'ah-pill-user'
+  if (key.includes('call')) return pillTone.call
+  if (key.includes('payment') || key.includes('discount')) return pillTone.payment
+  if (key.includes('document')) return pillTone.document
+  if (key.includes('application')) return pillTone.application
+  if (key.includes('user') || key.includes('role')) return pillTone.user
   if (key.includes('message') || key.includes('email') || key.includes('communication') || key.includes('meeting')) {
-    return 'ah-pill-comm'
+    return pillTone.comm
   }
-  if (key.includes('file')) return 'ah-pill-file'
-  if (key.includes('permission')) return 'ah-pill-permission'
-  if (key.includes('master')) return 'ah-pill-master'
-  if (key.includes('status')) return 'ah-pill-status'
-  return 'ah-pill-default'
+  if (key.includes('file')) return pillTone.file
+  if (key.includes('permission')) return pillTone.permission
+  if (key.includes('master')) return pillTone.master
+  if (key.includes('status')) return pillTone.status
+  return pillTone.default
 }
 
 function pageItems(current: number, total: number) {
@@ -320,18 +375,20 @@ export default function ActivityHistory() {
   const maxStat = Math.max(...cards.map((card) => card.stat.value), 0)
 
   return (
-    <div className="admin-page ah-page">
-      <header className="ah-header">
-        <div className="ah-header-copy">
-          <span className="ah-header-icon">
+    <div className={adminPage}>
+      <header className="flex justify-between gap-4 items-start max-[860px]:grid max-[860px]:grid-cols-1">
+        <div className="flex gap-3 items-start">
+          <span className="size-[42px] grid place-items-center rounded-xl bg-[#e8f1ff] text-[#3b82f6]">
             <HugeiconsIcon icon={Activity01Icon} size={18} />
           </span>
           <div>
-            <h2>Activity History</h2>
-            <p>View all activities, communications and actions performed by your team members.</p>
+            <h2 className="m-0 text-[1.45rem] tracking-[-0.02em]">Activity History</h2>
+            <p className="m-0 mt-1 text-text-muted text-[0.9rem]">
+              View all activities, communications and actions performed by your team members.
+            </p>
           </div>
         </div>
-        <div className="ah-header-actions">
+        <div className="flex flex-wrap items-center justify-end gap-2.5">
           <Dropdown menu={{ items: exportItems }} trigger={['click']}>
             <span>
               <Button variant="secondary">
@@ -343,7 +400,7 @@ export default function ActivityHistory() {
         </div>
       </header>
 
-      <section className="ah-filters-bar">
+      <section className="grid grid-cols-[minmax(240px,280px)_minmax(200px,1.4fr)_minmax(160px,280px)] gap-2.5 items-center py-3 px-3.5 bg-surface border border-border rounded-2xl max-[860px]:grid-cols-1 [&_.ant-picker]:w-full [&_.ant-picker]:min-w-0 [&_.ant-picker]:h-[42px] [&_.ant-picker]:rounded-xl [&_.ant-input-affix-wrapper]:w-full [&_.ant-select]:w-full">
         <DatePicker.RangePicker
           allowClear={false}
           value={[dayjs(from), dayjs(to)]}
@@ -370,66 +427,93 @@ export default function ActivityHistory() {
         />
       </section>
 
-      {message ? <p className="admin-banner">{message}</p> : null}
+      {message ? <p className={adminBanner}>{message}</p> : null}
 
-      <section className="ah-stats">
+      <section className="grid grid-cols-5 gap-3.5 max-[1280px]:grid-cols-2 max-[860px]:grid-cols-1">
         {cards.map((card) => {
           const percent = maxStat > 0 ? Math.round((card.stat.value / maxStat) * 100) : 0
+          const tone = statTone[card.tone]
           return (
-            <article key={card.key} className={`ah-stat tone-${card.tone}`}>
-              <span className="ah-stat-icon">
+            <article
+              key={card.key}
+              className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-2.5 min-h-[108px] pt-4 px-4 pb-3.5 bg-[#fbfcfe] border border-[#e7eef6] rounded-[22px] shadow-[0_10px_24px_rgba(90,120,170,0.06)] dark:bg-surface dark:border-border dark:shadow-none"
+            >
+              <span className={cx('size-[42px] grid place-items-center rounded-full', tone.icon)}>
                 <HugeiconsIcon icon={card.icon} size={18} />
               </span>
-              <div className="ah-stat-copy">
-                <p>{card.title}</p>
-                <strong>{card.stat.value.toLocaleString()}</strong>
-                <div className={`ah-stat-change ${card.stat.change >= 0 ? 'is-up' : 'is-down'}`}>
-                  <b>
+              <div className="min-w-0 pt-0.5">
+                <p className="m-0 text-[#6b7c8f] text-[0.92rem] font-semibold leading-[1.2] dark:text-text-muted">
+                  {card.title}
+                </p>
+                <strong className="block mt-1.5 text-[#1e3a5f] text-[1.7rem] tracking-[-0.04em] leading-none dark:text-text">
+                  {card.stat.value.toLocaleString()}
+                </strong>
+                <div className="flex flex-wrap items-center gap-1 mt-2 text-[#93a0ae] text-[0.72rem] leading-[1.2]">
+                  <b className={cx('font-bold', card.stat.change >= 0 ? 'text-[#16a34a]' : 'text-[#e11d48]')}>
                     {card.stat.change >= 0 ? '↑' : '↓'} {Math.abs(card.stat.change)}%
                   </b>
                   <span>vs. previous 7 days</span>
                 </div>
               </div>
-              <div className="ah-stat-bar" aria-label={`${percent}%`}>
-                <span style={{ width: `${percent}%` }} />
+              <div
+                className="col-span-full h-1.5 mt-3 overflow-hidden rounded-full bg-[#edf2f7] dark:bg-text/10"
+                aria-label={`${percent}%`}
+              >
+                <span
+                  className={cx('block h-full rounded-[inherit] transition-[width] duration-[250ms] ease-in-out', tone.bar)}
+                  style={{ width: `${percent}%` }}
+                />
               </div>
             </article>
           )
         })}
       </section>
 
-      <div className="ah-body">
-        <aside className="ah-nav">
-          <h3>Activity Timeline</h3>
-          <ul>
-            {FILTERS.map((item) => (
-              <li key={item.key}>
-                <button
-                  type="button"
-                  className={category === item.key ? 'is-active' : undefined}
-                  onClick={() => applyCategory(item.key)}
-                >
-                  <span>
-                    <HugeiconsIcon icon={item.icon} size={16} />
-                    {item.label}
-                  </span>
-                  <b>{counts[item.key].toLocaleString()}</b>
-                </button>
-              </li>
-            ))}
+      <div className="grid grid-cols-[250px_minmax(0,1fr)] gap-4 items-start max-[1280px]:grid-cols-1">
+        <aside className={cx(surfaceCard, 'py-4 px-3')}>
+          <h3 className="m-0 px-2 pb-2.5 text-[0.95rem]">Activity Timeline</h3>
+          <ul className="m-0 p-0 list-none grid gap-1">
+            {FILTERS.map((item) => {
+              const activeFilter = category === item.key
+              return (
+                <li key={item.key}>
+                  <button
+                    type="button"
+                    className={cx(
+                      'w-full flex justify-between items-center gap-2 py-[9px] px-2.5 border-0 rounded-[10px] bg-transparent text-text cursor-pointer font-inherit',
+                      activeFilter && 'bg-[#eef4ff] dark:bg-blue-500/15',
+                    )}
+                    onClick={() => applyCategory(item.key)}
+                  >
+                    <span
+                      className={cx(
+                        'flex items-center gap-2 text-text-muted',
+                        activeFilter && 'text-[#2563eb]',
+                      )}
+                    >
+                      <HugeiconsIcon icon={item.icon} size={16} />
+                      {item.label}
+                    </span>
+                    <b className={cx('text-text-faint text-[0.78rem]', activeFilter && 'text-[#2563eb]')}>
+                      {counts[item.key].toLocaleString()}
+                    </b>
+                  </button>
+                </li>
+              )
+            })}
           </ul>
         </aside>
 
-        <section className="admin-card ah-table-card">
-          <div className="ah-table-head">
+        <section className={cx(surfaceCard, 'p-0 overflow-hidden')}>
+          <div className="flex justify-between gap-3 items-center pt-4 px-4 pb-2">
             <div>
-              <h3>All Activities</h3>
-              <span>{items.length.toLocaleString()} events</span>
+              <h3 className="m-0">All Activities</h3>
+              <span className="text-text-muted text-[0.8rem]">{items.length.toLocaleString()} events</span>
             </div>
           </div>
           <Spin spinning={loading}>
             {!loading && items.length === 0 ? (
-              <div className="admin-empty">
+              <div className={adminEmpty}>
                 <strong>No matching activities</strong>
                 {canCreate ? (
                   <Button
@@ -444,8 +528,8 @@ export default function ActivityHistory() {
                 ) : null}
               </div>
             ) : (
-              <div className="ah-table-wrap">
-                <table className="admin-table ah-table">
+              <div className="overflow-auto">
+                <table className={cx(adminTable, 'min-w-[860px]')}>
                   <thead>
                     <tr>
                       <th>Date & Time</th>
@@ -460,7 +544,10 @@ export default function ActivityHistory() {
                     {pageRows.map((item) => (
                       <tr
                         key={item.id}
-                        className={detailOpen && active?.id === item.id ? 'is-active' : undefined}
+                        className={cx(
+                          'cursor-pointer',
+                          detailOpen && active?.id === item.id && 'bg-[#f4f8ff] dark:bg-blue-500/15',
+                        )}
                         onClick={() => {
                           setActiveId(item.id)
                           setDetailOpen(true)
@@ -468,23 +555,28 @@ export default function ActivityHistory() {
                       >
                         <td>{formatDateTime(item.occurredAt)}</td>
                         <td>
-                          <div className="ah-user">
+                          <div className="flex items-center gap-2.5">
                             <UserAvatar
                               name={item.user?.fullName || 'System'}
                               photoUrl={item.user?.photoUrl}
-                              className={`ah-avatar tone-${avatarTone(item.user?.fullName || 'System')}`}
+                              className={cx(
+                                'size-[34px] overflow-hidden grid place-items-center rounded-full text-[0.7rem] font-bold [&_img]:size-full [&_img]:object-cover',
+                                avatarToneClass[avatarTone(item.user?.fullName || 'System')],
+                              )}
                             />
                             <div>
-                              <strong>{item.user?.fullName || 'System'}</strong>
-                              <small>{item.user?.roleName || 'System'}</small>
+                              <strong className="block text-[0.84rem]">{item.user?.fullName || 'System'}</strong>
+                              <small className="text-text-faint text-[0.72rem]">{item.user?.roleName || 'System'}</small>
                             </div>
                           </div>
                         </td>
                         <td>
-                          <span className={`ah-pill ${actionClass(item.action, item.category)}`}>{item.action}</span>
+                          <span className={cx(ahPill, actionPillClass(item.action, item.category))}>
+                            {item.action}
+                          </span>
                         </td>
                         <td>{item.module}</td>
-                        <td className="ah-details-cell">{item.details}</td>
+                        <td className="max-w-[280px] overflow-hidden text-ellipsis">{item.details}</td>
                         <td>{item.ipAddress || '—'}</td>
                       </tr>
                     ))}
@@ -493,18 +585,18 @@ export default function ActivityHistory() {
               </div>
             )}
           </Spin>
-          <div className="ah-pagination">
-            <div className="ah-pages">
+          <div className="flex justify-between items-center gap-3 pt-3 px-4 pb-4">
+            <div className="flex gap-1.5">
               {pageItems(safePage, totalPages).map((item, index) =>
                 item === 'ellipsis' ? (
-                  <span key={`e-${index}`} className="ah-page-ellipsis">
+                  <span key={`e-${index}`} className="min-w-8 h-8 grid place-items-center text-text-muted font-semibold">
                     …
                   </span>
                 ) : (
                   <button
                     key={item}
                     type="button"
-                    className={`ah-page-btn${item === safePage ? ' is-active' : ''}`}
+                    className={cx(pageBtn, item === safePage && pageBtnActive)}
                     onClick={() => setPage(item)}
                   >
                     {item}
@@ -512,7 +604,7 @@ export default function ActivityHistory() {
                 ),
               )}
             </div>
-            <label className="ah-page-size">
+            <label className="flex items-center gap-2 text-text-muted text-[0.82rem] mb-0 [&_.ant-select]:w-[84px]">
               <Select
                 value={pageSize}
                 options={PAGE_SIZE_OPTIONS.map((value) => ({ value, label: String(value) }))}
@@ -525,23 +617,25 @@ export default function ActivityHistory() {
             </label>
           </div>
         </section>
-
       </div>
 
       {detailOpen && active ? (
         <div
-          className="modal-backdrop"
+          className={modalBackdrop}
           onClick={() => {
             setDetailOpen(false)
             setActiveId(null)
           }}
         >
-          <div className="modal-panel ah-detail-modal" onClick={(event) => event.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Activity Detail</h3>
+          <div
+            className={cx(modalPanel, 'w-[min(100%,640px)] py-[18px] px-[18px] pb-5')}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className={modalHeader}>
+              <h3 className="m-0 flex-1">Activity Detail</h3>
               <button
                 type="button"
-                className="modal-close"
+                className={modalClose}
                 aria-label="Close"
                 onClick={() => {
                   setDetailOpen(false)
@@ -551,65 +645,73 @@ export default function ActivityHistory() {
                 ×
               </button>
             </div>
-            <div className="ah-detail">
-              <div className="ah-detail-head">
-                <p>
+            <div className="grid content-start gap-3.5">
+              <div className="flex justify-between gap-2.5 items-start">
+                <p className="m-0 mt-1 text-text-muted text-[0.8rem]">
                   {formatDateTime(active.occurredAt)} · {active.user?.fullName || 'System'}
                 </p>
-                <span className="ah-status">{active.status}</span>
+                <span className="py-1 px-2.5 rounded-full bg-[#e7f8ef] text-[#15803d] text-[0.72rem] font-bold">
+                  {active.status}
+                </span>
               </div>
-              <div className="ah-detail-title">
-                <span className={`ah-pill ${actionClass(active.action, active.category)}`}>{active.action} Activity</span>
-                <h4>
+              <div>
+                <span className={cx(ahPill, actionPillClass(active.action, active.category))}>
+                  {active.action} Activity
+                </span>
+                <h4 className="mt-2 mb-0">
                   {active.user?.fullName || 'System'}
-                  {active.user?.roleName ? <small> ({active.user.roleName})</small> : null}
+                  {active.user?.roleName ? (
+                    <small className="text-text-muted font-medium"> ({active.user.roleName})</small>
+                  ) : null}
                 </h4>
               </div>
-              <dl>
-                <div>
-                  <dt>Module</dt>
-                  <dd>{active.module}</dd>
+              <dl className="m-0 grid gap-2.5">
+                <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[0.84rem]">
+                  <dt className="m-0 text-text-muted">Module</dt>
+                  <dd className="m-0 font-semibold">{active.module}</dd>
                 </div>
                 {active.relatedName ? (
-                  <div>
-                    <dt>Related To</dt>
-                    <dd>
+                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[0.84rem]">
+                    <dt className="m-0 text-text-muted">Related To</dt>
+                    <dd className="m-0 font-semibold">
                       {active.relatedName}
-                      {active.relatedType ? <small> ({active.relatedType})</small> : null}
+                      {active.relatedType ? (
+                        <small className="text-text-faint font-medium"> ({active.relatedType})</small>
+                      ) : null}
                     </dd>
                   </div>
                 ) : null}
                 {active.durationMin ? (
-                  <div>
-                    <dt>Duration</dt>
-                    <dd>{active.durationMin} min</dd>
+                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[0.84rem]">
+                    <dt className="m-0 text-text-muted">Duration</dt>
+                    <dd className="m-0 font-semibold">{active.durationMin} min</dd>
                   </div>
                 ) : null}
                 {active.outcome ? (
-                  <div>
-                    <dt>Outcome</dt>
-                    <dd>{active.outcome}</dd>
+                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[0.84rem]">
+                    <dt className="m-0 text-text-muted">Outcome</dt>
+                    <dd className="m-0 font-semibold">{active.outcome}</dd>
                   </div>
                 ) : null}
-                <div>
-                  <dt>IP Address</dt>
-                  <dd>{active.ipAddress || '—'}</dd>
+                <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[0.84rem]">
+                  <dt className="m-0 text-text-muted">IP Address</dt>
+                  <dd className="m-0 font-semibold">{active.ipAddress || '—'}</dd>
                 </div>
-                <div>
-                  <dt>Device</dt>
-                  <dd>{parseDevice(active.userAgent)}</dd>
+                <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[0.84rem]">
+                  <dt className="m-0 text-text-muted">Device</dt>
+                  <dd className="m-0 font-semibold">{parseDevice(active.userAgent)}</dd>
                 </div>
               </dl>
               {related.length ? (
                 <>
-                  <h4>Related Timeline</h4>
-                  <ol className="ah-timeline">
+                  <h4 className="m-0">Related Timeline</h4>
+                  <ol className="m-0 p-0 list-none grid gap-3">
                     {related.map((item) => (
-                      <li key={item.id}>
-                        <span />
+                      <li key={item.id} className="grid grid-cols-[14px_minmax(0,1fr)] gap-2.5">
+                        <span className="size-2.5 mt-1 rounded-full bg-[#22c55e] shadow-[0_0_0_4px_#dcfce7]" />
                         <div>
-                          <strong>{item.details}</strong>
-                          <small>{formatDateTime(item.occurredAt)}</small>
+                          <strong className="block text-[0.82rem]">{item.details}</strong>
+                          <small className="text-text-faint text-[0.72rem]">{formatDateTime(item.occurredAt)}</small>
                         </div>
                       </li>
                     ))}
@@ -618,10 +720,11 @@ export default function ActivityHistory() {
               ) : null}
               {canCreate ? (
                 <>
-                  <h4>Quick Actions</h4>
-                  <div className="ah-quick">
+                  <h4 className="m-0">Quick Actions</h4>
+                  <div className="grid gap-2">
                     <button
                       type="button"
+                      className="w-full py-2.5 px-3 border border-border rounded-xl bg-[#f8fafc] text-text text-left font-inherit font-semibold cursor-pointer hover:enabled:bg-[#eef4ff] hover:enabled:border-[#bfdbfe] disabled:opacity-55 disabled:cursor-not-allowed"
                       onClick={() => {
                         setLogType('CALL')
                         setLogName(active.relatedName || '')
@@ -632,6 +735,7 @@ export default function ActivityHistory() {
                     </button>
                     <button
                       type="button"
+                      className="w-full py-2.5 px-3 border border-border rounded-xl bg-[#f8fafc] text-text text-left font-inherit font-semibold cursor-pointer hover:enabled:bg-[#eef4ff] hover:enabled:border-[#bfdbfe] disabled:opacity-55 disabled:cursor-not-allowed"
                       onClick={() => {
                         setLogType('MESSAGE')
                         setLogName(active.relatedName || '')
@@ -649,15 +753,15 @@ export default function ActivityHistory() {
       ) : null}
 
       {logOpen ? (
-        <div className="modal-backdrop" onClick={() => setLogOpen(false)}>
-          <div className="modal-panel" onClick={(event) => event.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Log {logType === 'CALL' ? 'Call' : 'Message'}</h3>
-              <button type="button" className="modal-close" onClick={() => setLogOpen(false)}>
+        <div className={modalBackdrop} onClick={() => setLogOpen(false)}>
+          <div className={modalPanel} onClick={(event) => event.stopPropagation()}>
+            <div className={modalHeader}>
+              <h3 className="m-0 flex-1">Log {logType === 'CALL' ? 'Call' : 'Message'}</h3>
+              <button type="button" className={modalClose} onClick={() => setLogOpen(false)}>
                 ×
               </button>
             </div>
-            <div className="admin-form">
+            <div className={adminForm}>
               <label>
                 Related to
                 <Input value={logName} onChange={(event) => setLogName(event.target.value)} placeholder="Contact or student name" />
@@ -676,7 +780,7 @@ export default function ActivityHistory() {
                 Notes
                 <Input value={logNotes} onChange={(event) => setLogNotes(event.target.value)} placeholder="What happened?" />
               </label>
-              <div className="modal-actions">
+              <div className="flex justify-end gap-2 mt-3">
                 <Button variant="secondary" onClick={() => setLogOpen(false)}>
                   Cancel
                 </Button>

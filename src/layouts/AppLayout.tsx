@@ -340,7 +340,7 @@ export default function AppLayout() {
       {mobileNavOpen ? (
         <button
           type="button"
-          className="fixed inset-0 z-30 cursor-pointer border-0 p-0 max-[960px]:block"
+          className="fixed inset-0 z-30 hidden cursor-pointer border-0 p-0 max-[960px]:block"
           style={{ background: 'var(--modal-backdrop)' }}
           aria-label="Close menu"
           onClick={() => setMobileNavOpen(false)}

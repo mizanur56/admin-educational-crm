@@ -1,3 +1,4 @@
+import { adminEmpty, adminPage, crmAccessPillClass, employmentStatusPillClass, fieldError, photoCameraBadge, photoUploadSpin, statusPill } from '../styles/admin'
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { Spin } from 'antd'
@@ -24,8 +25,6 @@ import { getEmployee, uploadEmployeePhoto } from '../api/client'
 import Button from '../components/Button'
 import { hasPermission } from '../lib/access'
 import type { AuthSession, EmployeeCrmAccess, EmployeeRecord } from '../types'
-import './admin.css'
-
 type ProfileSection = {
   id: string
   label: string
@@ -172,10 +171,6 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-function statusClass(code?: string | null) {
-  return `status-${(code || 'inactive').toLowerCase().replaceAll('_', '-')}`
-}
-
 function crmAccessLabel(access: EmployeeCrmAccess) {
   if (access === 'ENABLED') {
     return 'Enabled'
@@ -232,9 +227,9 @@ function ProfileCard({
   children: ReactNode
 }) {
   return (
-    <article id={id} className="employee-profile-card">
+    <article id={id} className="scroll-mt-4 rounded-2xl border border-border bg-surface px-6 py-[22px] shadow-soft [&_header]:mb-5 [&_header]:flex [&_header]:items-center [&_header]:gap-3 [&_h3]:m-0 [&_h3]:text-base">
       <header>
-        <span className="employee-profile-card-icon">
+        <span className="grid h-[30px] w-[30px] place-items-center rounded-[9px] bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-primary">
           <HugeiconsIcon icon={icon} size={16} color="currentColor" strokeWidth={1.7} />
         </span>
         <h3>{title}</h3>
@@ -350,8 +345,8 @@ export default function EmployeeProfile() {
 
   if (!loading && (error || !employee)) {
     return (
-      <div className="admin-page">
-        <div className="admin-empty">
+      <div className={`${adminPage}`}>
+        <div className={`${adminEmpty}`}>
           <strong>Employee profile unavailable</strong>
           <p>{error || 'This employee could not be found.'}</p>
           <Button variant="secondary" onClick={() => navigate('/employees')}>
@@ -363,8 +358,8 @@ export default function EmployeeProfile() {
   }
 
   return (
-    <div className="admin-page employee-profile">
-      <nav className="employee-profile-crumb" aria-label="Breadcrumb">
+    <div className={`${adminPage} gap-5 overflow-visible [&_.ant-spin-nested-loading]:grid [&_.ant-spin-nested-loading]:gap-6 [&_.ant-spin-nested-loading]:overflow-visible [&_.ant-spin-container]:grid [&_.ant-spin-container]:gap-6 [&_.ant-spin-container]:overflow-visible`}>
+      <nav className="flex items-center gap-2 text-[0.84rem] text-text-muted [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline" aria-label="Breadcrumb">
         <Link to="/employees">Employees</Link>
         <span aria-hidden="true">/</span>
         <span>{employee?.employeeCode || 'Profile'}</span>
@@ -372,9 +367,9 @@ export default function EmployeeProfile() {
 
       <Spin spinning={loading}>
         {employee ? (
-          <div className="employee-profile-body">
-            <section className="employee-profile-hero">
-              <div className="employee-profile-hero-main">
+          <div className="grid gap-6">
+            <section className="flex items-start justify-between gap-7 rounded-[20px] border border-border bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-primary)_12%,var(--color-surface))_0%,var(--color-surface)_52%),var(--color-surface)] px-8 py-7 shadow-soft max-[720px]:flex-col">
+              <div className="flex min-w-0 gap-[22px] max-[720px]:flex-col">
                 {canEdit ? (
                   <div className={`employee-profile-photo-picker${photoUploading ? ' is-uploading' : ''}`}>
                     <input
@@ -385,53 +380,53 @@ export default function EmployeeProfile() {
                       disabled={photoUploading}
                       onChange={(event) => void onProfilePhotoChange(event)}
                     />
-                    <label htmlFor="employee-profile-photo" className="employee-profile-photo-button">
-                      <span className="employee-profile-photo-frame">
+                    <label htmlFor="employee-profile-photo" className="relative m-0 block cursor-pointer [&_.photo-camera-badge]:right-[-4px] [&_.photo-camera-badge]:bottom-[-2px] [&_.photo-camera-badge]:h-8 [&_.photo-camera-badge]:w-8">
+                      <span className="relative block h-24 w-24 overflow-hidden rounded-[28px]">
                         {photo ? (
-                          <img className="employee-profile-photo" src={photo} alt="" />
+                          <img className="grid h-24 w-24 shrink-0 place-items-center rounded-[28px] border-[3px] border-surface bg-[var(--avatar-bg)] text-[1.7rem] font-bold text-[var(--avatar-fg)] object-cover shadow-[0_8px_20px_rgba(18,32,51,0.08)]" src={photo} alt="" />
                         ) : (
-                          <span className="employee-profile-photo is-fallback">{employeeInitials(employee.fullName)}</span>
+                          <span className="grid h-24 w-24 shrink-0 place-items-center rounded-[28px] border-[3px] border-surface bg-[var(--avatar-bg)] text-[1.7rem] font-bold text-[var(--avatar-fg)] object-cover shadow-[0_8px_20px_rgba(18,32,51,0.08)] is-fallback">{employeeInitials(employee.fullName)}</span>
                         )}
                         {photoUploading ? (
-                          <span className="photo-upload-spin">
+                          <span className={`${photoUploadSpin}`}>
                             <Spin size="small" />
                           </span>
                         ) : null}
                       </span>
-                      <span className="photo-camera-badge" aria-hidden>
+                      <span className={`${photoCameraBadge}`} aria-hidden>
                         <HugeiconsIcon icon={Camera01Icon} size={16} color="currentColor" strokeWidth={1.8} />
                       </span>
                       <span className="sr-only">{photoUploading ? 'Uploading profile photo' : 'Change profile photo'}</span>
                     </label>
-                    {photoError ? <p className="field-error">{photoError}</p> : null}
+                    {photoError ? <p className={`${fieldError}`}>{photoError}</p> : null}
                   </div>
                 ) : photo ? (
-                  <img className="employee-profile-photo" src={photo} alt="" />
+                  <img className="grid h-24 w-24 shrink-0 place-items-center rounded-[28px] border-[3px] border-surface bg-[var(--avatar-bg)] text-[1.7rem] font-bold text-[var(--avatar-fg)] object-cover shadow-[0_8px_20px_rgba(18,32,51,0.08)]" src={photo} alt="" />
                 ) : (
-                  <span className="employee-profile-photo is-fallback">{employeeInitials(employee.fullName)}</span>
+                  <span className="grid h-24 w-24 shrink-0 place-items-center rounded-[28px] border-[3px] border-surface bg-[var(--avatar-bg)] text-[1.7rem] font-bold text-[var(--avatar-fg)] object-cover shadow-[0_8px_20px_rgba(18,32,51,0.08)] is-fallback">{employeeInitials(employee.fullName)}</span>
                 )}
-                <div className="employee-profile-identity">
-                  <div className="employee-profile-kicker">{employee.employeeCode}</div>
+                <div className="min-w-0 [&_h1]:my-1.5 [&_h1]:text-[1.7rem] [&_h1]:leading-tight [&_h1]:tracking-[-0.03em] [&_p]:mb-4 [&_p]:mt-0 [&_p]:text-text-muted">
+                  <div className="text-[0.78rem] font-bold tracking-[0.04em] text-text-muted uppercase">{employee.employeeCode}</div>
                   <h1>{employee.fullName}</h1>
                   <p>
                     {[employee.designation?.name, employee.department?.name, employee.team?.name]
                       .filter(Boolean)
                       .join(' · ') || 'No assignment recorded'}
                   </p>
-                  <div className="employee-profile-pills">
-                    <span className={`status-pill ${statusClass(employee.employmentStatus?.code)}`}>
+                  <div className="flex flex-wrap gap-2.5">
+                    <span className={employmentStatusPillClass(employee.employmentStatus?.code)}>
                       {employee.employmentStatus?.name || 'Unknown status'}
                     </span>
-                    <span className={`status-pill crm-access-${employee.crmAccess.toLowerCase()}`}>
+                    <span className={crmAccessPillClass(employee.crmAccess.toLowerCase())}>
                       CRM {crmAccessLabel(employee.crmAccess)}
                     </span>
                     {employee.employmentType?.name ? (
-                      <span className="status-pill employee-profile-type">{employee.employmentType.name}</span>
+                      <span className={`${statusPill} bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-surface))] text-primary`}>{employee.employmentType.name}</span>
                     ) : null}
                   </div>
                 </div>
               </div>
-              <div className="employee-profile-hero-actions">
+              <div className="flex flex-wrap justify-end gap-2.5">
                 <Button variant="secondary" onClick={() => navigate('/employees')}>
                   Back to list
                 </Button>
@@ -451,7 +446,7 @@ export default function EmployeeProfile() {
               </div>
             </section>
 
-            <section className="employee-profile-stats" aria-label="Employment snapshot">
+            <section className="grid grid-cols-1 gap-4 min-[1101px]:grid-cols-4 [&_article]:flex [&_article]:items-start [&_article]:gap-3.5 [&_article]:rounded-2xl [&_article]:border [&_article]:border-border [&_article]:bg-surface [&_article]:px-5 [&_article]:py-[18px] [&_article]:shadow-soft [&_article_svg]:mt-0.5 [&_article_svg]:text-primary [&_span]:block [&_span]:text-[0.75rem] [&_span]:text-text-muted [&_strong]:mt-1.5 [&_strong]:block [&_strong]:text-[0.95rem] [&_a]:text-inherit [&_a]:no-underline hover:[&_a]:text-primary hover:[&_a]:underline" aria-label="Employment snapshot">
               <article>
                 <HugeiconsIcon icon={Calendar03Icon} size={18} color="currentColor" strokeWidth={1.7} />
                 <div>
@@ -490,14 +485,14 @@ export default function EmployeeProfile() {
               </article>
             </section>
 
-            <div className="employee-profile-layout">
-              <aside className="employee-profile-aside">
-                <nav className="employee-profile-nav" aria-label="Profile sections">
+            <div className="grid grid-cols-1 items-start gap-x-8 gap-y-5 min-[1101px]:grid-cols-[220px_minmax(0,1fr)]">
+              <aside className="sticky top-4 z-6 grid items-start gap-4 self-start max-[1100px]:top-3 max-[1100px]:bg-page-bg max-[1100px]:pb-1 max-[960px]:top-[72px]">
+                <nav className="grid gap-1.5 rounded-2xl border border-border bg-surface p-2.5 shadow-soft max-[1100px]:grid-cols-[repeat(auto-fit,minmax(140px,1fr))] [&_button]:flex [&_button]:w-full [&_button]:cursor-pointer [&_button]:items-center [&_button]:gap-2.5 [&_button]:rounded-[10px] [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-3 [&_button]:py-2.5 [&_button]:text-left [&_button]:font-[inherit] [&_button]:text-text" aria-label="Profile sections">
                   {SECTIONS.map((section) => (
                     <button
                       key={section.id}
                       type="button"
-                      className={activeSection === section.id ? 'is-active' : undefined}
+                      className={activeSection === section.id ? 'bg-nav-active-bg text-nav-active' : 'hover:bg-hover-bg'}
                       onClick={() => scrollToSection(section.id)}
                     >
                       <HugeiconsIcon icon={section.icon} size={16} color="currentColor" strokeWidth={1.7} />
@@ -506,7 +501,7 @@ export default function EmployeeProfile() {
                   ))}
                 </nav>
 
-                <div className="employee-profile-aside-card">
+                <div className="rounded-2xl border border-border bg-surface p-4 [&_h4]:mb-3.5 [&_h4]:mt-0 [&_h4]:text-[0.86rem] [&_p]:mb-3 [&_p]:mt-0 [&_p]:flex [&_p]:items-start [&_p]:gap-2.5 [&_p]:text-[0.84rem] [&_p]:text-text-muted [&_p:last-child]:mb-0 [&_a]:text-inherit [&_a]:no-underline hover:[&_a]:text-primary">
                   <h4>Primary contact</h4>
                   <p>
                     <HugeiconsIcon icon={Call02Icon} size={14} color="currentColor" strokeWidth={1.7} />
@@ -527,15 +522,15 @@ export default function EmployeeProfile() {
                 </div>
               </aside>
 
-              <div className="employee-profile-main">
+              <div className="grid gap-5">
                 <ProfileCard id="personal" title="Personal information" icon={UserIcon}>
-                  <dl className="employee-profile-fields">
+                  <dl className="m-0 grid grid-cols-1 gap-x-10 gap-y-5 min-[721px]:grid-cols-2 [&_dt]:text-[0.76rem] [&_dt]:tracking-[0.03em] [&_dt]:text-text-muted [&_dt]:uppercase [&_dd]:mt-1.5 [&_dd]:break-words [&_dd]:text-text [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline">
                     <Field label="Full name">{employee.fullName}</Field>
                     <Field label="Employee ID">{employee.employeeCode}</Field>
                     <Field label="Gender">{employee.gender ? GENDER_LABELS[employee.gender] || employee.gender : '—'}</Field>
                     <Field label="Date of birth">
                       {formatPrettyDate(employee.dateOfBirth)}
-                      {age != null ? <span className="employee-profile-hint"> ({age} years)</span> : null}
+                      {age != null ? <span className="font-medium text-text-muted"> ({age} years)</span> : null}
                     </Field>
                     <Field label="Nationality">{displayValue(employee.nationality)}</Field>
                     <Field label="NID / Passport no.">{displayValue(employee.identityNumber)}</Field>
@@ -546,7 +541,7 @@ export default function EmployeeProfile() {
                 </ProfileCard>
 
                 <ProfileCard id="contact" title="Contact information" icon={Contact01Icon}>
-                  <dl className="employee-profile-fields">
+                  <dl className="m-0 grid grid-cols-1 gap-x-10 gap-y-5 min-[721px]:grid-cols-2 [&_dt]:text-[0.76rem] [&_dt]:tracking-[0.03em] [&_dt]:text-text-muted [&_dt]:uppercase [&_dd]:mt-1.5 [&_dd]:break-words [&_dd]:text-text [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline">
                     <Field label="Personal mobile">
                       {employee.mobile ? <a href={`tel:${employee.mobile}`}>{employee.mobile}</a> : '—'}
                     </Field>
@@ -566,7 +561,7 @@ export default function EmployeeProfile() {
                 </ProfileCard>
 
                 <ProfileCard id="employment" title="Employment information" icon={Briefcase01Icon}>
-                  <dl className="employee-profile-fields">
+                  <dl className="m-0 grid grid-cols-1 gap-x-10 gap-y-5 min-[721px]:grid-cols-2 [&_dt]:text-[0.76rem] [&_dt]:tracking-[0.03em] [&_dt]:text-text-muted [&_dt]:uppercase [&_dd]:mt-1.5 [&_dd]:break-words [&_dd]:text-text [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline">
                     <Field label="Designation">{displayValue(employee.designation?.name)}</Field>
                     <Field label="Employment type">{displayValue(employee.employmentType?.name)}</Field>
                     <Field label="Employment status">{displayValue(employee.employmentStatus?.name)}</Field>
@@ -576,14 +571,14 @@ export default function EmployeeProfile() {
                 </ProfileCard>
 
                 <ProfileCard id="organization" title="Organization structure" icon={Building03Icon}>
-                  <dl className="employee-profile-fields">
+                  <dl className="m-0 grid grid-cols-1 gap-x-10 gap-y-5 min-[721px]:grid-cols-2 [&_dt]:text-[0.76rem] [&_dt]:tracking-[0.03em] [&_dt]:text-text-muted [&_dt]:uppercase [&_dd]:mt-1.5 [&_dd]:break-words [&_dd]:text-text [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline">
                     <Field label="Department">{displayValue(employee.department?.name)}</Field>
                     <Field label="Team">{displayValue(employee.team?.name)}</Field>
                     <Field label="Reporting manager">
                       {employee.reportingManager ? (
                         <>
                           <Link to={`/employees/${employee.reportingManager.id}`}>{employee.reportingManager.fullName}</Link>
-                          <span className="employee-profile-hint"> ({employee.reportingManager.employeeCode})</span>
+                          <span className="font-medium text-text-muted"> ({employee.reportingManager.employeeCode})</span>
                         </>
                       ) : (
                         '—'
@@ -594,7 +589,7 @@ export default function EmployeeProfile() {
                 </ProfileCard>
 
                 <ProfileCard id="crm" title="CRM access" icon={Shield01Icon}>
-                  <dl className="employee-profile-fields">
+                  <dl className="m-0 grid grid-cols-1 gap-x-10 gap-y-5 min-[721px]:grid-cols-2 [&_dt]:text-[0.76rem] [&_dt]:tracking-[0.03em] [&_dt]:text-text-muted [&_dt]:uppercase [&_dd]:mt-1.5 [&_dd]:break-words [&_dd]:text-text [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline">
                     <Field label="CRM access">{crmAccessLabel(employee.crmAccess)}</Field>
                     <Field label="Linked account">{employee.user ? 'Yes' : 'No CRM user'}</Field>
                     <Field label="Username">{displayValue(employee.user?.username)}</Field>
@@ -606,7 +601,7 @@ export default function EmployeeProfile() {
                 </ProfileCard>
 
                 <ProfileCard id="emergency" title="Emergency contact" icon={Call02Icon}>
-                  <dl className="employee-profile-fields">
+                  <dl className="m-0 grid grid-cols-1 gap-x-10 gap-y-5 min-[721px]:grid-cols-2 [&_dt]:text-[0.76rem] [&_dt]:tracking-[0.03em] [&_dt]:text-text-muted [&_dt]:uppercase [&_dd]:mt-1.5 [&_dd]:break-words [&_dd]:text-text [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline">
                     <Field label="Contact name">{displayValue(employee.emergencyName)}</Field>
                     <Field label="Relationship">{displayValue(employee.emergencyRelationship)}</Field>
                     <Field label="Mobile">
@@ -622,9 +617,9 @@ export default function EmployeeProfile() {
 
                 <ProfileCard id="documents" title="Documents" icon={File01Icon}>
                   {documents.length === 0 ? (
-                    <p className="employee-profile-empty">No documents have been uploaded for this employee.</p>
+                    <p className="m-0 text-text-muted">No documents have been uploaded for this employee.</p>
                   ) : (
-                    <ul className="employee-profile-docs">
+                    <ul className="m-0 grid list-none gap-3 p-0 [&_li]:flex [&_li]:items-center [&_li]:justify-between [&_li]:gap-3 [&_li]:rounded-xl [&_li]:border [&_li]:border-border-subtle [&_li]:bg-[color-mix(in_srgb,var(--color-page-bg)_70%,var(--color-surface))] [&_li]:px-3.5 [&_li]:py-3 max-[720px]:[&_li]:grid [&_strong]:block [&_span]:block [&_span]:text-[0.8rem] [&_span]:text-text-muted">
                       {documents.map((doc) => (
                         <li key={doc.id}>
                           <div>
@@ -634,7 +629,7 @@ export default function EmployeeProfile() {
                             </span>
                           </div>
                           <a
-                            className="employee-profile-doc-link"
+                            className="inline-flex shrink-0 items-center gap-1.5 font-[650] text-primary no-underline"
                             href={documentHref(employee.id, doc.id)}
                             target="_blank"
                             rel="noreferrer"
@@ -648,14 +643,14 @@ export default function EmployeeProfile() {
                   )}
                 </ProfileCard>
 
-                <p className="employee-profile-meta">
+                <p className="m-0 text-[0.8rem] text-text-muted">
                   Record created {formatDateTime(employee.createdAt)} · Last updated {formatDateTime(employee.updatedAt)}
                 </p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="employee-profile-placeholder" />
+          <div className="min-h-[420px]" />
         )}
       </Spin>
     </div>

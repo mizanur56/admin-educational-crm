@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@theme {
+  --color-primary: #35ad0b;
+  --radius-search: 10px;
+}

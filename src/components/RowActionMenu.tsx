@@ -1,3 +1,4 @@
+import { rowActionBtn, rowActionMenu, rowActionMenuItem, rowActionMenuItemDanger } from '../styles/admin'
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -84,7 +85,7 @@ export default function RowActionMenu({ items }: { items: RowActionItem[] }) {
       <button
         ref={buttonRef}
         type="button"
-        className="row-action-btn ui-btn ui-btn-ghost ui-btn-sm"
+        className={`${rowActionBtn} ui-btn ui-btn-ghost ui-btn-sm`}
         title="Actions"
         aria-label="Actions"
         aria-expanded={open}
@@ -105,7 +106,7 @@ export default function RowActionMenu({ items }: { items: RowActionItem[] }) {
         ? createPortal(
             <div
               ref={menuRef}
-              className="row-action-menu"
+              className={`${rowActionMenu}`}
               style={{ top: coords.top, left: coords.left }}
               role="menu"
             >
