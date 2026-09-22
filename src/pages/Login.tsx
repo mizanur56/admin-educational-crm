@@ -4,6 +4,7 @@ import { login } from '../api/client'
 import { isAuthSession } from '../lib/auth-session'
 import Button from '../components/Button'
 import Input from '../components/Input'
+import PageMeta from '../components/PageMeta'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -40,7 +41,9 @@ export default function Login() {
   }
 
   return (
-    <form
+    <>
+      <PageMeta title="Sign In" description="Sign in to continue to your dashboard" />
+      <form
       className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"
       onSubmit={handleSubmit}
     >
@@ -90,5 +93,6 @@ export default function Login() {
         <Link to="/forgot-password">Forgot password?</Link>
       </p>
     </form>
+    </>
   )
 }

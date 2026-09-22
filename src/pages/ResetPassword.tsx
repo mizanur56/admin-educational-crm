@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { resetPassword } from '../api/client'
 import Button from '../components/Button'
 import Input from '../components/Input'
+import PageMeta from '../components/PageMeta'
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams()
@@ -33,7 +34,12 @@ export default function ResetPassword() {
   }
 
   return (
-    <form
+    <>
+      <PageMeta
+        title="Reset password"
+        description="Choose a new password of at least 8 characters."
+      />
+      <form
       className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"
       onSubmit={handleSubmit}
     >
@@ -64,5 +70,6 @@ export default function ResetPassword() {
         <Link to="/login">Back to sign in</Link>
       </p>
     </form>
+    </>
   )
 }

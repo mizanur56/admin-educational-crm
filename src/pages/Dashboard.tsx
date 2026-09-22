@@ -445,6 +445,10 @@ export default function Dashboard() {
 
   return (
     <section className="grid gap-[18px] min-w-0 text-text max-sm:gap-3.5">
+      <PageMeta
+        title="Dashboard"
+        description="Here's what's happening with your consultancy today."
+      />
       <PageHeader
         title={`${greetingForHour(now.getHours())}, ${name}`}
         subtitle="Here's what's happening with your consultancy today."

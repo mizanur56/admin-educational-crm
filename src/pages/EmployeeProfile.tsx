@@ -358,6 +358,10 @@ export default function EmployeeProfile() {
   if (!loading && (error || !employee)) {
     return (
       <div className={`${adminPage}`}>
+        <PageMeta
+          title="Employee Profile"
+          description={error || 'This employee could not be found.'}
+        />
         <PageHeader
           title="Employee Profile"
           subtitle={error || 'This employee could not be found.'}
@@ -385,6 +389,10 @@ export default function EmployeeProfile() {
 
   return (
     <div className={`${adminPage} gap-5 overflow-visible [&_.ant-spin-nested-loading]:grid [&_.ant-spin-nested-loading]:gap-6 [&_.ant-spin-nested-loading]:overflow-visible [&_.ant-spin-container]:grid [&_.ant-spin-container]:gap-6 [&_.ant-spin-container]:overflow-visible`}>
+      <PageMeta
+        title={employee?.fullName || 'Employee Profile'}
+        description="Employee Details"
+      />
       <PageHeader
         title={employee?.fullName || 'Employee Profile'}
         subtitle="Employee Details"

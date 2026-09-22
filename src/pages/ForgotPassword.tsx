@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { requestPasswordReset } from '../api/client'
 import Button from '../components/Button'
 import Input from '../components/Input'
+import PageMeta from '../components/PageMeta'
 
 export default function ForgotPassword() {
   const [identifier, setIdentifier] = useState('')
@@ -32,7 +33,12 @@ export default function ForgotPassword() {
   }
 
   return (
-    <form
+    <>
+      <PageMeta
+        title="Forgot password"
+        description="Enter your email or username. A reset link will be created for an active account."
+      />
+      <form
       className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"
       onSubmit={handleSubmit}
     >
@@ -69,5 +75,6 @@ export default function ForgotPassword() {
         <Link to="/login">Back to sign in</Link>
       </p>
     </form>
+    </>
   )
 }

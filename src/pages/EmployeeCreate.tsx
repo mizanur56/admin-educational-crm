@@ -833,6 +833,7 @@ export default function EmployeeCreate() {
 
   return (
     <div className={`${adminPage} [&_textarea.ui-input]:h-auto [&_textarea.ui-input]:min-h-[84px] [&_textarea.ui-input]:px-[11px] [&_textarea.ui-input]:py-2 [&_textarea.ant-input]:h-auto [&_textarea.ant-input]:min-h-[84px] [&_textarea.ant-input]:px-[11px] [&_textarea.ant-input]:py-2`}>
+      <PageMeta title={pageTitle} description={pageDescription} />
       <PageHeader
         title={pageTitle}
         subtitle={pageDescription}
