@@ -1,24 +1,43 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Key01Icon, Logout01Icon, UserCircleIcon } from '@hugeicons/core-free-icons'
+import { Logout01Icon, UserCircleIcon } from '@hugeicons/core-free-icons'
 import { logout } from '../api/client'
+import { hasPermission } from '../lib/access'
+import type { NavIconName } from '../config/navigation'
+import NavIcon from './NavIcon'
 import UserAvatar from './UserAvatar'
 import type { AuthSession } from '../types'
 
 const CLOSE_MS = 180
 
-type MenuItem = {
+type QuickMenuItem = {
   key: string
   label: string
   to: string
-  icon: typeof UserCircleIcon
+  icon: NavIconName
+  permission?: string
 }
 
-const MENU_ITEMS: MenuItem[] = [
-  { key: 'profile', label: 'Profile', to: '/profile', icon: UserCircleIcon },
-  { key: 'account', label: 'Change password', to: '/account', icon: Key01Icon },
+const ACCOUNT_MENUS = [
+  { key: 'dashboard', label: 'Dashboard', to: '/dashboard', navIcon: 'grid' as const },
+  { key: 'profile', label: 'Profile', to: '/profile', hugeIcon: UserCircleIcon },
 ]
+
+const QUICK_MENUS: QuickMenuItem[] = [
+  { key: 'leads', label: 'Leads', to: '/leads', icon: 'users', permission: 'lead:view' },
+  { key: 'applications', label: 'Applications', to: '/applications', icon: 'file', permission: 'lead:convert' },
+  { key: 'students', label: 'Students', to: '/students', icon: 'graduate', permission: 'lead:convert' },
+  { key: 'follow-ups', label: 'Follow-ups', to: '/follow-ups', icon: 'bell', permission: 'follow_up:view' },
+  { key: 'documents', label: 'Documents', to: '/documents', icon: 'folder', permission: 'document:view' },
+  { key: 'payments', label: 'Payments', to: '/payments', icon: 'card', permission: 'payment:view' },
+  { key: 'reports', label: 'Reports', to: '/reports', icon: 'chart', permission: 'report:view' },
+]
+
+function isPathActive(pathname: string, to: string) {
+  if (to === '/dashboard') return pathname === '/' || pathname === '/dashboard'
+  return pathname === to || pathname.startsWith(`${to}/`)
+}
 
 export default function UserDropdown({
   auth,
@@ -37,6 +56,11 @@ export default function UserDropdown({
 
   const user = auth.user
   const roleName = auth.role?.name?.trim()
+
+  const quickMenus = useMemo(
+    () => QUICK_MENUS.filter((item) => !item.permission || hasPermission(auth, item.permission)),
+    [auth],
+  )
 
   useEffect(() => {
     setIsOpen(false)
@@ -123,19 +147,56 @@ export default function UserDropdown({
           </div>
 
           <ul className="user-dropdown-list">
-            {MENU_ITEMS.map((item) => (
-              <li key={item.key}>
-                <NavLink
-                  to={item.to}
-                  className={({ isActive }) => `user-dropdown-item${isActive ? ' is-active' : ''}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <HugeiconsIcon icon={item.icon} size={15} color="currentColor" strokeWidth={1.5} />
-                  <span>{item.label}</span>
-                </NavLink>
-              </li>
-            ))}
+            {ACCOUNT_MENUS.map((item) => {
+              const active = isPathActive(location.pathname, item.to)
+              return (
+                <li key={item.key}>
+                  <NavLink
+                    to={item.to}
+                    className={`user-dropdown-item${active ? ' is-active' : ''}`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {'navIcon' in item && item.navIcon ? (
+                      <NavIcon name={item.navIcon} size={15} />
+                    ) : (
+                      <HugeiconsIcon
+                        icon={item.hugeIcon!}
+                        size={15}
+                        color="currentColor"
+                        strokeWidth={1.5}
+                      />
+                    )}
+                    <span>{item.label}</span>
+                  </NavLink>
+                </li>
+              )
+            })}
           </ul>
+
+          {quickMenus.length > 0 ? (
+            <>
+              <div className="user-dropdown-section">
+                <p className="user-dropdown-section-label">Quick</p>
+              </div>
+              <ul className="user-dropdown-list user-dropdown-list-quick">
+                {quickMenus.map((item) => {
+                  const active = isPathActive(location.pathname, item.to)
+                  return (
+                    <li key={item.key}>
+                      <NavLink
+                        to={item.to}
+                        className={`user-dropdown-item${active ? ' is-active' : ''}`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <NavIcon name={item.icon} size={15} />
+                        <span>{item.label}</span>
+                      </NavLink>
+                    </li>
+                  )
+                })}
+              </ul>
+            </>
+          ) : null}
 
           <div className="user-dropdown-footer">
             <button

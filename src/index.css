@@ -779,6 +779,7 @@ input[type='checkbox'] {
   display: flex;
   flex-direction: column;
   width: 220px;
+  max-height: min(70vh, 480px);
   overflow: hidden;
   padding: 0;
   background: var(--surface);
@@ -800,6 +801,7 @@ input[type='checkbox'] {
 }
 
 .user-dropdown-header {
+  flex: 0 0 auto;
   padding: 8px 12px;
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -837,6 +839,27 @@ input[type='checkbox'] {
   margin: 0;
   padding: 6px;
   list-style: none;
+}
+
+.user-dropdown-list-quick {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-top: 0;
+}
+
+.user-dropdown-section {
+  flex: 0 0 auto;
+  padding: 2px 12px 0;
+}
+
+.user-dropdown-section-label {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .user-dropdown-item {
