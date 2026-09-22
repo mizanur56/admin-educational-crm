@@ -68,6 +68,7 @@ export default function AppLayout() {
   const auth = useOutletContext<AuthSession>()
   const navigate = useNavigate()
   const location = useLocation()
+  const { logout } = useAuth()
   const [pending, setPending] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
