@@ -1,3 +1,4 @@
+import { adminCard, adminFilters, adminFiltersCompact, adminForm, adminFormFields, adminFormSpan, adminPage, adminTable, appToastClass, formActions, matrix, matrixActions, matrixGroup, matrixModal, modalBackdrop, modalClose, modalHeader, modalPanel, modalPanelWide, muted, rowActions, tableWrap } from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { useOutletContext, useLocation } from 'react-router-dom'
@@ -24,12 +25,11 @@ import Button from '../components/Button'
 import Input from '../components/Input'
 import Select from '../components/Select'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import RowActionMenu, { type RowActionItem } from '../components/RowActionMenu'
 import { hasPermission } from '../lib/access'
 import { readUrlSearchQuery } from '../lib/url-search'
 import type { AuthSession, PermissionRecord, RecordStatus, RoleRecord } from '../types'
-import './admin.css'
-
 type FormMode = 'create' | 'view' | 'edit'
 type ToastState = { text: string; type: 'success' | 'error' }
 
@@ -239,15 +239,19 @@ export default function Roles() {
   }
 
   return (
-    <div className="admin-page">
+    <div className={`${adminPage}`}>
+      <PageMeta
+        title="Roles & Permissions"
+        description="Configure role-based permissions for modules and actions across EduConsult CRM."
+      />
       <PageHeader
         title="Roles & Permissions"
-        description="Configure role-wise, module-wise, and action-level access."
-      >
-        {canCreate ? <Button onClick={openCreate}>Create Role</Button> : null}
-      </PageHeader>
+        subtitle="Configure role-wise, module-wise, and action-level access."
+        breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Roles & Permissions' }]}
+        extra={canCreate ? <Button onClick={openCreate}>Create Role</Button> : undefined}
+      />
 
-      <section className="admin-filters admin-filters-compact">
+      <section className={`${adminFilters} ${adminFiltersCompact}`}>
         <Input.Search
           allowClear
           enterButton="Search"
@@ -271,9 +275,9 @@ export default function Roles() {
         />
       </section>
 
-      <section className="admin-card table-wrap">
+      <section className={`${adminCard} ${tableWrap}`}>
         <Spin spinning={loading}>
-          <table className="admin-table">
+          <table className={`${adminTable}`}>
             <thead>
               <tr>
                 <th>Role</th>
@@ -292,7 +296,7 @@ export default function Roles() {
                   <tr key={role.id}>
                     <td>
                       <strong>{role.name}</strong>
-                      <div className="muted">{role.description}</div>
+                      <div className={`${muted}`}>{role.description}</div>
                     </td>
                     <td>
                       <Switch
@@ -307,7 +311,7 @@ export default function Roles() {
                       />
                     </td>
                     <td>{role.assignedUserCount}</td>
-                    <td className="row-actions">
+                    <td className={`${rowActions}`}>
                       <RowActionMenu
                         items={(
                           [
@@ -358,24 +362,24 @@ export default function Roles() {
 
       {formOpen
         ? createPortal(
-            <div className="modal-backdrop" onClick={closeForm}>
+            <div className={`${modalBackdrop}`} onClick={closeForm}>
               <div
-                className="modal-panel"
+                className={`${modalPanel}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="role-modal-title"
                 onClick={(event) => event.stopPropagation()}
               >
-                <div className="modal-header">
+                <div className={`${modalHeader}`}>
                   <h3 id="role-modal-title">
                     {formMode === 'create' ? 'Create Role' : formMode === 'view' ? 'View Role' : 'Edit Role'}
                   </h3>
-                  <button type="button" className="modal-close" aria-label="Close" onClick={closeForm}>
+                  <button type="button" className={`${modalClose}`} aria-label="Close" onClick={closeForm}>
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
                 <form
-                  className="admin-form"
+                  className={`${adminForm}`}
                   onSubmit={(event) => {
                     if (formLocked) {
                       event.preventDefault()
@@ -384,7 +388,7 @@ export default function Roles() {
                     void saveRole(event)
                   }}
                 >
-                  <fieldset className="admin-form-fields" disabled={formLocked}>
+                  <fieldset className={`${adminFormFields}`} disabled={formLocked}>
                     <label>
                       Role Name
                       <Input
@@ -411,7 +415,7 @@ export default function Roles() {
                         disabled={formLocked}
                       />
                     </label>
-                    <label className="admin-form-span">
+                    <label className={`${adminFormSpan}`}>
                       Description
                       <Input
                         value={form.description}
@@ -420,7 +424,7 @@ export default function Roles() {
                       />
                     </label>
                   </fieldset>
-                  <div className="form-actions">
+                  <div className={`${formActions}`}>
                     <Button type="button" variant="secondary" onClick={closeForm}>
                       {formLocked ? 'Close' : 'Cancel'}
                     </Button>
@@ -435,21 +439,21 @@ export default function Roles() {
 
       {permissionOpen && selected
         ? createPortal(
-            <div className="modal-backdrop" onClick={closePermissions}>
+            <div className={`${modalBackdrop}`} onClick={closePermissions}>
               <div
-                className="modal-panel modal-panel-wide"
+                className={`${modalPanel} ${modalPanelWide}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="permission-modal-title"
                 onClick={(event) => event.stopPropagation()}
               >
-                <div className="modal-header">
+                <div className={`${modalHeader}`}>
                   <h3 id="permission-modal-title">Permissions · {selected.name}</h3>
-                  <button type="button" className="modal-close" aria-label="Close" onClick={closePermissions}>
+                  <button type="button" className={`${modalClose}`} aria-label="Close" onClick={closePermissions}>
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
-                <div className="matrix matrix-modal">
+                <div className={`${matrix} ${matrixModal}`}>
                   <Input.Search
                     allowClear
                     placeholder="Search permissions, e.g. Lead"
@@ -457,9 +461,9 @@ export default function Roles() {
                     onChange={(event) => setPermissionSearch(event.target.value)}
                   />
                   {grouped.map(([moduleName, items]) => (
-                    <div key={moduleName} className="matrix-group">
+                    <div key={moduleName} className={`${matrixGroup}`}>
                       <strong>{moduleName}</strong>
-                      <div className="matrix-actions">
+                      <div className={`${matrixActions}`}>
                         {items.map((item) => (
                           <label key={item.id}>
                             <input
@@ -479,7 +483,7 @@ export default function Roles() {
                       </div>
                     </div>
                   ))}
-                  <div className="form-actions">
+                  <div className={`${formActions}`}>
                     <Button type="button" variant="secondary" onClick={closePermissions}>
                       Cancel
                     </Button>
@@ -494,7 +498,7 @@ export default function Roles() {
 
       {toast
         ? createPortal(
-            <div className={`app-toast app-toast-${toast.type}`} role="status">
+            <div className={appToastClass(toast.type)} role="status">
               {toast.text}
             </div>,
             document.body,

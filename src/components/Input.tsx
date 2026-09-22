@@ -10,19 +10,19 @@ function mergeClassName(...parts: Array<string | undefined>) {
 }
 
 function TextInput({ className, ...props }: InputProps) {
-  return <AntInput className={mergeClassName('ui-input', className)} {...props} />
+  return <AntInput className={mergeClassName('w-full', className)} {...props} />
 }
 
 function PasswordInput({ className, ...props }: PasswordProps) {
-  return <AntInput.Password className={mergeClassName('ui-input', className)} {...props} />
+  return <AntInput.Password className={mergeClassName('w-full', className)} {...props} />
 }
 
 function SearchInput({ className, ...props }: SearchProps) {
-  return <AntInput.Search className={mergeClassName('ui-input', className)} {...props} />
+  return <AntInput.Search className={mergeClassName('w-full', className)} {...props} />
 }
 
 function TextAreaInput({ className, ...props }: TextAreaProps) {
-  return <AntInput.TextArea className={mergeClassName('ui-input', className)} {...props} />
+  return <AntInput.TextArea className={mergeClassName('w-full', className)} {...props} />
 }
 
 type AppInputComponent = ComponentType<InputProps> & {

@@ -1,3 +1,32 @@
+import {
+  adminBanner,
+  adminCard,
+  adminEmpty,
+  adminFilters,
+  adminFiltersEmployees,
+  adminForm,
+  adminPage,
+  adminTable,
+  appToastClass,
+  crmAccessPillClass,
+  employeeAvatar,
+  employeeAvatarLg,
+  employeeAvatarSm,
+  fieldLabelClass,
+  formActions,
+  linkBtn,
+  modalBackdrop,
+  modalClose,
+  modalHeader,
+  modalPanel,
+  muted,
+  rowActions,
+  statusConfirmCopy,
+  statusConfirmMeta,
+  statusConfirmPanel,
+  tableWrap,
+  adminTableRowStatusUpdated,
+} from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
@@ -18,6 +47,7 @@ import Button from '../components/Button'
 import Input from '../components/Input'
 import Select from '../components/Select'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import RowActionMenu, { type RowActionItem } from '../components/RowActionMenu'
 import { hasPermission } from '../lib/access'
 import { readUrlSearchQuery } from '../lib/url-search'
@@ -27,8 +57,6 @@ import type {
   EmployeeOptions,
   EmployeeRecord,
 } from '../types'
-import './admin.css'
-
 type ToastState = { text: string; type: 'success' | 'error' }
 
 type Filters = {
@@ -71,7 +99,7 @@ function ActionIcon({ icon }: { icon: IconSvgElement }) {
 }
 
 function FieldLabel({ children, required }: { children: ReactNode; required?: boolean }) {
-  return <span className={required ? 'field-label is-required' : 'field-label'}>{children}</span>
+  return <span className={fieldLabelClass(required)}>{children}</span>
 }
 
 function asSelectString(value: unknown) {
@@ -145,9 +173,13 @@ function EmployeeAvatar({
 }) {
   const src = employeePhotoSrc(employeeId, photoUrl)
   if (src) {
-    return <img className={`employee-avatar employee-avatar-${size}`} src={src} alt="" />
+    return <img className={`${employeeAvatar} ${size === 'lg' ? employeeAvatarLg : employeeAvatarSm}`} src={src} alt="" />
   }
-  return <span className={`employee-avatar employee-avatar-${size}`}>{employeeInitials(name)}</span>
+  return (
+    <span className={`${employeeAvatar} ${size === 'lg' ? employeeAvatarLg : employeeAvatarSm}`}>
+      {employeeInitials(name)}
+    </span>
+  )
 }
 
 export default function Employees() {
@@ -336,12 +368,19 @@ export default function Employees() {
     : null
 
   return (
-    <div className="admin-page">
-      <PageHeader title="Employees" description="Manage employee records, assignments, and employment status.">
-        {canCreate ? <Button onClick={openCreate}>Create Employee</Button> : null}
-      </PageHeader>
+    <div className={`${adminPage}`}>
+      <PageMeta
+        title="Employees"
+        description="Manage employee profiles, designations, departments, CRM access, and employment status."
+      />
+      <PageHeader
+        title="Employees"
+        subtitle="Manage employee records, assignments, and employment status."
+        breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Employees' }]}
+        extra={canCreate ? <Button onClick={openCreate}>Create Employee</Button> : undefined}
+      />
 
-      <section className="admin-filters admin-filters-employees">
+      <section className={`${adminFilters} ${adminFiltersEmployees}`}>
         <Input.Search
           allowClear
           enterButton="Search"
@@ -429,18 +468,18 @@ export default function Employees() {
       </section>
 
       {error ? (
-        <p className="admin-banner">
+        <p className={`${adminBanner}`}>
           {error}{' '}
-          <button type="button" className="link-btn" onClick={() => void loadList()}>
+          <button type="button" className={`${linkBtn}`} onClick={() => void loadList()}>
             Retry
           </button>
         </p>
       ) : null}
 
-      <section className="admin-card table-wrap">
+      <section className={`${adminCard} ${tableWrap}`}>
         <Spin spinning={loading}>
           {!loading && employees.length === 0 ? (
-            <div className="admin-empty">
+            <div className={`${adminEmpty}`}>
               <strong>
                 {error ? 'Unable to load employees' : hasActiveFilters ? 'No matching employees' : 'No employees yet'}
               </strong>
@@ -464,7 +503,7 @@ export default function Employees() {
               ) : null}
             </div>
           ) : (
-            <table className="admin-table employee-table">
+            <table className={`${adminTable} [&_th]:align-middle [&_th]:whitespace-nowrap [&_td]:align-middle [&_td]:whitespace-nowrap`}>
               <thead>
                 <tr>
                   <th>Employee</th>
@@ -484,15 +523,15 @@ export default function Employees() {
                 {employees.map((employee) => (
                   <tr
                     key={employee.id}
-                    className={statusFlashId === employee.id ? 'is-status-updated' : undefined}
+                    className={statusFlashId === employee.id ? adminTableRowStatusUpdated : undefined}
                     onClick={() => openEmployee(employee)}
                   >
                     <td>
-                      <div className="employee-identity">
+                      <div className="flex min-w-[180px] items-center gap-2.5">
                         <EmployeeAvatar name={employee.fullName} employeeId={employee.id} photoUrl={employee.photoUrl} />
                         <div>
-                          <div className="employee-name">{employee.fullName}</div>
-                          <div className="muted">{employee.officialEmail}</div>
+                          <div className="font-[650]">{employee.fullName}</div>
+                          <div className={`${muted}`}>{employee.officialEmail}</div>
                         </div>
                       </div>
                     </td>
@@ -504,7 +543,7 @@ export default function Employees() {
                     <td>
                       {employee.reportingManager ? (
                         <Link
-                          className="employee-name-link"
+                          className="font-[650] text-inherit no-underline hover:text-primary hover:underline"
                           to={`/employees/${employee.reportingManager.id}`}
                           onClick={(event) => event.stopPropagation()}
                         >
@@ -532,11 +571,11 @@ export default function Employees() {
                       />
                     </td>
                     <td>
-                      <span className={`status-pill crm-access-${employee.crmAccess.toLowerCase()}`}>
+                      <span className={crmAccessPillClass(employee.crmAccess.toLowerCase())}>
                         {crmAccessLabel(employee.crmAccess)}
                       </span>
                     </td>
-                    <td className="row-actions" onClick={(event) => event.stopPropagation()}>
+                    <td className={`${rowActions}`} onClick={(event) => event.stopPropagation()}>
                       <RowActionMenu
                         items={(
                           [
@@ -599,7 +638,7 @@ export default function Employees() {
       {statusPrompt
         ? createPortal(
             <div
-              className="modal-backdrop"
+              className={`${modalBackdrop}`}
               onClick={() => {
                 if (!statusSaving) {
                   setStatusPrompt(null)
@@ -607,17 +646,17 @@ export default function Employees() {
               }}
             >
               <div
-                className="modal-panel status-confirm-panel"
+                className={`${modalPanel} ${statusConfirmPanel}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="employee-status-title"
                 onClick={(event) => event.stopPropagation()}
               >
-                <div className="modal-header">
+                <div className={`${modalHeader}`}>
                   <h3 id="employee-status-title">Change Status</h3>
                   <button
                     type="button"
-                    className="modal-close"
+                    className={`${modalClose}`}
                     aria-label="Close"
                     disabled={statusSaving}
                     onClick={() => setStatusPrompt(null)}
@@ -625,10 +664,10 @@ export default function Employees() {
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
-                <p className="status-confirm-copy">
+                <p className={`${statusConfirmCopy}`}>
                   Update employment status for <strong>{statusPrompt.employee.fullName}</strong>.
                 </p>
-                <label className="admin-form">
+                <label className={`${adminForm}`}>
                   <FieldLabel required>New status</FieldLabel>
                   <Select
                     value={statusPrompt.nextStatusId || undefined}
@@ -640,7 +679,7 @@ export default function Employees() {
                     }
                   />
                 </label>
-                <p className="status-confirm-meta">
+                <p className={`${statusConfirmMeta}`}>
                   Current status: <strong>{statusPrompt.employee.employmentStatus?.name || '—'}</strong>
                   {promptStatus ? (
                     <>
@@ -649,7 +688,7 @@ export default function Employees() {
                     </>
                   ) : null}
                 </p>
-                <div className="form-actions">
+                <div className={`${formActions}`}>
                   <Button loading={statusSaving} disabled={!statusPrompt.nextStatusId} onClick={() => void changeStatus()}>
                     Change Status
                   </Button>
@@ -665,7 +704,7 @@ export default function Employees() {
 
       {toast
         ? createPortal(
-            <div className={`app-toast app-toast-${toast.type}`} role="status">
+            <div className={appToastClass(toast.type)} role="status">
               {toast.text}
             </div>,
             document.body,

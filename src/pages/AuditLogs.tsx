@@ -19,11 +19,21 @@ import { readUrlSearchQuery } from '../lib/url-search'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import Select from '../components/Select'
 import type { AuditLog } from '../types'
 import { useLocation } from 'react-router-dom'
-import './admin.css'
-import './AuditLogs.css'
+import {
+  adminBanner,
+  adminCard,
+  adminEmpty,
+  adminPage,
+  adminTable,
+  modalBackdrop,
+  modalClose,
+  modalHeader,
+  modalPanel,
+} from '../styles/admin'
 
 type Filters = {
   search: string
@@ -46,6 +56,62 @@ const EMPTY_FILTERS: Filters = {
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
 const CRITICAL_RE = /fail|lock|deny|delete|reject|suspend|unauthor/i
+
+const surfaceCard =
+  'bg-surface border border-border rounded-[18px] shadow-soft'
+
+const auditPill =
+  'inline-flex items-center px-[9px] py-[3px] rounded-full text-[0.72rem] font-bold leading-[1.4]'
+
+const moduleTone: Record<string, string> = {
+  lead: 'bg-[#ece8ff] text-[#6d4aff]',
+  user: 'bg-[#ece8ff] text-[#6d4aff]',
+  payment: 'bg-[#fde8ef] text-[#d63d74]',
+  document: 'bg-[#fff1e6] text-[#c26a1a]',
+  communication: 'bg-[#fff7d6] text-[#a07800]',
+  'master-data': 'bg-[#eef2f6] text-[#5b6b7c]',
+  session: 'bg-[#eef2f6] text-[#5b6b7c]',
+  permission: 'bg-[#fde8e8] text-[#c24141]',
+  role: 'bg-[#fde8e8] text-[#c24141]',
+  employee: 'bg-[#e7f8ef] text-[#0f7a4a]',
+  service: 'bg-[#e7f8ef] text-[#0f7a4a]',
+}
+
+const actionTone: Record<string, string> = {
+  status: 'bg-[#fff1e6] text-[#c26a1a]',
+  updated: 'bg-[#fff1e6] text-[#c26a1a]',
+  created: 'bg-[#e7f8ef] text-[#0f7a4a]',
+  completed: 'bg-[#e7f8ef] text-[#0f7a4a]',
+  verified: 'bg-[#e7f8ef] text-[#0f7a4a]',
+  changed: 'bg-[#ece8ff] text-[#6d4aff]',
+  assigned: 'bg-[#ece8ff] text-[#6d4aff]',
+  logged: 'bg-[#fff7d6] text-[#a07800]',
+  closed: 'bg-[#fde8e8] text-[#c24141]',
+  denied: 'bg-[#fde8e8] text-[#c24141]',
+  failure: 'bg-[#fde8e8] text-[#c24141]',
+  locked: 'bg-[#fde8e8] text-[#c24141]',
+  rejected: 'bg-[#fde8e8] text-[#c24141]',
+  deleted: 'bg-[#fde8e8] text-[#c24141]',
+  default: 'bg-[#e8f1ff] text-[#2f6fed]',
+}
+
+const statIconTone: Record<string, string> = {
+  blue: 'bg-[#e8f1ff] text-[#3b82f6]',
+  violet: 'bg-[#eee8ff] text-[#7c5cfc]',
+  green: 'bg-[#e7f8ef] text-[#16a34a]',
+}
+
+const pageBtn =
+  'min-w-8 h-8 px-2 border-0 rounded-lg bg-transparent text-text-muted font-semibold cursor-pointer hover:bg-hover-bg hover:text-text'
+
+const pageBtnActive = 'bg-primary text-on-primary hover:bg-primary hover:text-on-primary'
+
+const filterControl =
+  '[&_.ant-input-affix-wrapper]:!h-[42px] [&_.ant-input-affix-wrapper]:!min-h-[42px] [&_.ant-input-affix-wrapper]:!max-h-[42px] [&_.ant-input-affix-wrapper]:!flex [&_.ant-input-affix-wrapper]:!items-center [&_.ant-select]:!h-[42px] [&_.ant-select-selector]:!h-[42px] [&_.ant-select-selector]:!min-h-[42px] [&_.ant-select-selector]:!max-h-[42px] [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-picker]:!h-[42px] [&_.ant-picker]:!min-h-[42px] [&_.ant-picker]:!max-h-[42px] [&_.ant-picker]:!flex [&_.ant-picker]:!items-center [&_.ant-input]:!h-auto [&_.ant-input]:!min-h-0 [&_.ant-input]:!max-h-none [&_.ant-input]:!py-0 [&_.ant-input]:leading-[1.2] [&_.ant-select-selection-item]:leading-[1.2] [&_.ant-select-selection-placeholder]:leading-[1.2] [&_.ant-picker-input_input]:leading-[1.2] [&_.ui-input]:w-full [&_.ui-input]:h-[42px] [&_.ui-select]:w-full [&_.ui-select]:h-[42px] [&_.ant-select]:w-full [&_.ant-picker]:w-full'
+
+function cx(...parts: Array<string | false | undefined | null>) {
+  return parts.filter(Boolean).join(' ')
+}
 
 function toDayjs(value: string) {
   return value ? dayjs(value) : null
@@ -77,41 +143,28 @@ function moduleLabel(entityType: string | null | undefined) {
   return humanize(entityType)
 }
 
-function moduleClass(entityType: string | null | undefined) {
+function moduleToneClass(entityType: string | null | undefined) {
   const key = (entityType || 'system').toLowerCase().replace(/[\s_]+/g, '-')
-  const known = [
-    'lead',
-    'payment',
-    'document',
-    'user',
-    'communication',
-    'master-data',
-    'permission',
-    'role',
-    'employee',
-    'service',
-    'session',
-  ]
-  return known.includes(key) ? `module-${key}` : 'module-session'
+  return moduleTone[key] || moduleTone.session
 }
 
-function actionClass(action: string) {
+function actionToneKey(action: string) {
   const text = action.toLowerCase()
-  if (text.includes('status')) return 'action-status'
-  if (text.includes('creat')) return 'action-created'
-  if (text.includes('verif')) return 'action-verified'
-  if (text.includes('complet')) return 'action-completed'
-  if (text.includes('assign')) return 'action-assigned'
-  if (text.includes('role') || text.includes('chang')) return 'action-changed'
-  if (text.includes('log')) return 'action-logged'
-  if (text.includes('close')) return 'action-closed'
-  if (text.includes('deny') || text.includes('denied')) return 'action-denied'
-  if (text.includes('fail')) return 'action-failure'
-  if (text.includes('lock')) return 'action-locked'
-  if (text.includes('reject')) return 'action-rejected'
-  if (text.includes('delet')) return 'action-deleted'
-  if (text.includes('updat')) return 'action-updated'
-  return 'action-default'
+  if (text.includes('status')) return 'status'
+  if (text.includes('creat')) return 'created'
+  if (text.includes('verif')) return 'verified'
+  if (text.includes('complet')) return 'completed'
+  if (text.includes('assign')) return 'assigned'
+  if (text.includes('role') || text.includes('chang')) return 'changed'
+  if (text.includes('log')) return 'logged'
+  if (text.includes('close')) return 'closed'
+  if (text.includes('deny') || text.includes('denied')) return 'denied'
+  if (text.includes('fail')) return 'failure'
+  if (text.includes('lock')) return 'locked'
+  if (text.includes('reject')) return 'rejected'
+  if (text.includes('delet')) return 'deleted'
+  if (text.includes('updat')) return 'updated'
+  return 'default'
 }
 
 function logCode(id: string) {
@@ -310,6 +363,40 @@ function downloadCsv(logs: AuditLog[]) {
   URL.revokeObjectURL(url)
 }
 
+function StatCard({
+  tone,
+  icon,
+  label,
+  value,
+  change,
+}: {
+  tone: keyof typeof statIconTone
+  icon: typeof File01Icon
+  label: string
+  value: number
+  change: number
+}) {
+  return (
+    <article className={cx('flex gap-3 items-start p-4', surfaceCard)}>
+      <span className={cx('size-[42px] shrink-0 grid place-items-center rounded-xl', statIconTone[tone])}>
+        <HugeiconsIcon icon={icon} size={18} />
+      </span>
+      <div className="min-w-0">
+        <p className="m-0 text-text-muted text-[0.82rem]">{label}</p>
+        <strong className="block mt-0.5 text-[1.55rem] tracking-[-0.03em] leading-[1.15] text-text">
+          {value.toLocaleString()}
+        </strong>
+        <div className="flex items-center gap-1.5 mt-1.5 text-[0.72rem] text-text-faint">
+          <b className={cx('font-bold', change >= 0 ? 'text-[#16a34a]' : 'text-[#e11d48]')}>
+            {change >= 0 ? '↑' : '↓'} {Math.abs(change)}%
+          </b>
+          vs previous period
+        </div>
+      </div>
+    </article>
+  )
+}
+
 export default function AuditLogs() {
   const location = useLocation()
   const urlQuery = readUrlSearchQuery(location.search)
@@ -464,90 +551,60 @@ export default function AuditLogs() {
   ]
 
   return (
-    <div className="admin-page audit-page">
-      <PageHeader title="Audit Log" description="Track all important actions, data changes and system events across the CRM.">
-        <div className="audit-header-actions">
+    <div className={cx(adminPage, 'gap-[18px]')}>
+      <PageMeta
+        title="Audit Log"
+        description="Review user actions, data changes, and system events across EduConsult CRM for compliance."
+      />
+      <PageHeader
+        title="Audit Log"
+        subtitle="Track all important actions, data changes and system events across the CRM."
+        breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Audit Log' }]}
+        extra={
           <Dropdown menu={{ items: exportItems }} trigger={['click']}>
             <span>
-              <Button className="audit-export-btn" variant="secondary">
+              <Button className="min-w-[132px]" variant="secondary">
                 Export Logs
                 <HugeiconsIcon icon={ArrowDown01Icon} size={14} />
               </Button>
             </span>
           </Dropdown>
-        </div>
-      </PageHeader>
+        }
+      />
 
-      {message ? <p className="admin-banner">{message}</p> : null}
+      {message ? <p className={adminBanner}>{message}</p> : null}
 
-      <div className="audit-body">
-        <div className="audit-main">
-          <section className="audit-stats">
-            <article className="audit-stat tone-blue">
-              <span className="audit-stat-icon">
-                <HugeiconsIcon icon={File01Icon} size={18} />
-              </span>
-              <div className="audit-stat-copy">
-                <p>Total Logs</p>
-                <strong>{stats.total.value.toLocaleString()}</strong>
-                <div className={`audit-stat-change ${stats.total.change >= 0 ? 'is-up' : 'is-down'}`}>
-                  <b>
-                    {stats.total.change >= 0 ? '↑' : '↓'} {Math.abs(stats.total.change)}%
-                  </b>
-                  vs previous period
-                </div>
-              </div>
-            </article>
-            <article className="audit-stat tone-violet">
-              <span className="audit-stat-icon">
-                <HugeiconsIcon icon={UserMultiple02Icon} size={18} />
-              </span>
-              <div className="audit-stat-copy">
-                <p>Unique Users</p>
-                <strong>{stats.users.value.toLocaleString()}</strong>
-                <div className={`audit-stat-change ${stats.users.change >= 0 ? 'is-up' : 'is-down'}`}>
-                  <b>
-                    {stats.users.change >= 0 ? '↑' : '↓'} {Math.abs(stats.users.change)}%
-                  </b>
-                  vs previous period
-                </div>
-              </div>
-            </article>
-            <article className="audit-stat tone-violet">
-              <span className="audit-stat-icon">
-                <HugeiconsIcon icon={DashboardSquare01Icon} size={18} />
-              </span>
-              <div className="audit-stat-copy">
-                <p>Modules</p>
-                <strong>{stats.modules.value.toLocaleString()}</strong>
-                <div className={`audit-stat-change ${stats.modules.change >= 0 ? 'is-up' : 'is-down'}`}>
-                  <b>
-                    {stats.modules.change >= 0 ? '↑' : '↓'} {Math.abs(stats.modules.change)}%
-                  </b>
-                  vs previous period
-                </div>
-              </div>
-            </article>
-            <article className="audit-stat tone-green">
-              <span className="audit-stat-icon">
-                <HugeiconsIcon icon={Alert02Icon} size={18} />
-              </span>
-              <div className="audit-stat-copy">
-                <p>Critical Actions</p>
-                <strong>{stats.critical.value.toLocaleString()}</strong>
-                <div className={`audit-stat-change ${stats.critical.change >= 0 ? 'is-up' : 'is-down'}`}>
-                  <b>
-                    {stats.critical.change >= 0 ? '↑' : '↓'} {Math.abs(stats.critical.change)}%
-                  </b>
-                  vs previous period
-                </div>
-              </div>
-            </article>
+      <div className="grid gap-4 min-w-0">
+        <div className="grid gap-4 min-w-0">
+          <section className="grid grid-cols-4 gap-3 max-[1280px]:grid-cols-2 max-[860px]:grid-cols-1">
+            <StatCard tone="blue" icon={File01Icon} label="Total Logs" value={stats.total.value} change={stats.total.change} />
+            <StatCard tone="violet" icon={UserMultiple02Icon} label="Unique Users" value={stats.users.value} change={stats.users.change} />
+            <StatCard
+              tone="violet"
+              icon={DashboardSquare01Icon}
+              label="Modules"
+              value={stats.modules.value}
+              change={stats.modules.change}
+            />
+            <StatCard
+              tone="green"
+              icon={Alert02Icon}
+              label="Critical Actions"
+              value={stats.critical.value}
+              change={stats.critical.change}
+            />
           </section>
 
-          <section className="audit-filters">
-            <div className="audit-filter-field">
-              <span>Search</span>
+          <section
+            className={cx(
+              'grid grid-cols-[minmax(180px,1.4fr)_repeat(3,minmax(120px,0.9fr))_minmax(220px,1.2fr)] gap-x-3 gap-y-2.5 items-end py-3.5 px-4',
+              surfaceCard,
+              filterControl,
+              'max-[860px]:grid-cols-2 max-sm:grid-cols-1',
+            )}
+          >
+            <div className="grid grid-rows-[auto_42px] gap-1.5 min-w-0 m-0">
+              <span className="text-text-muted text-[0.78rem] font-semibold leading-[1.2]">Search</span>
               <Input
                 allowClear
                 placeholder="User, action, record ID..."
@@ -555,8 +612,8 @@ export default function AuditLogs() {
                 onChange={(event) => updateFilters({ search: event.target.value })}
               />
             </div>
-            <div className="audit-filter-field">
-              <span>Module</span>
+            <div className="grid grid-rows-[auto_42px] gap-1.5 min-w-0 m-0">
+              <span className="text-text-muted text-[0.78rem] font-semibold leading-[1.2]">Module</span>
               <Select
                 allowClear
                 placeholder="All Modules"
@@ -565,8 +622,8 @@ export default function AuditLogs() {
                 onChange={(value) => updateFilters({ module: String(value || '') })}
               />
             </div>
-            <div className="audit-filter-field">
-              <span>Action</span>
+            <div className="grid grid-rows-[auto_42px] gap-1.5 min-w-0 m-0">
+              <span className="text-text-muted text-[0.78rem] font-semibold leading-[1.2]">Action</span>
               <Select
                 allowClear
                 placeholder="All Actions"
@@ -575,8 +632,8 @@ export default function AuditLogs() {
                 onChange={(value) => updateFilters({ action: String(value || '') })}
               />
             </div>
-            <div className="audit-filter-field">
-              <span>User</span>
+            <div className="grid grid-rows-[auto_42px] gap-1.5 min-w-0 m-0">
+              <span className="text-text-muted text-[0.78rem] font-semibold leading-[1.2]">User</span>
               <Select
                 allowClear
                 placeholder="All Users"
@@ -585,8 +642,8 @@ export default function AuditLogs() {
                 onChange={(value) => updateFilters({ userId: String(value || '') })}
               />
             </div>
-            <div className="audit-filter-field">
-              <span>Date Range</span>
+            <div className="grid grid-rows-[auto_42px] gap-1.5 min-w-0 m-0">
+              <span className="text-text-muted text-[0.78rem] font-semibold leading-[1.2]">Date Range</span>
               <DatePicker.RangePicker
                 allowClear
                 value={filters.from && filters.to ? [toDayjs(filters.from), toDayjs(filters.to)] : null}
@@ -601,14 +658,14 @@ export default function AuditLogs() {
             </div>
           </section>
 
-          <section className="admin-card table-wrap audit-table-card">
-            <div className="audit-table-meta">
+          <section className={cx(adminCard, 'rounded-[18px] p-0 overflow-hidden')}>
+            <div className="pt-3 px-4 text-text-muted text-[0.82rem]">
               Showing {filtered.length === 0 ? 0 : (safePage - 1) * pageSize + 1}–
               {Math.min(safePage * pageSize, filtered.length)} of {filtered.length.toLocaleString()} logs
             </div>
             <Spin spinning={loading}>
               {!loading && filtered.length === 0 ? (
-                <div className="admin-empty">
+                <div className={adminEmpty}>
                   <strong>{message ? 'Unable to load audit logs' : 'No matching audit events'}</strong>
                   <p>
                     {message
@@ -620,13 +677,13 @@ export default function AuditLogs() {
                   </Button>
                 </div>
               ) : (
-                <div className="audit-table-wrap">
-                  <table className="admin-table audit-table">
+                <div className="overflow-auto max-w-full">
+                  <table className={cx(adminTable, 'min-w-[1080px] [&_th]:align-middle [&_th]:whitespace-nowrap [&_th]:text-[0.82rem] [&_td]:align-middle [&_td]:whitespace-nowrap [&_td]:text-[0.82rem] [&_th:first-child]:w-[42px] [&_th:first-child]:pl-4 [&_td:first-child]:w-[42px] [&_td:first-child]:pl-4 [&_th:last-child]:w-11 [&_th:last-child]:text-right [&_th:last-child]:pr-3 [&_td:last-child]:w-11 [&_td:last-child]:text-right [&_td:last-child]:pr-3')}>
                     <thead>
                       <tr>
                         <th>
                           <input
-                            className="audit-check"
+                            className="size-4 accent-[#6366f1] cursor-pointer"
                             type="checkbox"
                             checked={pageRows.length > 0 && pageSelectedCount === pageRows.length}
                             onChange={togglePageSelected}
@@ -651,26 +708,33 @@ export default function AuditLogs() {
                         return (
                           <tr
                             key={log.id}
-                            className={active ? 'is-active' : undefined}
+                            className={cx(
+                              'cursor-pointer',
+                              active && 'bg-indigo-500/10',
+                            )}
                             onClick={() => setActiveId(log.id)}
                           >
                             <td onClick={(event) => event.stopPropagation()}>
                               <input
-                                className="audit-check"
+                                className="size-4 accent-[#6366f1] cursor-pointer"
                                 type="checkbox"
                                 checked={selected}
                                 onChange={() => toggleSelected(log.id)}
                                 aria-label={`Select ${logCode(log.id)}`}
                               />
                             </td>
-                            <td className="audit-log-id">{logCode(log.id)}</td>
+                            <td className="font-bold text-text">{logCode(log.id)}</td>
                             <td>{formatDateTime(log.createdAt)}</td>
                             <td>{log.user?.fullName || 'System'}</td>
                             <td>
-                              <span className={`audit-pill ${moduleClass(log.entityType)}`}>{moduleLabel(log.entityType)}</span>
+                              <span className={cx(auditPill, moduleToneClass(log.entityType))}>
+                                {moduleLabel(log.entityType)}
+                              </span>
                             </td>
                             <td>
-                              <span className={`audit-pill ${actionClass(log.action)}`}>{humanize(log.action)}</span>
+                              <span className={cx(auditPill, actionTone[actionToneKey(log.action)])}>
+                                {humanize(log.action)}
+                              </span>
                             </td>
                             <td>{recordCode(log.entityType, log.entityId)}</td>
                             <td>{log.ipAddress || '—'}</td>
@@ -678,7 +742,10 @@ export default function AuditLogs() {
                             <td>
                               <button
                                 type="button"
-                                className="audit-row-open"
+                                className={cx(
+                                  'grid place-items-center size-7 ml-auto border-0 rounded-lg bg-transparent text-text-muted cursor-pointer hover:text-[#6366f1] hover:bg-indigo-500/10',
+                                  active && 'text-[#6366f1] bg-indigo-500/10',
+                                )}
                                 aria-label="View details"
                                 onClick={(event) => {
                                   event.stopPropagation()
@@ -696,18 +763,18 @@ export default function AuditLogs() {
                 </div>
               )}
             </Spin>
-            <div className="audit-pagination">
-              <div className="audit-pages">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 px-4 pb-4">
+              <div className="flex flex-wrap gap-1.5">
                 {pageItems(safePage, totalPages).map((item, index) =>
                   item === 'ellipsis' ? (
-                    <span key={`e-${index}`} className="audit-page-ellipsis">
+                    <span key={`e-${index}`} className="min-w-8 h-8 px-2 grid place-items-center text-text-muted font-semibold">
                       …
                     </span>
                   ) : (
                     <button
                       key={item}
                       type="button"
-                      className={`audit-page-btn${item === safePage ? ' is-active' : ''}`}
+                      className={cx(pageBtn, item === safePage && pageBtnActive)}
                       onClick={() => setPage(item)}
                     >
                       {item}
@@ -715,7 +782,7 @@ export default function AuditLogs() {
                   ),
                 )}
               </div>
-              <label className="audit-page-size">
+              <label className="flex items-center gap-2 text-text-muted text-[0.82rem] mb-0 [&_.ant-select]:w-[84px]">
                 <Select
                   value={pageSize}
                   options={PAGE_SIZE_OPTIONS.map((value) => ({ value, label: String(value) }))}
@@ -733,72 +800,78 @@ export default function AuditLogs() {
 
       {activeLog
         ? createPortal(
-            <div className="modal-backdrop" onClick={() => setActiveId(null)}>
+            <div className={modalBackdrop} onClick={() => setActiveId(null)}>
               <div
-                className="modal-panel audit-details-modal"
+                className={cx(modalPanel, 'grid content-start gap-4 w-[min(100%,560px)]')}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="audit-details-title"
                 onClick={(event) => event.stopPropagation()}
               >
-                <div className="modal-header">
-                  <div className="audit-details-head">
-                    <h3 id="audit-details-title">Log Details</h3>
-                    <span className="audit-details-id">{logCode(activeLog.id)}</span>
+                <div className={cx(modalHeader, 'mb-0')}>
+                  <div className="flex flex-1 items-center justify-between gap-2.5 min-w-0">
+                    <h3 id="audit-details-title" className="m-0 text-base">
+                      Log Details
+                    </h3>
+                    <span className="text-text-faint text-[0.78rem] font-semibold">{logCode(activeLog.id)}</span>
                   </div>
-                  <button type="button" className="modal-close" aria-label="Close" onClick={() => setActiveId(null)}>
+                  <button type="button" className={modalClose} aria-label="Close" onClick={() => setActiveId(null)}>
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
-                <div className="audit-details-title">
-                  <h4>{humanize(activeLog.action)}</h4>
-                  <p>{summaryText(activeLog)}</p>
+                <div className="grid gap-1.5">
+                  <h4 className="m-0 text-[1.02rem]">{humanize(activeLog.action)}</h4>
+                  <p className="m-0 text-text-muted text-[0.84rem]">{summaryText(activeLog)}</p>
                 </div>
-                <dl className="audit-details-list">
-                  <div>
-                    <dt>Date & Time</dt>
-                    <dd>{formatDateTime(activeLog.createdAt)}</dd>
+                <dl className="grid gap-2.5 m-0">
+                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                    <dt className="m-0 text-text-muted">Date & Time</dt>
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">{formatDateTime(activeLog.createdAt)}</dd>
                   </div>
-                  <div>
-                    <dt>User</dt>
-                    <dd>
-                      <div className="audit-user-cell">
+                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                    <dt className="m-0 text-text-muted">User</dt>
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
+                      <div className="grid gap-px">
                         <span>{activeLog.user?.fullName || 'System'}</span>
-                        {activeLog.user?.email ? <small>{activeLog.user.email}</small> : null}
+                        {activeLog.user?.email ? (
+                          <small className="text-text-faint font-medium">{activeLog.user.email}</small>
+                        ) : null}
                       </div>
                     </dd>
                   </div>
-                  <div>
-                    <dt>Module</dt>
-                    <dd>
-                      <span className={`audit-pill ${moduleClass(activeLog.entityType)}`}>
+                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                    <dt className="m-0 text-text-muted">Module</dt>
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
+                      <span className={cx(auditPill, moduleToneClass(activeLog.entityType))}>
                         {moduleLabel(activeLog.entityType)}
                       </span>
                     </dd>
                   </div>
-                  <div>
-                    <dt>Record ID</dt>
-                    <dd>{recordCode(activeLog.entityType, activeLog.entityId)}</dd>
+                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                    <dt className="m-0 text-text-muted">Record ID</dt>
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
+                      {recordCode(activeLog.entityType, activeLog.entityId)}
+                    </dd>
                   </div>
-                  <div>
-                    <dt>IP Address</dt>
-                    <dd>{activeLog.ipAddress || '—'}</dd>
+                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                    <dt className="m-0 text-text-muted">IP Address</dt>
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">{activeLog.ipAddress || '—'}</dd>
                   </div>
-                  <div>
-                    <dt>Device</dt>
-                    <dd>{parseDevice(activeLog.userAgent)}</dd>
+                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                    <dt className="m-0 text-text-muted">Device</dt>
+                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">{parseDevice(activeLog.userAgent)}</dd>
                   </div>
                 </dl>
                 {changePairs(activeLog.metadata).length ? (
                   <>
-                    <h4 className="audit-section-title">Change Details</h4>
+                    <h4 className="mt-1 mb-0 text-text text-[0.92rem]">Change Details</h4>
                     {changePairs(activeLog.metadata).map((change) => (
-                      <div key={change.label} className="audit-change">
-                        <span className="audit-change-label">{change.label}</span>
-                        <span className="audit-pill action-rejected">{change.from}</span>
-                        <span className="audit-arrow">→</span>
-                        <span className="audit-pill action-created">{change.to}</span>
-                        <div className="audit-change-hint">
+                      <div key={change.label} className="flex flex-wrap items-center gap-2">
+                        <span className="w-full text-text-muted text-[0.8rem]">{change.label}</span>
+                        <span className={cx(auditPill, actionTone.rejected)}>{change.from}</span>
+                        <span className="text-text-faint">→</span>
+                        <span className={cx(auditPill, actionTone.created)}>{change.to}</span>
+                        <div className="flex justify-between gap-3 w-full text-text-faint text-[0.7rem]">
                           <span>Previous Value</span>
                           <span>New Value</span>
                         </div>
@@ -808,19 +881,21 @@ export default function AuditLogs() {
                 ) : null}
                 {extraMetadata(activeLog.metadata).length ? (
                   <>
-                    <h4 className="audit-section-title">Additional Info</h4>
-                    <dl className="audit-extra">
+                    <h4 className="mt-1 mb-0 text-text text-[0.92rem]">Additional Info</h4>
+                    <dl className="grid gap-2">
                       {extraMetadata(activeLog.metadata).map(([key, value]) => (
-                        <div key={key}>
-                          <dt>{humanize(key)}</dt>
-                          <dd>{stringifyMeta(value)}</dd>
+                        <div key={key} className="flex justify-between gap-3 text-[0.84rem]">
+                          <dt className="m-0 text-text-muted">{humanize(key)}</dt>
+                          <dd className="m-0 font-semibold text-right [overflow-wrap:anywhere]">{stringifyMeta(value)}</dd>
                         </div>
                       ))}
                     </dl>
                   </>
                 ) : null}
-                <div className="audit-note">
-                  <span className="audit-note-icon">i</span>
+                <div className="flex gap-2.5 items-start mt-1 p-3 rounded-xl bg-[#eef2ff] text-[#4338ca] text-[0.8rem] leading-[1.45] dark:bg-indigo-500/20 dark:text-[#c7d2fe]">
+                  <span className="shrink-0 size-[18px] grid place-items-center mt-px rounded-full bg-[#c7d2fe] font-extrabold text-[0.72rem] dark:bg-indigo-500/40">
+                    i
+                  </span>
                   This log is immutable and cannot be edited or deleted by regular users.
                 </div>
               </div>

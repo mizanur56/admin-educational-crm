@@ -1,77 +1,50 @@
-import { useEffect, useState } from 'react'
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { getMe } from '../api/client'
+import { useEffect, type ReactNode } from 'react'
+import { Navigate, Outlet } from 'react-router-dom'
 import PageLoader from '../components/PageLoader'
-import { AUTH_USER_PATCH_EVENT, isAuthSession } from '../lib/auth-session'
-import type { AuthSession, AuthUser } from '../types'
+import { AUTH_USER_PATCH_EVENT } from '../lib/auth-session'
+import { useAuth } from '../hooks/useAuth'
+import type { AuthUser } from '../types'
 
-type RouteState =
-  | { status: 'loading'; auth: null }
-  | { status: 'authenticated'; auth: AuthSession }
-  | { status: 'unauthenticated'; auth: null }
+type ProtectedRouteProps = {
+  /** Login / forgot / reset: redirect away if already signed in. */
+  guestOnly?: boolean
+  children?: ReactNode
+}
 
-export default function ProtectedRoute() {
-  const location = useLocation()
-  const [state, setState] = useState<RouteState>({ status: 'loading', auth: null })
-
-  useEffect(() => {
-    let cancelled = false
-
-    getMe()
-      .then((result) => {
-        if (cancelled) {
-          return
-        }
-
-        if (result.ok && isAuthSession(result.data)) {
-          setState({ status: 'authenticated', auth: result.data })
-          return
-        }
-
-        setState({ status: 'unauthenticated', auth: null })
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setState({ status: 'unauthenticated', auth: null })
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [location.key])
+export default function ProtectedRoute({ guestOnly = false, children }: ProtectedRouteProps) {
+  const { session, hydrated, updateUser } = useAuth()
 
   useEffect(() => {
+    if (guestOnly) return undefined
+
     function onAuthUserPatch(event: Event) {
       const patch = (event as CustomEvent<Partial<AuthUser>>).detail
-      if (!patch) {
-        return
-      }
-      setState((current) => {
-        if (current.status !== 'authenticated') {
-          return current
-        }
-        return {
-          status: 'authenticated',
-          auth: {
-            ...current.auth,
-            user: { ...current.auth.user, ...patch },
-          },
-        }
-      })
+      if (!patch) return
+      updateUser(patch)
     }
 
     window.addEventListener(AUTH_USER_PATCH_EVENT, onAuthUserPatch)
     return () => window.removeEventListener(AUTH_USER_PATCH_EVENT, onAuthUserPatch)
-  }, [])
+  }, [guestOnly, updateUser])
 
-  if (state.status === 'loading') {
+  if (!hydrated) {
     return <PageLoader />
   }
 
-  if (state.status === 'unauthenticated') {
+  if (guestOnly) {
+    if (session) {
+      return <Navigate to="/dashboard" replace />
+    }
+    return children ? <>{children}</> : <Outlet />
+  }
+
+  if (!session) {
     return <Navigate to="/login" replace />
   }
 
-  return <Outlet context={state.auth} />
+  if (children) {
+    return <>{children}</>
+  }
+
+  return <Outlet context={session} />
 }

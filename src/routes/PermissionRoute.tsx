@@ -1,4 +1,7 @@
+import { adminCard, adminPage } from '../styles/admin'
 import { Outlet, useOutletContext } from 'react-router-dom'
+import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import { hasPermission } from '../lib/access'
 import type { AuthSession } from '../types'
 
@@ -11,10 +14,18 @@ export default function PermissionRoute({ permission }: PermissionRouteProps) {
 
   if (!hasPermission(auth, permission)) {
     return (
-      <div className="admin-page">
-        <div className="admin-card">
-          <h2>Access denied</h2>
-          <p>You do not have permission to perform this action.</p>
+      <div className={`${adminPage}`}>
+        <PageMeta
+          title="Access Denied"
+          description="You do not have permission to view this page in EduConsult CRM. Contact an administrator for access."
+        />
+        <PageHeader
+          title="Access denied"
+          subtitle="You do not have permission to perform this action."
+          breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Access denied' }]}
+        />
+        <div className={`${adminCard}`}>
+          <p>Contact an administrator if you believe you should have access to this area.</p>
         </div>
       </div>
     )

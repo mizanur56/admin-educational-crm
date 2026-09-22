@@ -1,3 +1,45 @@
+import {
+  adminCard,
+  adminFilters,
+  adminForm,
+  adminFormFields,
+  adminFormSpan,
+  adminPage,
+  adminTable,
+  appToastClass,
+  fieldHint,
+  fieldLabelClass,
+  formActions,
+  modalBackdrop,
+  modalClose,
+  modalHeader,
+  modalPanel,
+  muted,
+  photoCameraBadge,
+  photoPicker,
+  photoPickerButton,
+  photoPreviewFrame,
+  photoUpload,
+  rowActions,
+  scopeGrid,
+  scopeSkeleton,
+  sessionRow,
+  statusConfirmCopy,
+  statusConfirmMeta,
+  statusConfirmPanel,
+  tableWrap,
+  userStatusPillClass,
+  userViewActivity,
+  userViewActivityIcon,
+  userViewActivityIconAdd,
+  userViewNavBtn,
+  userViewNavBtnActive,
+  userViewNavBtnIdle,
+  userViewPanel,
+  userViewScopeBase,
+  userViewScopeTone,
+  adminTableRowStatusUpdated,
+} from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useOutletContext, useLocation } from 'react-router-dom'
@@ -51,6 +93,7 @@ import RowActionMenu, { type RowActionItem } from '../components/RowActionMenu'
 import Input from '../components/Input'
 import Select from '../components/Select'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import { hasPermission } from '../lib/access'
 import { readUrlSearchQuery } from '../lib/url-search'
 import type {
@@ -64,8 +107,6 @@ import type {
   UserSession,
   UserStatus,
 } from '../types'
-import './admin.css'
-
 type FormMode = 'create' | 'view' | 'edit'
 type ViewTab = 'overview' | 'permissions' | 'leads' | 'applications' | 'documents' | 'performance'
 type ToastState = { text: string; type: 'success' | 'error' }
@@ -76,7 +117,7 @@ function ActionIcon({ icon }: { icon: IconSvgElement }) {
 
 function FieldLabel({ children, required }: { children: ReactNode; required?: boolean }) {
   return (
-    <span className={required ? 'field-label is-required' : 'field-label'}>{children}</span>
+    <span className={fieldLabelClass(required)}>{children}</span>
   )
 }
 
@@ -334,38 +375,38 @@ function UserViewLayout({
 
   return (
     <>
-      <div className="user-view-header">
-        <div className="user-view-title">
-          <span className="user-view-title-icon">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[#ebeff7] bg-white px-5 py-4 dark:border-border dark:bg-surface [&_h3]:m-0 [&_h3]:text-[1.05rem] [&_h3]:text-[#24324d] dark:[&_h3]:text-text-strong">
+        <div className="flex items-center gap-2.5">
+          <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-[#eef0ff] text-[#5b67e8]">
             <HugeiconsIcon icon={UserIcon} size={18} color="currentColor" strokeWidth={1.7} />
           </span>
           <h3 id="user-modal-title">View User</h3>
         </div>
-        <button type="button" className="modal-close" aria-label="Close" onClick={onClose}>
+        <button type="button" className={`${modalClose}`} aria-label="Close" onClick={onClose}>
           <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
         </button>
       </div>
 
-      <div className="user-view-body">
-        <aside className="user-view-aside">
-          <div className="user-view-profile">
-            <UserAvatar name={displayName} photoUrl={selected?.photoUrl} className="user-view-avatar" />
-            <div className="user-view-identity">
+      <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden max-[960px]:grid-rows-none max-[960px]:overflow-auto max-[960px]:overscroll-contain min-[961px]:grid-cols-[248px_minmax(0,1fr)] min-[961px]:grid-rows-[minmax(0,1fr)]">
+        <aside className="flex h-auto min-h-0 flex-col gap-[18px] overflow-visible border-b border-border bg-[radial-gradient(circle_at_0_100%,rgba(91,103,232,0.08),transparent_46%),#fff] px-4 pt-[22px] pb-[18px] max-[960px]:overflow-visible min-[961px]:h-full min-[961px]:overflow-auto min-[961px]:border-r min-[961px]:border-b-0 dark:border-border dark:bg-surface">
+          <div className="grid justify-items-center gap-2.5 text-center">
+            <UserAvatar name={displayName} photoUrl={selected?.photoUrl} className="grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full bg-primary text-[1.2rem] font-bold text-on-primary shadow-[0_10px_20px_color-mix(in_srgb,var(--color-primary)_28%,transparent)] [&_img]:h-full [&_img]:w-full [&_img]:object-cover" />
+            <div className="[&_strong]:block [&_strong]:text-[1.02rem] [&_strong]:text-[#24324d] dark:[&_strong]:text-text-strong [&_p]:my-0.5 [&_p]:mb-2 [&_p]:text-[0.82rem] [&_p]:text-[#7b8498]">
               <strong>{displayName}</strong>
               <p>
                 {roleName || '—'}
                 {departmentName !== '—' ? ` • ${departmentName}` : ''}
               </p>
-              <span className={`status-pill status-${form.status.toLowerCase()}`}>{statusLabel(form.status)}</span>
+              <span className={userStatusPillClass(form.status.toLowerCase())}>{statusLabel(form.status)}</span>
             </div>
           </div>
 
-          <nav className="user-view-nav" aria-label="User sections">
+          <nav className="grid gap-1" aria-label="User sections">
             {VIEW_TABS.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
-                className={viewTab === tab.id ? 'is-active' : undefined}
+                className={`${userViewNavBtn} ${viewTab === tab.id ? userViewNavBtnActive : userViewNavBtnIdle}`}
                 onClick={() => onTabChange(tab.id)}
               >
                 <HugeiconsIcon icon={tab.icon} size={16} color="currentColor" strokeWidth={1.7} />
@@ -374,7 +415,7 @@ function UserViewLayout({
             ))}
           </nav>
 
-          <div className="user-view-note">
+          <div className="mt-auto flex gap-2 rounded-[14px] bg-[#eef4ff] p-3 text-[#5b67e8] dark:bg-[rgba(91,103,232,0.16)] [&_strong]:mb-1 [&_strong]:block [&_strong]:text-[0.82rem] [&_p]:m-0 [&_p]:text-[0.75rem] [&_p]:leading-snug [&_p]:text-[#6b7690]">
             <HugeiconsIcon icon={InformationCircleIcon} size={16} color="currentColor" strokeWidth={1.7} />
             <div>
               <strong>User Information</strong>
@@ -383,19 +424,19 @@ function UserViewLayout({
           </div>
         </aside>
 
-        <section className="user-view-main">
-          <div className="user-view-scroll">
+        <section className="flex h-auto min-h-0 min-w-0 flex-col overflow-visible max-[960px]:overflow-visible min-[961px]:h-full min-[961px]:overflow-hidden">
+          <div className="grid min-h-0 flex-1 content-start gap-3.5 overflow-visible overscroll-contain px-[18px] pt-4 pb-2 max-[960px]:overflow-visible min-[961px]:overflow-y-auto">
             {viewTab === 'overview' ? (
               <>
-                <div className="user-view-top">
-                  <article className="user-view-card">
+                <div className="grid grid-cols-1 gap-3.5 max-[960px]:grid-cols-1 min-[961px]:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
+                  <article className="rounded-[18px] border border-[#e8edf6] bg-white px-[18px] py-4 shadow-[0_8px_20px_rgba(36,50,77,0.04)] dark:border-border dark:bg-surface [&_header]:mb-3.5 [&_header]:flex [&_header]:items-center [&_header]:gap-2 [&_h4]:m-0 [&_h4]:text-[0.95rem] [&_h4]:text-[#24324d] dark:[&_h4]:text-text-strong">
                     <header>
-                      <span className="user-view-card-icon is-blue">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#eef1ff] text-[#5b67e8]">
                         <HugeiconsIcon icon={Contact01Icon} size={16} color="currentColor" strokeWidth={1.7} />
                       </span>
                       <h4>Contact Information</h4>
                     </header>
-                    <dl className="user-view-fields">
+                    <dl className="m-0 grid gap-2.5 [&>div]:grid [&>div]:grid-cols-1 [&>div]:items-center [&>div]:gap-2.5 max-[960px]:[&>div]:grid-cols-1 min-[961px]:[&>div]:grid-cols-[110px_minmax(0,1fr)] [&_dt]:text-[0.84rem] [&_dt]:text-[#7b8498] [&_dt]:after:content-[':'] [&_dd]:m-0 [&_dd]:text-[0.9rem] [&_dd]:font-semibold [&_dd]:text-[#24324d] dark:[&_dd]:text-text-strong">
                       <div>
                         <dt>Full Name</dt>
                         <dd>{form.fullName || '—'}</dd>
@@ -415,16 +456,16 @@ function UserViewLayout({
                     </dl>
                   </article>
 
-                  <div className="user-view-side-stack">
-                    <div className="user-view-meta-row">
-                      <div className="user-view-meta">
+                  <div className="grid content-start gap-3">
+                    <div className="grid grid-cols-1 gap-2.5 max-[960px]:grid-cols-1 min-[961px]:grid-cols-2">
+                      <div className="flex items-start gap-2 rounded-[14px] border border-[#e8edf6] bg-white px-3 py-2.5 text-[#7b8498] dark:border-border dark:bg-surface [&_span]:block [&_span]:text-[0.72rem] [&_strong]:mt-0.5 [&_strong]:block [&_strong]:text-[0.78rem] [&_strong]:text-[#24324d] dark:[&_strong]:text-text-strong">
                         <HugeiconsIcon icon={Calendar03Icon} size={15} color="currentColor" strokeWidth={1.7} />
                         <div>
                           <span>Account created</span>
                           <strong>{formatPrettyDate(selected?.createdAt)}</strong>
                         </div>
                       </div>
-                      <div className="user-view-meta">
+                      <div className="flex items-start gap-2 rounded-[14px] border border-[#e8edf6] bg-white px-3 py-2.5 text-[#7b8498] dark:border-border dark:bg-surface [&_span]:block [&_span]:text-[0.72rem] [&_strong]:mt-0.5 [&_strong]:block [&_strong]:text-[0.78rem] [&_strong]:text-[#24324d] dark:[&_strong]:text-text-strong">
                         <HugeiconsIcon icon={Clock01Icon} size={15} color="currentColor" strokeWidth={1.7} />
                         <div>
                           <span>Last updated</span>
@@ -432,24 +473,24 @@ function UserViewLayout({
                         </div>
                       </div>
                     </div>
-                    <article className="user-view-card">
+                    <article className="rounded-[18px] border border-[#e8edf6] bg-white px-[18px] py-4 shadow-[0_8px_20px_rgba(36,50,77,0.04)] dark:border-border dark:bg-surface [&_header]:mb-3.5 [&_header]:flex [&_header]:items-center [&_header]:gap-2 [&_h4]:m-0 [&_h4]:text-[0.95rem] [&_h4]:text-[#24324d] dark:[&_h4]:text-text-strong">
                       <header>
-                        <span className="user-view-card-icon is-blue">
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#eef1ff] text-[#5b67e8]">
                           <HugeiconsIcon icon={Building03Icon} size={16} color="currentColor" strokeWidth={1.7} />
                         </span>
                         <h4>Organization</h4>
                       </header>
-                      <dl className="user-view-fields">
+                      <dl className="m-0 grid gap-2.5 [&>div]:grid [&>div]:grid-cols-1 [&>div]:items-center [&>div]:gap-2.5 max-[960px]:[&>div]:grid-cols-1 min-[961px]:[&>div]:grid-cols-[110px_minmax(0,1fr)] [&_dt]:text-[0.84rem] [&_dt]:text-[#7b8498] [&_dt]:after:content-[':'] [&_dd]:m-0 [&_dd]:text-[0.9rem] [&_dd]:font-semibold [&_dd]:text-[#24324d] dark:[&_dd]:text-text-strong">
                         <div>
                           <dt>Role</dt>
                           <dd>
-                            <span className="user-view-chip is-role">{roleName || '—'}</span>
+                            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.75rem] font-bold bg-[#eef1ff] text-[#4f5de4]">{roleName || '—'}</span>
                           </dd>
                         </div>
                         <div>
                           <dt>Department</dt>
                           <dd>
-                            <span className="user-view-chip is-dept">{departmentName}</span>
+                            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.75rem] font-bold bg-[#e9f8ef] text-[#17824b]">{departmentName}</span>
                           </dd>
                         </div>
                         <div>
@@ -461,14 +502,14 @@ function UserViewLayout({
                   </div>
                 </div>
 
-                <article className="user-view-card">
+                <article className="rounded-[18px] border border-[#e8edf6] bg-white px-[18px] py-4 shadow-[0_8px_20px_rgba(36,50,77,0.04)] dark:border-border dark:bg-surface [&_header]:mb-3.5 [&_header]:flex [&_header]:items-center [&_header]:gap-2 [&_h4]:m-0 [&_h4]:text-[0.95rem] [&_h4]:text-[#24324d] dark:[&_h4]:text-text-strong">
                   <header>
-                    <span className="user-view-card-icon is-blue">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#eef1ff] text-[#5b67e8]">
                       <HugeiconsIcon icon={Shield01Icon} size={16} color="currentColor" strokeWidth={1.7} />
                     </span>
                     <h4>CRM Access & Scope</h4>
                   </header>
-                  <div className="user-view-scope-grid">
+                  <div className="grid grid-cols-1 gap-3 max-[960px]:grid-cols-1 min-[961px]:grid-cols-3">
                     <ScopePreviewCard
                       tone="blue"
                       icon={UserGroupIcon}
@@ -493,40 +534,40 @@ function UserViewLayout({
                   </div>
                 </article>
 
-                <article className="user-view-card">
+                <article className="rounded-[18px] border border-[#e8edf6] bg-white px-[18px] py-4 shadow-[0_8px_20px_rgba(36,50,77,0.04)] dark:border-border dark:bg-surface [&_header]:mb-3.5 [&_header]:flex [&_header]:items-center [&_header]:gap-2 [&_h4]:m-0 [&_h4]:text-[0.95rem] [&_h4]:text-[#24324d] dark:[&_h4]:text-text-strong">
                   <header>
-                    <span className="user-view-card-icon is-green">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#e8f8ef] text-[#1f9d5d]">
                       <HugeiconsIcon icon={AnalyticsUpIcon} size={16} color="currentColor" strokeWidth={1.7} />
                     </span>
                     <h4>Activity / Summary</h4>
                   </header>
-                  <div className="user-view-stats">
-                    <div className="user-view-stat is-blue">
-                      <span className="user-view-stat-icon">
+                  <div className="grid grid-cols-1 gap-3 max-[960px]:grid-cols-1 min-[961px]:grid-cols-4">
+                    <div className="rounded-2xl p-3.5 text-left bg-[#eef1ff] text-[#5b67e8]">
+                      <span className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white">
                         <HugeiconsIcon icon={UserGroupIcon} size={18} color="currentColor" strokeWidth={1.7} />
                       </span>
                       <strong>0</strong>
                       <b>Assigned Leads</b>
                       <p>Total leads assigned</p>
                     </div>
-                    <div className="user-view-stat is-purple">
-                      <span className="user-view-stat-icon">
+                    <div className="rounded-2xl p-3.5 text-left bg-[#f3efff] text-[#6d4ee8] dark:bg-[rgba(122,90,248,0.14)]">
+                      <span className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white">
                         <HugeiconsIcon icon={LicenseIcon} size={18} color="currentColor" strokeWidth={1.7} />
                       </span>
                       <strong>0</strong>
                       <b>Active Applications</b>
                       <p>In progress applications</p>
                     </div>
-                    <div className="user-view-stat is-orange">
-                      <span className="user-view-stat-icon">
+                    <div className="rounded-2xl p-3.5 text-left bg-[#fff3e8] text-[#d46b08] dark:bg-[rgba(212,107,8,0.16)]">
+                      <span className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white">
                         <HugeiconsIcon icon={DocumentAttachmentIcon} size={18} color="currentColor" strokeWidth={1.7} />
                       </span>
                       <strong>0</strong>
                       <b>Pending Documents</b>
                       <p>Awaiting approval</p>
                     </div>
-                    <div className="user-view-stat is-green">
-                      <span className="user-view-stat-icon">
+                    <div className="rounded-2xl p-3.5 text-left bg-[#e8f8ef] text-[#1f9d5d]">
+                      <span className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-white">
                         <HugeiconsIcon icon={Task01Icon} size={18} color="currentColor" strokeWidth={1.7} />
                       </span>
                       <strong>{monthActivity}</strong>
@@ -536,9 +577,9 @@ function UserViewLayout({
                   </div>
                 </article>
 
-                <article className="user-view-card">
+                <article className="rounded-[18px] border border-[#e8edf6] bg-white px-[18px] py-4 shadow-[0_8px_20px_rgba(36,50,77,0.04)] dark:border-border dark:bg-surface [&_header]:mb-3.5 [&_header]:flex [&_header]:items-center [&_header]:gap-2 [&_h4]:m-0 [&_h4]:text-[0.95rem] [&_h4]:text-[#24324d] dark:[&_h4]:text-text-strong">
                   <header>
-                    <span className="user-view-card-icon is-blue">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#eef1ff] text-[#5b67e8]">
                       <HugeiconsIcon icon={Clock01Icon} size={16} color="currentColor" strokeWidth={1.7} />
                     </span>
                     <h4>Recent Activity</h4>
@@ -546,14 +587,16 @@ function UserViewLayout({
                   {detailLoading ? (
                     <Skeleton active paragraph={{ rows: 3 }} />
                   ) : activity.length === 0 ? (
-                    <p className="muted">No recent activity yet.</p>
+                    <p className={`${muted}`}>No recent activity yet.</p>
                   ) : (
-                    <ul className="user-view-activity">
+                    <ul className={userViewActivity}>
                       {activity.slice(0, 8).map((item) => {
                         const copy = activityCopy(item.action)
                         return (
                           <li key={item.id}>
-                            <span className={`user-view-activity-icon ${item.action === 'USER_CREATED' ? 'is-add' : ''}`}>
+                            <span
+                              className={`${userViewActivityIcon} ${item.action === 'USER_CREATED' ? userViewActivityIconAdd : ''}`}
+                            >
                               <HugeiconsIcon
                                 icon={item.action === 'USER_CREATED' ? Add01Icon : PencilEdit02Icon}
                                 size={14}
@@ -576,21 +619,21 @@ function UserViewLayout({
             ) : null}
 
             {viewTab === 'permissions' ? (
-              <div className="user-view-stack">
+              <div className="grid gap-3.5">
                 {canOverride ? (
-                  <article className="user-view-card">
+                  <article className="rounded-[18px] border border-[#e8edf6] bg-white px-[18px] py-4 shadow-[0_8px_20px_rgba(36,50,77,0.04)] dark:border-border dark:bg-surface [&_header]:mb-3.5 [&_header]:flex [&_header]:items-center [&_header]:gap-2 [&_h4]:m-0 [&_h4]:text-[0.95rem] [&_h4]:text-[#24324d] dark:[&_h4]:text-text-strong">
                     <header>
-                      <span className="user-view-card-icon is-blue">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#eef1ff] text-[#5b67e8]">
                         <HugeiconsIcon icon={Shield01Icon} size={16} color="currentColor" strokeWidth={1.7} />
                       </span>
                       <h4>Data scope</h4>
                     </header>
-                    <div className="scope-grid">
+                    <div className={`${scopeGrid}`}>
                       {SCOPE_RESOURCES.map((resource) => (
                         <label key={resource}>
                           {resource.replaceAll('_', ' ')}
                           {detailLoading ? (
-                            <Skeleton.Input active block className="scope-skeleton" />
+                            <Skeleton.Input active block className={`${scopeSkeleton}`} />
                           ) : (
                             <Select
                               value={scopeDraft[resource]}
@@ -608,21 +651,21 @@ function UserViewLayout({
                         </label>
                       ))}
                     </div>
-                    <div className="form-actions">
+                    <div className={`${formActions}`}>
                       <Button size="sm" onClick={onSaveScopes} disabled={detailLoading}>
                         Save scopes
                       </Button>
                     </div>
                   </article>
                 ) : (
-                  <article className="user-view-card">
+                  <article className="rounded-[18px] border border-[#e8edf6] bg-white px-[18px] py-4 shadow-[0_8px_20px_rgba(36,50,77,0.04)] dark:border-border dark:bg-surface [&_header]:mb-3.5 [&_header]:flex [&_header]:items-center [&_header]:gap-2 [&_h4]:m-0 [&_h4]:text-[0.95rem] [&_h4]:text-[#24324d] dark:[&_h4]:text-text-strong">
                     <header>
-                      <span className="user-view-card-icon is-blue">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#eef1ff] text-[#5b67e8]">
                         <HugeiconsIcon icon={Shield01Icon} size={16} color="currentColor" strokeWidth={1.7} />
                       </span>
                       <h4>CRM Access & Scope</h4>
                     </header>
-                    <div className="user-view-scope-grid">
+                    <div className="grid grid-cols-1 gap-3 max-[960px]:grid-cols-1 min-[961px]:grid-cols-3">
                       <ScopePreviewCard
                         tone="blue"
                         icon={UserGroupIcon}
@@ -649,18 +692,18 @@ function UserViewLayout({
                 )}
 
                 {canConfigure ? (
-                  <article className="user-view-card">
+                  <article className="rounded-[18px] border border-[#e8edf6] bg-white px-[18px] py-4 shadow-[0_8px_20px_rgba(36,50,77,0.04)] dark:border-border dark:bg-surface [&_header]:mb-3.5 [&_header]:flex [&_header]:items-center [&_header]:gap-2 [&_h4]:m-0 [&_h4]:text-[0.95rem] [&_h4]:text-[#24324d] dark:[&_h4]:text-text-strong">
                     <header>
-                      <span className="user-view-card-icon is-blue">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#eef1ff] text-[#5b67e8]">
                         <HugeiconsIcon icon={Shield01Icon} size={16} color="currentColor" strokeWidth={1.7} />
                       </span>
                       <h4>Sessions</h4>
                     </header>
                     {sessions.map((session) => (
-                      <div key={session.id} className="session-row">
+                      <div key={session.id} className={`${sessionRow}`}>
                         <div>
                           <strong>{session.userAgent || 'Unknown device'}</strong>
-                          <div className="muted">
+                          <div className={`${muted}`}>
                             Login: {formatDate(session.createdAt)} · Last active: {formatDate(session.lastActiveAt)}
                           </div>
                         </div>
@@ -669,11 +712,11 @@ function UserViewLayout({
                             Logout Session
                           </Button>
                         ) : (
-                          <span className="muted">{session.revokedAt ? 'Revoked' : 'Expired'}</span>
+                          <span className={`${muted}`}>{session.revokedAt ? 'Revoked' : 'Expired'}</span>
                         )}
                       </div>
                     ))}
-                    <div className="form-actions">
+                    <div className={`${formActions}`}>
                       <Button size="sm" variant="secondary" onClick={() => void onForceLogout()}>
                         Force Logout
                       </Button>
@@ -687,9 +730,9 @@ function UserViewLayout({
             ) : null}
 
             {viewTab === 'leads' || viewTab === 'applications' || viewTab === 'documents' || viewTab === 'performance' ? (
-              <article className="user-view-card user-view-empty">
+              <article className="rounded-[18px] border border-[#e8edf6] bg-white px-[18px] py-4 shadow-[0_8px_20px_rgba(36,50,77,0.04)] dark:border-border dark:bg-surface [&_header]:mb-3.5 [&_header]:flex [&_header]:items-center [&_header]:gap-2 [&_h4]:m-0 [&_h4]:text-[0.95rem] [&_h4]:text-[#24324d] dark:[&_h4]:text-text-strong min-h-[180px]">
                 <header>
-                  <span className="user-view-card-icon is-blue">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#eef1ff] text-[#5b67e8]">
                     <HugeiconsIcon
                       icon={
                         viewTab === 'leads'
@@ -715,7 +758,7 @@ function UserViewLayout({
                           : 'Performance'}
                   </h4>
                 </header>
-                <p className="muted">
+                <p className={`${muted}`}>
                   {viewTab === 'leads'
                     ? `No assigned lead records to show yet. Inactive owner leads: ${selected?.inactiveOwnerLeadCount ?? 0}.`
                     : 'No records available for this section yet.'}
@@ -724,7 +767,7 @@ function UserViewLayout({
             ) : null}
           </div>
 
-          <div className="user-view-footer">
+          <div className="flex shrink-0 justify-end px-[18px] pt-3 pb-4">
             <Button type="button" variant="secondary" onClick={onClose}>
               Close
             </Button>
@@ -749,9 +792,9 @@ function ScopePreviewCard({
   copy: string
 }) {
   return (
-    <div className={`user-view-scope ${tone}`}>
-      <div className="user-view-scope-head">
-        <span>
+    <div className={`${userViewScopeBase} ${userViewScopeTone[tone]}`}>
+      <div className="mb-2 flex items-center gap-2 [&_span]:inline-flex [&_span]:h-7 [&_span]:w-7 [&_span]:items-center [&_span]:justify-center [&_span]:rounded-lg [&_span]:bg-white [&_b]:flex-1 [&_b]:text-[0.88rem] [&_b]:text-[#24324d] dark:[&_b]:text-text-strong [&_em]:rounded-full [&_em]:bg-white [&_em]:px-2 [&_em]:py-0.5 [&_em]:text-[0.72rem] [&_em]:font-bold [&_em]:not-italic [&_em]:text-[#4f5de4]">
+        <span className="user-view-scope-icon">
           <HugeiconsIcon icon={icon} size={16} color="currentColor" strokeWidth={1.7} />
         </span>
         <b>{title}</b>
@@ -1092,12 +1135,19 @@ export default function Users() {
   }
 
   return (
-    <div className="admin-page">
-      <PageHeader title="Users" description="Create users, assign roles, and control login access.">
-        {canCreate ? <Button onClick={() => void openCreate()}>Create User</Button> : null}
-      </PageHeader>
+    <div className={`${adminPage}`}>
+      <PageMeta
+        title="Users"
+        description="Create CRM users, assign roles, control login access, and manage account status."
+      />
+      <PageHeader
+        title="Users"
+        subtitle="Create users, assign roles, and control login access."
+        breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Users' }]}
+        extra={canCreate ? <Button onClick={() => void openCreate()}>Create User</Button> : undefined}
+      />
 
-      <section className="admin-filters">
+      <section className={`${adminFilters}`}>
         <Input.Search
           allowClear
           enterButton="Search"
@@ -1148,9 +1198,9 @@ export default function Users() {
         />
       </section>
 
-      <section className="admin-card table-wrap">
+      <section className={`${adminCard} ${tableWrap}`}>
         <Spin spinning={loading}>
-          <table className="admin-table">
+          <table className={`${adminTable}`}>
             <thead>
               <tr>
                 <th>Name</th>
@@ -1170,17 +1220,17 @@ export default function Users() {
                 users.map((user) => (
                   <tr
                     key={user.id}
-                    className={statusFlashId === user.id ? 'is-status-updated' : undefined}
+                    className={statusFlashId === user.id ? adminTableRowStatusUpdated : undefined}
                     onClick={() => {
                       void openUser(user, 'view')
                     }}
                   >
                     <td>
-                      <div className="user-table-person">
-                        <UserAvatar name={user.fullName} photoUrl={user.photoUrl} className="user-table-avatar" />
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <UserAvatar name={user.fullName} photoUrl={user.photoUrl} className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-primary text-[0.72rem] font-bold text-on-primary [&_img]:h-full [&_img]:w-full [&_img]:object-cover" />
                         <div>
                           <strong>{user.fullName}</strong>
-                          <div className="muted">{user.email}</div>
+                          <div className={`${muted}`}>{user.email}</div>
                         </div>
                       </div>
                     </td>
@@ -1199,7 +1249,7 @@ export default function Users() {
                         }}
                       />
                     </td>
-                    <td className="row-actions" onClick={(event) => event.stopPropagation()}>
+                    <td className={`${rowActions}`} onClick={(event) => event.stopPropagation()}>
                       <RowActionMenu
                         items={(
                           [
@@ -1266,9 +1316,9 @@ export default function Users() {
 
       {formOpen
         ? createPortal(
-            <div className="modal-backdrop" onClick={closeForm}>
+            <div className={`${modalBackdrop}`} onClick={closeForm}>
               <div
-                className={formMode === 'view' ? 'modal-panel user-view-panel' : 'modal-panel'}
+                className={formMode === 'view' ? userViewPanel : modalPanel}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="user-modal-title"
@@ -1334,14 +1384,14 @@ export default function Users() {
                   />
                 ) : (
                   <>
-                <div className="modal-header">
+                <div className={`${modalHeader}`}>
                   <h3 id="user-modal-title">{editingId ? 'Edit User' : 'Create User'}</h3>
-                  <button type="button" className="modal-close" aria-label="Close" onClick={closeForm}>
+                  <button type="button" className={`${modalClose}`} aria-label="Close" onClick={closeForm}>
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
                 <form
-                  className="admin-form"
+                  className={`${adminForm}`}
                   autoComplete="off"
                   onSubmit={(event) => {
                     void saveUser(event)
@@ -1353,9 +1403,9 @@ export default function Users() {
                       <input type="password" name="password" autoComplete="current-password" tabIndex={-1} defaultValue="" />
                     </div>
                   )}
-                  <fieldset className="admin-form-fields" disabled={formSaving}>
-              <div className="photo-upload admin-form-span">
-                <div className="photo-picker">
+                  <fieldset className={`${adminFormFields}`} disabled={formSaving}>
+              <div className={`${photoUpload} ${adminFormSpan}`}>
+                <div className={`${photoPicker}`}>
                   <input
                     id="user-photo"
                     className="sr-only"
@@ -1363,21 +1413,21 @@ export default function Users() {
                     accept="image/jpeg,image/png,image/webp"
                     onChange={onPhotoChange}
                   />
-                  <label htmlFor="user-photo" className="photo-picker-button">
-                    <span className="photo-preview">
+                  <label htmlFor="user-photo" className={`${photoPickerButton}`}>
+                    <span className={photoPreviewFrame}>
                       {photoPreview ? (
                         <img src={photoPreview} alt="" />
                       ) : (
                         <HugeiconsIcon icon={UserIcon} size={52} color="currentColor" strokeWidth={1.5} />
                       )}
                     </span>
-                    <span className="photo-camera-badge" aria-hidden>
+                    <span className={`${photoCameraBadge}`} aria-hidden>
                       <HugeiconsIcon icon={Camera01Icon} size={16} color="currentColor" strokeWidth={1.8} />
                     </span>
                     <span className="sr-only">Upload profile image</span>
                   </label>
                 </div>
-                <p className="field-hint">Profile image · JPG, PNG, or WEBP. Max 5 MB.</p>
+                <p className={`${fieldHint}`}>Profile image · JPG, PNG, or WEBP. Max 5 MB.</p>
               </div>
               <label>
                 <FieldLabel required>Full Name</FieldLabel>
@@ -1486,7 +1536,7 @@ export default function Users() {
                 />
               </label>
               </fieldset>
-              <div className="form-actions">
+              <div className={`${formActions}`}>
                 <Button type="submit" loading={formSaving}>
                   {editingId ? 'Save User' : 'Create User'}
                 </Button>
@@ -1506,7 +1556,7 @@ export default function Users() {
       {statusPrompt
         ? createPortal(
             <div
-              className="modal-backdrop"
+              className={`${modalBackdrop}`}
               onClick={() => {
                 if (!statusSaving) {
                   setStatusPrompt(null)
@@ -1514,7 +1564,7 @@ export default function Users() {
               }}
             >
               <div
-                className="modal-panel status-confirm-panel"
+                className={`${modalPanel} ${statusConfirmPanel}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="status-confirm-title"
@@ -1524,11 +1574,11 @@ export default function Users() {
                   const copy = statusChangeCopy(statusPrompt.user, statusPrompt.nextStatus)
                   return (
                     <>
-                      <div className="modal-header">
+                      <div className={`${modalHeader}`}>
                         <h3 id="status-confirm-title">{copy.title}</h3>
                         <button
                           type="button"
-                          className="modal-close"
+                          className={`${modalClose}`}
                           aria-label="Close"
                           disabled={statusSaving}
                           onClick={() => setStatusPrompt(null)}
@@ -1536,13 +1586,13 @@ export default function Users() {
                           <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                         </button>
                       </div>
-                      <p className="status-confirm-copy">{copy.body}</p>
-                      <p className="status-confirm-meta">
+                      <p className={`${statusConfirmCopy}`}>{copy.body}</p>
+                      <p className={`${statusConfirmMeta}`}>
                         Current status: <strong>{statusLabel(statusPrompt.user.status)}</strong>
                         {' → '}
                         New status: <strong>{statusLabel(statusPrompt.nextStatus)}</strong>
                       </p>
-                      <div className="form-actions">
+                      <div className={`${formActions}`}>
                         <Button
                           loading={statusSaving}
                           className={statusPrompt.nextStatus === 'SUSPENDED' ? 'ui-btn-danger' : undefined}
@@ -1570,7 +1620,7 @@ export default function Users() {
 
       {toast
         ? createPortal(
-            <div className={`app-toast app-toast-${toast.type}`} role="status">
+            <div className={appToastClass(toast.type)} role="status">
               {toast.text}
             </div>,
             document.body,

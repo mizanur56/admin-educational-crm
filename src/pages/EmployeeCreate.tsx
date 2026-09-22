@@ -1,3 +1,36 @@
+import {
+  adminBanner,
+  adminCard,
+  adminFormSpan,
+  adminPage,
+  appToastClass,
+  createFormFields,
+  documentUpload,
+  documentUploadHasFile,
+  documentUploadInvalid,
+  fieldError,
+  fieldHint,
+  fieldLabel,
+  fieldLabelClass,
+  formActions,
+  formField,
+  formFieldInvalid,
+  isUploading,
+  modalBackdrop,
+  modalClose,
+  modalHeader,
+  modalPanel,
+  muted,
+  photoCameraBadge,
+  photoPicker,
+  photoPickerButton,
+  photoPreviewFrame,
+  photoPreviewInvalid,
+  photoUpload,
+  photoUploadSpin,
+  statusConfirmCopy,
+  statusConfirmPanel,
+} from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
@@ -33,10 +66,9 @@ import Button from '../components/Button'
 import Input from '../components/Input'
 import Select from '../components/Select'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import { hasPermission } from '../lib/access'
 import type { AuthSession, EmployeeOptions, EmployeeRecord, UserStatus } from '../types'
-import './admin.css'
-
 type FieldErrors = Record<string, string>
 type ToastState = { text: string; type: 'success' | 'error' }
 type ExistingDocument = { id: string; fileName: string; mimeType: string }
@@ -176,7 +208,7 @@ const SECTION_FIELDS: Record<string, string[]> = {
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
 function FieldLabel({ children, required }: { children: ReactNode; required?: boolean }) {
-  return <span className={required ? 'field-label is-required' : 'field-label'}>{children}</span>
+  return <span className={fieldLabelClass(required)}>{children}</span>
 }
 
 function asSelectString(value: unknown) {
@@ -222,14 +254,14 @@ function Field({
   children: ReactNode
 }) {
   return (
-    <div className={`form-field${error ? ' is-invalid' : ''}${span ? ' admin-form-span' : ''}`}>
+    <div className={`${formField}${error ? ` ${formFieldInvalid}` : ''}${span ? ` ${adminFormSpan}` : ''}`}>
       <label htmlFor={id}>
         <FieldLabel required={required}>{label}</FieldLabel>
       </label>
       {children}
-      {hint && !error ? <span className="field-hint">{hint}</span> : null}
+      {hint && !error ? <span className={`${fieldHint}`}>{hint}</span> : null}
       {error ? (
-        <span id={`${id}-error`} className="field-error" role="alert">
+        <span id={`${id}-error`} className={`${fieldError}`} role="alert">
           {error}
         </span>
       ) : null}
@@ -253,19 +285,19 @@ function FormSection({
   className?: string
 }) {
   return (
-    <section id={id} className={`admin-card form-section ${className}`.trim()} aria-labelledby={`${id}-title`}>
-      <header className="form-section-header">
+    <section id={id} className={`${adminCard} ${className}`.trim()} aria-labelledby={`${id}-title`}>
+      <header className="border-b border-[color-mix(in_srgb,var(--color-text-muted)_22%,transparent)] pb-3 [&_h3]:m-0 [&_h3]:text-[1.05rem] [&_p]:mt-1.5 [&_p]:mb-0 [&_p]:text-text-muted">
         <h3 id={`${id}-title`}>{title}</h3>
         {description ? <p>{description}</p> : null}
       </header>
       {errors.length > 0 ? (
-        <ul className="section-errors" aria-live="polite">
+        <ul className="mt-3 mb-0 rounded-[10px] bg-[#fde8e8] py-2.5 pr-3 pl-7 text-[#b42318]" aria-live="polite">
           {errors.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
       ) : null}
-      <div className="admin-form-fields">{children}</div>
+      <div className={`mt-4 ${createFormFields}`}>{children}</div>
     </section>
   )
 }
@@ -767,10 +799,25 @@ export default function EmployeeCreate() {
 
   if (!allowed) {
     return (
-      <div className="admin-page">
+      <div className={`${adminPage}`}>
+        <PageMeta
+          title={pageTitle}
+          description={
+            isEdit
+              ? 'You do not have permission to edit employee records in EduConsult CRM.'
+              : 'You do not have permission to create employee records in EduConsult CRM.'
+          }
+        />
         <PageHeader
           title={pageTitle}
-          description={isEdit ? 'You do not have permission to edit employees.' : 'You do not have permission to create employees.'}
+          subtitle={
+            isEdit ? 'You do not have permission to edit employees.' : 'You do not have permission to create employees.'
+          }
+          breadcrumbs={[
+            { title: 'Dashboard', path: '/dashboard' },
+            { title: 'Employees', path: '/employees' },
+            { title: pageTitle },
+          ]}
         />
       </div>
     )
@@ -787,30 +834,49 @@ export default function EmployeeCreate() {
   const showCrmFields = hasExistingCrmAccount || form.createCrmAccount
 
   return (
-    <div className="admin-page employee-create">
-      <PageHeader title={pageTitle} description={pageDescription}>
-        {isEdit && id ? (
-          <Button variant="secondary" onClick={() => navigate(`/employees/${id}`)}>
-            View profile
-          </Button>
-        ) : null}
-        <Button variant="secondary" onClick={() => navigate('/employees')}>
-          Back to Employees
-        </Button>
-      </PageHeader>
+    <div className={`${adminPage} [&_textarea.ui-input]:h-auto [&_textarea.ui-input]:min-h-[84px] [&_textarea.ui-input]:px-[11px] [&_textarea.ui-input]:py-2 [&_textarea.ant-input]:h-auto [&_textarea.ant-input]:min-h-[84px] [&_textarea.ant-input]:px-[11px] [&_textarea.ant-input]:py-2`}>
+      <PageMeta
+        title={pageTitle}
+        description={
+          isEdit
+            ? 'Update staff details, organization structure, CRM access, and documents for this employee.'
+            : 'Add a new staff record with personal, employment, organization, and CRM access details.'
+        }
+      />
+      <PageHeader
+        title={pageTitle}
+        subtitle={pageDescription}
+        breadcrumbs={[
+          { title: 'Dashboard', path: '/dashboard' },
+          { title: 'Employees', path: '/employees' },
+          { title: pageTitle },
+        ]}
+        extra={
+          <>
+            {isEdit && id ? (
+              <Button variant="secondary" onClick={() => navigate(`/employees/${id}`)}>
+                View profile
+              </Button>
+            ) : null}
+            <Button variant="secondary" onClick={() => navigate('/employees')}>
+              Back to Employees
+            </Button>
+          </>
+        }
+      />
 
-      {formError ? <p className="admin-banner">{formError}</p> : null}
+      {formError ? <p className={`${adminBanner}`}>{formError}</p> : null}
 
       <Spin spinning={loading}>
-        <form className="employee-create-form" onSubmit={(event) => void onSubmit(event)} noValidate>
+        <form className="grid gap-4" onSubmit={(event) => void onSubmit(event)} noValidate>
         <FormSection
           id="personal"
           title="Personal Information"
           description="Identity details used across HR records and the employee list."
           errors={sectionErrors('personal', errors)}
         >
-          <div className={`photo-upload admin-form-span${errors.photo ? ' is-invalid' : ''}`}>
-            <div className="photo-picker">
+          <div className={`${photoUpload} ${adminFormSpan}`}>
+            <div className={photoPicker}>
               <input
                 {...fieldProps('photo')}
                 className="sr-only"
@@ -819,28 +885,31 @@ export default function EmployeeCreate() {
                 disabled={photoUploading}
                 onChange={(event) => void onPhotoChange(event)}
               />
-              <label htmlFor="photo" className={`photo-picker-button${photoUploading ? ' is-uploading' : ''}`}>
-                <span className="photo-preview">
+              <label
+                htmlFor="photo"
+                className={`${photoPickerButton}${photoUploading ? ` ${isUploading}` : ''}`}
+              >
+                <span className={`${photoPreviewFrame}${errors.photo ? ` ${photoPreviewInvalid}` : ''}`}>
                   {photoPreview ? (
                     <img src={photoPreview} alt="" />
                   ) : (
                     <HugeiconsIcon icon={UserIcon} size={52} color="currentColor" strokeWidth={1.5} />
                   )}
                   {photoUploading ? (
-                    <span className="photo-upload-spin">
+                    <span className={photoUploadSpin}>
                       <Spin size="small" />
                     </span>
                   ) : null}
                 </span>
-                <span className="photo-camera-badge" aria-hidden>
+                <span className={photoCameraBadge} aria-hidden>
                   <HugeiconsIcon icon={Camera01Icon} size={16} color="currentColor" strokeWidth={1.8} />
                 </span>
                 <span className="sr-only">{photoUploading ? 'Uploading profile photo' : 'Upload profile photo'}</span>
               </label>
             </div>
-            <p className="field-hint">JPG, PNG, or WEBP. Max 5 MB.</p>
+            <p className={`${fieldHint}`}>JPG, PNG, or WEBP. Max 5 MB.</p>
             {errors.photo ? (
-              <p id="photo-error" className="field-error">
+              <p id="photo-error" className={`${fieldError}`}>
                 {errors.photo}
               </p>
             ) : null}
@@ -959,7 +1028,7 @@ export default function EmployeeCreate() {
               onBlur={() => validateField('officialEmail')}
             />
           </Field>
-          <div className="address-row admin-form-span">
+          <div className={`grid min-w-0 grid-cols-1 gap-3 min-[721px]:grid-cols-2 ${adminFormSpan}`}>
             <Field id="presentAddress" label="Present address" error={errors.presentAddress}>
               <Input.TextArea
                 {...fieldProps('presentAddress')}
@@ -1078,9 +1147,9 @@ export default function EmployeeCreate() {
           errors={sectionErrors('crm', errors)}
         >
           {hasExistingCrmAccount ? null : (
-            <div className="toggle-row admin-form-span">
+            <div className={`flex items-center justify-between gap-4 max-[720px]:flex-col max-[720px]:items-stretch [&_p]:mt-1 [&_p]:mb-0 [&_p]:text-text-muted ${adminFormSpan}`}>
               <div>
-                <span id="createCrmAccountLabel" className="field-label">
+                <span id="createCrmAccountLabel" className={`${fieldLabel}`}>
                   Create CRM account
                 </span>
                 <p>Creates a user login using the official email, department, and team above.</p>
@@ -1140,7 +1209,7 @@ export default function EmployeeCreate() {
               </Field>
             </>
           ) : (
-            <p className="muted admin-form-span">No CRM login will be created. You can still save the employee record.</p>
+            <p className={`${muted} ${adminFormSpan}`}>No CRM login will be created. You can still save the employee record.</p>
           )}
         </FormSection>
 
@@ -1184,7 +1253,7 @@ export default function EmployeeCreate() {
           description="Each file can be up to 5 MB."
           errors={sectionErrors('documents', errors)}
         >
-          <div className="document-upload-grid admin-form-span">
+          <div className={`grid grid-cols-1 gap-3 min-[721px]:grid-cols-2 min-[1101px]:grid-cols-3 ${adminFormSpan}`}>
             {DOCUMENT_FIELDS.map((item) => {
               const file = documents[item.key]
               const existing = existingDocuments[item.key]
@@ -1194,34 +1263,37 @@ export default function EmployeeCreate() {
               return (
                 <div
                   key={item.key}
-                  className={`document-upload${invalid ? ' is-invalid' : ''}${hasFile ? ' has-file' : ''}${uploading ? ' is-uploading' : ''}`}
+                  className={`${documentUpload}${invalid ? ` ${documentUploadInvalid}` : ''}${hasFile ? ` ${documentUploadHasFile}` : ''}${uploading ? ` ${isUploading}` : ''}`}
                 >
                   <input
                     {...fieldProps(item.key)}
-                    className="sr-only document-upload-input"
+                    className="sr-only"
                     type="file"
                     accept={item.accept}
                     disabled={uploading || hasFile}
                     onChange={(event) => void onDocumentChange(item.key, event)}
                   />
                   {hasFile || uploading ? (
-                    <div className="document-upload-card">
-                      <span className="document-upload-icon" aria-hidden>
+                    <div
+                      data-doc-card
+                      className="m-0 flex min-h-[86px] cursor-pointer items-center gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_32%,var(--color-border))] bg-surface px-4 py-3.5 transition-[border-color,background,box-shadow] duration-150 hover:border-[color-mix(in_srgb,var(--color-primary)_55%,var(--color-border))] hover:bg-[color-mix(in_srgb,var(--color-primary)_6%,var(--color-surface))]"
+                    >
+                      <span className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-surface))] text-primary" aria-hidden>
                         <HugeiconsIcon icon={item.icon} size={22} color="currentColor" strokeWidth={1.8} />
                       </span>
-                      <span className="document-upload-copy">
+                      <span className="min-w-0 flex-1 [&_strong]:block [&_strong]:text-[0.92rem] [&_strong]:font-[650] [&_strong]:leading-snug [&_strong]:text-text [&_span]:mt-0.5 [&_span]:line-clamp-2 [&_span]:text-[0.76rem] [&_span]:leading-snug [&_span]:text-text-muted">
                         <strong>{item.label}</strong>
                         <span>{uploading ? 'Uploading…' : file?.name || existing?.fileName}</span>
                       </span>
                       {uploading ? (
-                        <span className="document-upload-action is-spinning" aria-hidden>
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-primary [&_.ant-spin-dot-item]:bg-primary" aria-hidden>
                           <Spin size="small" />
                         </span>
                       ) : (
-                        <span className="document-upload-actions">
+                        <span className="flex items-center gap-1">
                           <button
                             type="button"
-                            className="document-upload-tool"
+                            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-icon hover:bg-hover-bg"
                             aria-label={`View ${item.label}`}
                             onClick={() => void openDocumentPreview(item)}
                           >
@@ -1229,7 +1301,7 @@ export default function EmployeeCreate() {
                           </button>
                           <button
                             type="button"
-                            className="document-upload-tool is-danger"
+                            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-icon hover:bg-hover-bg text-danger hover:bg-[color-mix(in_srgb,var(--color-danger)_16%,var(--color-surface))]"
                             aria-label={`Delete ${item.label}`}
                             onClick={() =>
                               setDeleteTarget({
@@ -1246,21 +1318,25 @@ export default function EmployeeCreate() {
                       )}
                     </div>
                   ) : (
-                    <label htmlFor={item.key} className="document-upload-card">
-                      <span className="document-upload-icon" aria-hidden>
+                    <label
+                      htmlFor={item.key}
+                      data-doc-card
+                      className="m-0 flex min-h-[86px] cursor-pointer items-center gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_32%,var(--color-border))] bg-surface px-4 py-3.5 transition-[border-color,background,box-shadow] duration-150 hover:border-[color-mix(in_srgb,var(--color-primary)_55%,var(--color-border))] hover:bg-[color-mix(in_srgb,var(--color-primary)_6%,var(--color-surface))]"
+                    >
+                      <span className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-surface))] text-primary" aria-hidden>
                         <HugeiconsIcon icon={item.icon} size={22} color="currentColor" strokeWidth={1.8} />
                       </span>
-                      <span className="document-upload-copy">
+                      <span className="min-w-0 flex-1 [&_strong]:block [&_strong]:text-[0.92rem] [&_strong]:font-[650] [&_strong]:leading-snug [&_strong]:text-text [&_span]:mt-0.5 [&_span]:line-clamp-2 [&_span]:text-[0.76rem] [&_span]:leading-snug [&_span]:text-text-muted">
                         <strong>{item.label}</strong>
                         <span>{item.description}</span>
                       </span>
-                      <span className="document-upload-action" aria-hidden>
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-primary" aria-hidden>
                         <HugeiconsIcon icon={CloudUploadIcon} size={16} color="currentColor" strokeWidth={2} />
                       </span>
                     </label>
                   )}
                   {errors[item.key] ? (
-                    <span id={`${item.key}-error`} className="field-error" role="alert">
+                    <span id={`${item.key}-error`} className={`${fieldError}`} role="alert">
                       {errors[item.key]}
                     </span>
                   ) : null}
@@ -1276,7 +1352,7 @@ export default function EmployeeCreate() {
           description={isEdit ? 'Review the record before saving changes.' : 'Review the record before saving. Nothing is created until you confirm.'}
           errors={[]}
         >
-          <dl className="account-summary admin-form-span">
+          <dl className={`m-0 grid grid-cols-1 gap-x-4 gap-y-3 min-[721px]:grid-cols-3 [&_dt]:text-[0.78rem] [&_dt]:text-text-muted [&_dd]:mt-0.5 [&_dd]:mb-0 ${adminFormSpan}`}>
             <div>
               <dt>Employee</dt>
               <dd>{form.fullName.trim() || '—'}</dd>
@@ -1298,7 +1374,7 @@ export default function EmployeeCreate() {
               </dd>
             </div>
           </dl>
-          <div className="form-actions admin-form-span">
+          <div className={`${formActions} ${adminFormSpan}`}>
             <Button type="submit" loading={saving} disabled={saving || !options || loading || (isEdit && !employee)}>
               {isEdit ? 'Save Employee' : 'Create Employee'}
             </Button>
@@ -1312,24 +1388,24 @@ export default function EmployeeCreate() {
 
       {preview
         ? createPortal(
-            <div className="modal-backdrop" onClick={closePreview}>
+            <div className={`${modalBackdrop}`} onClick={closePreview}>
               <div
-                className="modal-panel document-preview-panel"
+                className={`${modalPanel} grid gap-3`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="document-preview-title"
                 onClick={(event) => event.stopPropagation()}
               >
-                <div className="modal-header">
+                <div className={`${modalHeader}`}>
                   <div>
                     <h3 id="document-preview-title">{preview.title}</h3>
-                    <p className="document-preview-name">{preview.fileName}</p>
+                    <p className="m-0 text-[0.92rem] font-semibold text-text">{preview.fileName}</p>
                   </div>
-                  <button type="button" className="modal-close" aria-label="Close" onClick={closePreview}>
+                  <button type="button" className={`${modalClose}`} aria-label="Close" onClick={closePreview}>
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
-                <div className="document-preview-body">
+                <div className="overflow-hidden rounded-xl border border-border bg-[color-mix(in_srgb,var(--color-page-bg)_70%,var(--color-surface))] [&_img]:mx-auto [&_img]:max-h-[60vh] [&_img]:max-w-full [&_img]:object-contain [&_iframe]:h-[60vh] [&_iframe]:w-full [&_iframe]:border-0">
                   {preview.loading ? (
                     <Spin />
                   ) : isImageMime(preview.mimeType) ? (
@@ -1337,7 +1413,7 @@ export default function EmployeeCreate() {
                   ) : isPdfMime(preview.mimeType, preview.fileName) ? (
                     <iframe title={preview.fileName} src={preview.url} />
                   ) : (
-                    <div className="document-preview-fallback">
+                    <div className="p-6 text-center [&_p]:mb-3 [&_p]:mt-0 [&_p]:text-text-muted">
                       <p>Preview is not available for this file type.</p>
                       <a href={preview.url} download={preview.fileName}>
                         Download {preview.fileName}
@@ -1354,7 +1430,7 @@ export default function EmployeeCreate() {
       {deleteTarget
         ? createPortal(
             <div
-              className="modal-backdrop"
+              className={`${modalBackdrop}`}
               onClick={() => {
                 if (!deletingDocument) {
                   setDeleteTarget(null)
@@ -1362,17 +1438,17 @@ export default function EmployeeCreate() {
               }}
             >
               <div
-                className="modal-panel status-confirm-panel"
+                className={`${modalPanel} ${statusConfirmPanel}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="document-delete-title"
                 onClick={(event) => event.stopPropagation()}
               >
-                <div className="modal-header">
+                <div className={`${modalHeader}`}>
                   <h3 id="document-delete-title">Delete document?</h3>
                   <button
                     type="button"
-                    className="modal-close"
+                    className={`${modalClose}`}
                     aria-label="Close"
                     disabled={deletingDocument}
                     onClick={() => setDeleteTarget(null)}
@@ -1380,11 +1456,11 @@ export default function EmployeeCreate() {
                     <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
                   </button>
                 </div>
-                <p className="status-confirm-copy">
+                <p className={`${statusConfirmCopy}`}>
                   Are you sure you want to delete <strong>{deleteTarget.fileName}</strong> from {deleteTarget.label}? This
                   action cannot be undone.
                 </p>
-                <div className="form-actions">
+                <div className={`${formActions}`}>
                   <Button loading={deletingDocument} className="ui-btn-danger" onClick={() => void confirmDeleteDocument()}>
                     Delete
                   </Button>
@@ -1400,7 +1476,7 @@ export default function EmployeeCreate() {
 
       {toast
         ? createPortal(
-            <div className={`app-toast app-toast-${toast.type}`} role="status">
+            <div className={appToastClass(toast.type)} role="status">
               {toast.text}
             </div>,
             document.body,

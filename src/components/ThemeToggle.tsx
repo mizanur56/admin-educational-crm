@@ -1,5 +1,8 @@
 import { useTheme } from '../theme/ThemeProvider'
 
+const DEFAULT_ICON_BTN =
+  'relative grid size-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-icon hover:bg-hover-bg'
+
 type ThemeToggleProps = {
   className?: string
 }
@@ -21,7 +24,7 @@ function SunIcon() {
   )
 }
 
-export default function ThemeToggle({ className = 'icon-btn' }: ThemeToggleProps) {
+export default function ThemeToggle({ className = DEFAULT_ICON_BTN }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === 'dark'
 

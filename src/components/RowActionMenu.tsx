@@ -1,3 +1,4 @@
+import { rowActionBtn, rowActionMenu, rowActionMenuItem, rowActionMenuItemDanger } from '../styles/admin'
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -84,7 +85,7 @@ export default function RowActionMenu({ items }: { items: RowActionItem[] }) {
       <button
         ref={buttonRef}
         type="button"
-        className="row-action-btn ui-btn ui-btn-ghost ui-btn-sm"
+        className={`${rowActionBtn} inline-flex min-h-[34px] items-center justify-center rounded-(--radius-btn) border-0 bg-transparent px-3 py-1.5 text-[0.82rem] font-semibold text-primary hover:bg-primary/10`}
         title="Actions"
         aria-label="Actions"
         aria-expanded={open}
@@ -97,7 +98,7 @@ export default function RowActionMenu({ items }: { items: RowActionItem[] }) {
           setOpen(true)
         }}
       >
-        <span className="ui-btn-icon">
+        <span className="grid place-items-center [&_svg]:block">
           <HugeiconsIcon icon={MoreVerticalIcon} size={16} color="currentColor" strokeWidth={1.5} />
         </span>
       </button>
@@ -105,7 +106,7 @@ export default function RowActionMenu({ items }: { items: RowActionItem[] }) {
         ? createPortal(
             <div
               ref={menuRef}
-              className="row-action-menu"
+              className={`${rowActionMenu}`}
               style={{ top: coords.top, left: coords.left }}
               role="menu"
             >
@@ -114,7 +115,7 @@ export default function RowActionMenu({ items }: { items: RowActionItem[] }) {
                   key={item.key}
                   type="button"
                   role="menuitem"
-                  className={item.danger ? 'is-danger' : undefined}
+                  className={item.danger ? rowActionMenuItemDanger : rowActionMenuItem}
                   onClick={() => {
                     setOpen(false)
                     item.onSelect()

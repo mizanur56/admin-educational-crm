@@ -1,0 +1,25 @@
+/* Ant Design overrides for Campusly CRM */
+
+.ant-btn-primary {
+  box-shadow: none;
+}
+
+.ant-modal-root .ant-modal-mask {
+  backdrop-filter: blur(2px);
+}
+
+.ant-dropdown,
+.ant-select-dropdown,
+.ant-picker-dropdown,
+.ant-tooltip,
+.ant-popover {
+  z-index: 2100 !important;
+}
+
+[data-theme='dark'] .ant-table {
+  background: transparent;
+}
+
+[data-theme='dark'] .ant-modal-content {
+  background: var(--surface);
+}

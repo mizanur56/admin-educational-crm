@@ -1,12 +1,19 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
+import { Provider } from 'react-redux'
+import { PersistGate } from 'redux-persist/integration/react'
+import { RouterProvider } from 'react-router-dom'
 import { ConfigProvider, theme as antdTheme } from 'antd'
-import App from './App'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import router from './routes/routes'
+import { persistor, store } from './redux/features/store'
+import AuthSessionProvider from './providers/AuthSessionProvider'
 import { ThemeProvider, useTheme } from './theme/ThemeProvider'
+import PageLoader from './components/PageLoader'
 import './index.css'
-import './components/Button.css'
-import './components/FormControls.css'
+import './styles/antd.css'
 
 const root = document.getElementById('root')
 
@@ -38,17 +45,35 @@ function ThemedApp() {
         },
       }}
     >
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={isDark ? 'dark' : 'colored'}
+      />
+      <RouterProvider router={router} />
     </ConfigProvider>
   )
 }
 
 createRoot(root).render(
   <StrictMode>
-    <ThemeProvider>
-      <ThemedApp />
-    </ThemeProvider>
+    <HelmetProvider>
+      <Provider store={store}>
+        <PersistGate loading={<PageLoader />} persistor={persistor}>
+          <ThemeProvider>
+            <AuthSessionProvider>
+              <ThemedApp />
+            </AuthSessionProvider>
+          </ThemeProvider>
+        </PersistGate>
+      </Provider>
+    </HelmetProvider>
   </StrictMode>,
 )
