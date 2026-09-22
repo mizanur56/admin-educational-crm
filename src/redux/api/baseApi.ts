@@ -90,6 +90,7 @@ export const baseApi = createApi({
     'Activities',
     'AuditLogs',
     'Search',
+    'Pipeline',
   ],
   endpoints: () => ({}),
 })

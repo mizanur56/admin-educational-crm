@@ -4,8 +4,8 @@ import AuthLayout from '../layouts/AuthLayout'
 import Account from '../pages/Account'
 import ActivityHistory from '../pages/ActivityHistory'
 import AuditLogs from '../pages/AuditLogs'
-import ComingSoon from '../pages/ComingSoon'
 import Dashboard from '../pages/Dashboard'
+import DemoModulePage from '../pages/DemoModulePage'
 import EmployeeCreate from '../pages/EmployeeCreate'
 import EmployeeProfile from '../pages/EmployeeProfile'
 import Employees from '../pages/Employees'
@@ -16,7 +16,17 @@ import MasterDataItems from '../pages/MasterDataItems'
 import Profile from '../pages/Profile'
 import ResetPassword from '../pages/ResetPassword'
 import Roles from '../pages/Roles'
+import Settings from '../pages/Settings'
 import Users from '../pages/Users'
+import {
+  applicationsDemo,
+  documentsDemo,
+  followUpsDemo,
+  leadsDemo,
+  paymentsDemo,
+  reportsDemo,
+  studentsDemo,
+} from '../data/moduleDemo'
 import PermissionRoute from './PermissionRoute'
 import ProtectedRoute from './ProtectedRoute'
 
@@ -34,26 +44,26 @@ const routes = [
 
           {
             element: <PermissionRoute permission="lead:view" />,
-            children: [{ path: '/leads', element: <ComingSoon title="Leads" /> }],
+            children: [{ path: '/leads', element: <DemoModulePage config={leadsDemo} /> }],
           },
           {
             element: <PermissionRoute permission="lead:convert" />,
             children: [
-              { path: '/applications', element: <ComingSoon title="Applications" /> },
-              { path: '/students', element: <ComingSoon title="Students" /> },
+              { path: '/applications', element: <DemoModulePage config={applicationsDemo} /> },
+              { path: '/students', element: <DemoModulePage config={studentsDemo} /> },
             ],
           },
           {
             element: <PermissionRoute permission="document:view" />,
-            children: [{ path: '/documents', element: <ComingSoon title="Documents" /> }],
+            children: [{ path: '/documents', element: <DemoModulePage config={documentsDemo} /> }],
           },
           {
             element: <PermissionRoute permission="payment:view" />,
-            children: [{ path: '/payments', element: <ComingSoon title="Payments" /> }],
+            children: [{ path: '/payments', element: <DemoModulePage config={paymentsDemo} /> }],
           },
           {
             element: <PermissionRoute permission="follow_up:view" />,
-            children: [{ path: '/follow-ups', element: <ComingSoon title="Follow-ups" /> }],
+            children: [{ path: '/follow-ups', element: <DemoModulePage config={followUpsDemo} /> }],
           },
           {
             element: <PermissionRoute permission="activity:view" />,
@@ -61,7 +71,7 @@ const routes = [
           },
           {
             element: <PermissionRoute permission="report:view" />,
-            children: [{ path: '/reports', element: <ComingSoon title="Reports" /> }],
+            children: [{ path: '/reports', element: <DemoModulePage config={reportsDemo} /> }],
           },
           {
             element: <PermissionRoute permission="employee:create" />,
@@ -100,7 +110,7 @@ const routes = [
           },
           {
             element: <PermissionRoute permission="settings:view" />,
-            children: [{ path: '/settings', element: <ComingSoon title="Settings" /> }],
+            children: [{ path: '/settings', element: <Settings /> }],
           },
         ],
       },

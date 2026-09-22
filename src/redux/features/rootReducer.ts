@@ -13,6 +13,7 @@ import './masterData/masterDataApi'
 import './activities/activitiesApi'
 import './auditLogs/auditLogsApi'
 import './search/searchApi'
+import './pipeline/pipelineApi'
 
 const authPersistConfig = {
   key: 'crm-auth',
