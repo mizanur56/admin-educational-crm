@@ -7,6 +7,7 @@ import {
 } from '@reduxjs/toolkit/query/react'
 import { toast } from 'react-toastify'
 import { config } from '@/config'
+import { clearAuthPersistStorage } from '@/lib/authStorage'
 import { clearSession } from '../features/auth/authSlice'
 
 function getToastMessage(data: unknown, fallback: string): string {
@@ -45,6 +46,8 @@ const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQuery
   if (status === 401 && !isGuestAuthEndpoint(requestUrl)) {
     toast.error(getToastMessage(result.error?.data, 'Session expired. Please sign in again.'))
     api.dispatch(clearSession())
+    api.dispatch(baseApi.util.resetApiState())
+    clearAuthPersistStorage()
     try {
       const path = window.location.pathname
       if (!path.includes('/login') && !path.includes('/forgot-password') && !path.includes('/reset-password')) {

@@ -69,7 +69,6 @@ export default function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { logout } = useAuth()
-  const [pending, setPending] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
@@ -146,13 +145,9 @@ export default function AppLayout() {
     })
   }, [location.pathname])
 
-  async function handleLogout() {
-    setPending(true)
-    try {
-      await logout()
-    } finally {
-      navigate('/login', { replace: true })
-    }
+  function handleLogout() {
+    logout()
+    navigate('/login', { replace: true })
   }
 
   function toggleGroup(id: string) {
@@ -401,12 +396,11 @@ export default function AppLayout() {
                 ? 'justify-center px-0 py-2.5 max-[960px]:justify-start max-[960px]:px-3 max-[960px]:py-[9px]'
                 : 'justify-center',
             ].join(' ')}
-            onClick={() => void handleLogout()}
-            disabled={pending}
+            onClick={handleLogout}
             title="Logout"
           >
             <HugeiconsIcon icon={Logout03Icon} size={18} color="currentColor" strokeWidth={1.5} />
-            <span className={labelHidden}>{pending ? 'Signing out…' : 'Logout'}</span>
+            <span className={labelHidden}>Logout</span>
           </button>
         </div>
       </aside>

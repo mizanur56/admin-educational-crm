@@ -1,4 +1,5 @@
 import { persistReducer } from 'redux-persist'
+import { AUTH_PERSIST_KEY } from '@/constants'
 import { baseApi } from '../api/baseApi'
 import storage from '../storage'
 import authReducer from './auth/authSlice'
@@ -16,7 +17,7 @@ import './search/searchApi'
 import './pipeline/pipelineApi'
 
 const authPersistConfig = {
-  key: 'crm-auth',
+  key: AUTH_PERSIST_KEY,
   storage,
   whitelist: ['session'],
 }
