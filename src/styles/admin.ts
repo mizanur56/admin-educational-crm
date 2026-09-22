@@ -191,11 +191,89 @@ export const photoPicker = 'relative'
 export const photoPickerButton =
   'relative m-0 grid h-[132px] w-[132px] cursor-pointer place-items-center focus-visible:outline-none'
 
-export const photoPreview =
+export const photoPreviewFrame =
   'relative grid h-[118px] w-[118px] place-items-center overflow-hidden rounded-full bg-primary text-on-primary shadow-[0_0_0_6px_var(--color-surface),0_0_0_8px_var(--color-primary)] [&_img]:h-full [&_img]:w-full [&_img]:object-cover'
+
+/** @deprecated alias — prefer photoPreviewFrame to avoid clashing with local state named photoPreview */
+export const photoPreview = photoPreviewFrame
 
 export const photoPreviewInvalid =
   'shadow-[0_0_0_6px_var(--color-surface),0_0_0_8px_#ff4d4f]'
+
+export const createFormFields =
+  'm-0 grid min-w-0 grid-cols-1 items-start gap-3 border-0 p-0 min-[721px]:grid-cols-2 min-[1101px]:grid-cols-3'
+
+export const formField = 'grid min-w-0 gap-1.5 content-start [&_>label]:min-h-[1.35em] [&_.ant-input]:w-full [&_.ant-input]:min-w-0 [&_.ant-input-affix-wrapper]:w-full [&_.ant-input-affix-wrapper]:min-w-0 [&_.ant-select]:w-full [&_.ant-select]:min-w-0 [&_.ant-picker]:w-full [&_.ant-picker]:min-w-0'
+
+export const formFieldInvalid =
+  '[&_.ant-select-selector]:!border-[#ff4d4f] [&_.ant-input]:!border-[#ff4d4f] [&_.ant-picker]:!border-[#ff4d4f] [&_.file-input]:!border-[#ff4d4f]'
+
+export const userViewNavBtn =
+  'flex w-full cursor-pointer items-center gap-2.5 rounded-xl border-0 bg-transparent px-3 py-2.5 text-left text-[#667085]'
+
+export const userViewNavBtnActive =
+  'bg-[#eef1ff] font-semibold text-[#4f5de4] dark:bg-[rgba(91,103,232,0.18)] dark:text-[#aab3ff]'
+
+export const userViewNavBtnIdle = 'hover:bg-[#f5f7fb]'
+
+export const userViewActivity =
+  'm-0 grid list-none p-0 [&_li]:grid [&_li]:grid-cols-[34px_minmax(0,1fr)_auto] [&_li]:items-center [&_li]:gap-2.5 [&_li]:border-b [&_li]:border-[#eef2f8] [&_li]:py-2.5 [&_li:last-child]:border-b-0 [&_strong]:block [&_strong]:text-[0.88rem] [&_strong]:text-[#24324d] dark:[&_strong]:text-text-strong [&_p]:m-0 [&_p]:text-[0.76rem] [&_p]:text-[#7b8498] [&_time]:whitespace-nowrap [&_time]:text-[0.76rem] [&_time]:text-[#8b97a8]'
+
+export const userViewActivityIcon =
+  'inline-flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-[#eef1ff] text-[#5b67e8]'
+
+export const userViewActivityIconAdd = 'bg-[#e8f8ef] text-[#17824b]'
+
+export const userViewScopeBase = 'rounded-2xl border p-3.5'
+
+export const userViewScopeTone: Record<'blue' | 'purple' | 'green', string> = {
+  blue: 'border-[#e4e8fb] bg-[#f5f7ff] dark:bg-[rgba(91,103,232,0.14)] [&_.user-view-scope-icon]:text-[#5b67e8]',
+  purple: 'border-[#ebe4fb] bg-[#f7f4ff] dark:bg-[rgba(122,90,248,0.14)] [&_.user-view-scope-icon]:text-[#7a5af8]',
+  green: 'border-[#dceee3] bg-[#f3fbf6] dark:bg-[rgba(31,157,93,0.14)] [&_.user-view-scope-icon]:text-[#1f9d5d]',
+}
+
+export const userViewPanel =
+  'flex h-[min(92vh,860px)] max-h-[min(92vh,860px)] w-[min(100%,1120px)] min-h-0 flex-col overflow-hidden bg-[#f7f8fd] p-0 dark:bg-[#151b22]'
+
+export const mdTab =
+  'shrink-0 whitespace-nowrap border-0 border-b-2 border-transparent bg-transparent px-3 py-2 font-[inherit] text-[0.88rem] text-text-muted no-underline hover:text-text'
+
+export const mdTabActive = 'border-primary font-semibold text-primary'
+
+export const mdHistoryEvent =
+  'flex w-full cursor-pointer items-start gap-2.5 rounded-xl border-0 bg-transparent px-2 py-2 text-left'
+
+export const mdHistoryEventActive = 'bg-[color-mix(in_srgb,#2f6fed_10%,var(--color-surface))] dark:bg-[color-mix(in_srgb,#2f6fed_18%,var(--color-surface))]'
+
+export const mdHistoryDetailIcon =
+  'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eef2f7] text-[#64748b]'
+
+export const mdHistoryRole =
+  'rounded-full bg-[color-mix(in_srgb,#2f6fed_12%,var(--color-surface))] px-2 py-0.5 text-[0.72rem] font-semibold dark:bg-[color-mix(in_srgb,#2f6fed_18%,var(--color-surface))]'
+
+export const historyKindDot: Record<string, string> = {
+  updated: 'bg-[#2f6fed] text-[#2f6fed]',
+  created: 'bg-[#17824b] text-[#17824b]',
+  status: 'bg-[#d46b08] text-[#d46b08]',
+  assigned: 'bg-[#4f5de4] text-[#4f5de4]',
+  deleted: 'bg-[#b42318] text-[#b42318]',
+}
+
+export const employeeAvatar =
+  'grid shrink-0 place-items-center overflow-hidden rounded-full bg-primary object-cover font-bold text-on-primary'
+
+export const employeeAvatarSm = 'h-[34px] w-[34px] text-[0.72rem]'
+
+export const employeeAvatarLg = 'h-16 w-16 text-[1.1rem]'
+
+export const documentUpload =
+  'relative grid min-w-0 gap-1.5'
+
+export const documentUploadHasFile =
+  '[&_[data-doc-card]]:border-primary [&_[data-doc-card]]:bg-[color-mix(in_srgb,var(--color-primary)_6%,var(--color-surface))]'
+
+export const documentUploadInvalid =
+  '[&_[data-doc-card]]:border-[#ff4d4f]'
 
 export const photoCameraBadge =
   'absolute right-1.5 bottom-2 grid h-9 w-9 place-items-center rounded-full bg-primary text-on-primary shadow-[0_0_0_3px_var(--color-surface)] group-hover:bg-primary-hover'

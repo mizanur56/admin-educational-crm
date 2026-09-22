@@ -1,4 +1,36 @@
-import { adminBanner, adminFormFields, adminFormSpan, adminPage, appToastClass, fieldError, fieldHint, fieldLabel, fieldLabelClass, formActions, modalBackdrop, modalClose, modalHeader, modalPanel, muted, photoCameraBadge, photoPicker, photoPreview, photoUploadSpin, statusConfirmCopy, statusConfirmPanel } from '../styles/admin'
+import {
+  adminBanner,
+  adminCard,
+  adminFormSpan,
+  adminPage,
+  appToastClass,
+  createFormFields,
+  documentUpload,
+  documentUploadHasFile,
+  documentUploadInvalid,
+  fieldError,
+  fieldHint,
+  fieldLabel,
+  fieldLabelClass,
+  formActions,
+  formField,
+  formFieldInvalid,
+  isUploading,
+  modalBackdrop,
+  modalClose,
+  modalHeader,
+  modalPanel,
+  muted,
+  photoCameraBadge,
+  photoPicker,
+  photoPickerButton,
+  photoPreviewFrame,
+  photoPreviewInvalid,
+  photoUpload,
+  photoUploadSpin,
+  statusConfirmCopy,
+  statusConfirmPanel,
+} from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
@@ -221,7 +253,7 @@ function Field({
   children: ReactNode
 }) {
   return (
-    <div className={`form-field${error ? ' is-invalid' : ''}${span ? ' admin-form-span' : ''}`}>
+    <div className={`${formField}${error ? ` ${formFieldInvalid}` : ''}${span ? ` ${adminFormSpan}` : ''}`}>
       <label htmlFor={id}>
         <FieldLabel required={required}>{label}</FieldLabel>
       </label>
@@ -252,7 +284,7 @@ function FormSection({
   className?: string
 }) {
   return (
-    <section id={id} className={`admin-card form-section ${className}`.trim()} aria-labelledby={`${id}-title`}>
+    <section id={id} className={`${adminCard} ${className}`.trim()} aria-labelledby={`${id}-title`}>
       <header className="border-b border-[color-mix(in_srgb,var(--color-text-muted)_22%,transparent)] pb-3 [&_h3]:m-0 [&_h3]:text-[1.05rem] [&_p]:mt-1.5 [&_p]:mb-0 [&_p]:text-text-muted">
         <h3 id={`${id}-title`}>{title}</h3>
         {description ? <p>{description}</p> : null}
@@ -264,7 +296,7 @@ function FormSection({
           ))}
         </ul>
       ) : null}
-      <div className={`${adminFormFields}`}>{children}</div>
+      <div className={`mt-4 ${createFormFields}`}>{children}</div>
     </section>
   )
 }
@@ -786,7 +818,7 @@ export default function EmployeeCreate() {
   const showCrmFields = hasExistingCrmAccount || form.createCrmAccount
 
   return (
-    <div className={`${adminPage} [&_.admin-form-fields]:grid-cols-1 [&_.admin-form-fields]:items-start min-[721px]:[&_.admin-form-fields]:grid-cols-2 min-[1101px]:[&_.admin-form-fields]:grid-cols-3 [&_.form-field]:content-start [&_.form-field>label]:min-h-[1.35em] [&_.form-field_.ant-input]:w-full [&_.form-field_.ant-input]:min-w-0 [&_.form-field_.ant-input-affix-wrapper]:w-full [&_.form-field_.ant-input-affix-wrapper]:min-w-0 [&_.form-field_.ant-select]:w-full [&_.form-field_.ant-select]:min-w-0 [&_.form-field_.ant-picker]:w-full [&_.form-field_.ant-picker]:min-w-0 [&_textarea.ui-input]:h-auto [&_textarea.ui-input]:min-h-[84px] [&_textarea.ui-input]:px-[11px] [&_textarea.ui-input]:py-2 [&_textarea.ant-input]:h-auto [&_textarea.ant-input]:min-h-[84px] [&_textarea.ant-input]:px-[11px] [&_textarea.ant-input]:py-2`}>
+    <div className={`${adminPage} [&_textarea.ui-input]:h-auto [&_textarea.ui-input]:min-h-[84px] [&_textarea.ui-input]:px-[11px] [&_textarea.ui-input]:py-2 [&_textarea.ant-input]:h-auto [&_textarea.ant-input]:min-h-[84px] [&_textarea.ant-input]:px-[11px] [&_textarea.ant-input]:py-2`}>
       <PageHeader title={pageTitle} description={pageDescription}>
         {isEdit && id ? (
           <Button variant="secondary" onClick={() => navigate(`/employees/${id}`)}>
@@ -808,8 +840,8 @@ export default function EmployeeCreate() {
           description="Identity details used across HR records and the employee list."
           errors={sectionErrors('personal', errors)}
         >
-          <div className={`photo-upload admin-form-span${errors.photo ? ' is-invalid' : ''}`}>
-            <div className={`${photoPicker}`}>
+          <div className={`${photoUpload} ${adminFormSpan}`}>
+            <div className={photoPicker}>
               <input
                 {...fieldProps('photo')}
                 className="sr-only"
@@ -818,20 +850,23 @@ export default function EmployeeCreate() {
                 disabled={photoUploading}
                 onChange={(event) => void onPhotoChange(event)}
               />
-              <label htmlFor="photo" className={`photo-picker-button${photoUploading ? ' is-uploading' : ''}`}>
-                <span className={`${photoPreview}`}>
+              <label
+                htmlFor="photo"
+                className={`${photoPickerButton}${photoUploading ? ` ${isUploading}` : ''}`}
+              >
+                <span className={`${photoPreviewFrame}${errors.photo ? ` ${photoPreviewInvalid}` : ''}`}>
                   {photoPreview ? (
                     <img src={photoPreview} alt="" />
                   ) : (
                     <HugeiconsIcon icon={UserIcon} size={52} color="currentColor" strokeWidth={1.5} />
                   )}
                   {photoUploading ? (
-                    <span className={`${photoUploadSpin}`}>
+                    <span className={photoUploadSpin}>
                       <Spin size="small" />
                     </span>
                   ) : null}
                 </span>
-                <span className={`${photoCameraBadge}`} aria-hidden>
+                <span className={photoCameraBadge} aria-hidden>
                   <HugeiconsIcon icon={Camera01Icon} size={16} color="currentColor" strokeWidth={1.8} />
                 </span>
                 <span className="sr-only">{photoUploading ? 'Uploading profile photo' : 'Upload profile photo'}</span>
@@ -1193,7 +1228,7 @@ export default function EmployeeCreate() {
               return (
                 <div
                   key={item.key}
-                  className={`document-upload${invalid ? ' is-invalid' : ''}${hasFile ? ' has-file' : ''}${uploading ? ' is-uploading' : ''}`}
+                  className={`${documentUpload}${invalid ? ` ${documentUploadInvalid}` : ''}${hasFile ? ` ${documentUploadHasFile}` : ''}${uploading ? ` ${isUploading}` : ''}`}
                 >
                   <input
                     {...fieldProps(item.key)}
@@ -1204,7 +1239,10 @@ export default function EmployeeCreate() {
                     onChange={(event) => void onDocumentChange(item.key, event)}
                   />
                   {hasFile || uploading ? (
-                    <div className="m-0 flex min-h-[86px] cursor-pointer items-center gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_32%,var(--color-border))] bg-surface px-4 py-3.5 transition-[border-color,background,box-shadow] duration-150 hover:border-[color-mix(in_srgb,var(--color-primary)_55%,var(--color-border))] hover:bg-[color-mix(in_srgb,var(--color-primary)_6%,var(--color-surface))]">
+                    <div
+                      data-doc-card
+                      className="m-0 flex min-h-[86px] cursor-pointer items-center gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_32%,var(--color-border))] bg-surface px-4 py-3.5 transition-[border-color,background,box-shadow] duration-150 hover:border-[color-mix(in_srgb,var(--color-primary)_55%,var(--color-border))] hover:bg-[color-mix(in_srgb,var(--color-primary)_6%,var(--color-surface))]"
+                    >
                       <span className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-surface))] text-primary" aria-hidden>
                         <HugeiconsIcon icon={item.icon} size={22} color="currentColor" strokeWidth={1.8} />
                       </span>
@@ -1245,7 +1283,11 @@ export default function EmployeeCreate() {
                       )}
                     </div>
                   ) : (
-                    <label htmlFor={item.key} className="m-0 flex min-h-[86px] cursor-pointer items-center gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_32%,var(--color-border))] bg-surface px-4 py-3.5 transition-[border-color,background,box-shadow] duration-150 hover:border-[color-mix(in_srgb,var(--color-primary)_55%,var(--color-border))] hover:bg-[color-mix(in_srgb,var(--color-primary)_6%,var(--color-surface))]">
+                    <label
+                      htmlFor={item.key}
+                      data-doc-card
+                      className="m-0 flex min-h-[86px] cursor-pointer items-center gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_32%,var(--color-border))] bg-surface px-4 py-3.5 transition-[border-color,background,box-shadow] duration-150 hover:border-[color-mix(in_srgb,var(--color-primary)_55%,var(--color-border))] hover:bg-[color-mix(in_srgb,var(--color-primary)_6%,var(--color-surface))]"
+                    >
                       <span className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-surface))] text-primary" aria-hidden>
                         <HugeiconsIcon icon={item.icon} size={22} color="currentColor" strokeWidth={1.8} />
                       </span>

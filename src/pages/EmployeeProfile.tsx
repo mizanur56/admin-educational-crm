@@ -1,4 +1,14 @@
-import { adminEmpty, adminPage, crmAccessPillClass, employmentStatusPillClass, fieldError, photoCameraBadge, photoUploadSpin, statusPill } from '../styles/admin'
+import {
+  adminEmpty,
+  adminPage,
+  crmAccessPillClass,
+  employmentStatusPillClass,
+  fieldError,
+  isUploading,
+  photoCameraBadge,
+  photoUploadSpin,
+  statusPill,
+} from '../styles/admin'
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { Spin } from 'antd'
@@ -371,7 +381,7 @@ export default function EmployeeProfile() {
             <section className="flex items-start justify-between gap-7 rounded-[20px] border border-border bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-primary)_12%,var(--color-surface))_0%,var(--color-surface)_52%),var(--color-surface)] px-8 py-7 shadow-soft max-[720px]:flex-col">
               <div className="flex min-w-0 gap-[22px] max-[720px]:flex-col">
                 {canEdit ? (
-                  <div className={`employee-profile-photo-picker${photoUploading ? ' is-uploading' : ''}`}>
+                  <div className={`relative shrink-0${photoUploading ? ` ${isUploading}` : ''}`}>
                     <input
                       id="employee-profile-photo"
                       className="sr-only"
@@ -380,7 +390,10 @@ export default function EmployeeProfile() {
                       disabled={photoUploading}
                       onChange={(event) => void onProfilePhotoChange(event)}
                     />
-                    <label htmlFor="employee-profile-photo" className="relative m-0 block cursor-pointer [&_.photo-camera-badge]:right-[-4px] [&_.photo-camera-badge]:bottom-[-2px] [&_.photo-camera-badge]:h-8 [&_.photo-camera-badge]:w-8">
+                    <label
+                      htmlFor="employee-profile-photo"
+                      className="relative m-0 block cursor-pointer [&_.photo-camera-badge]:right-[-4px] [&_.photo-camera-badge]:bottom-[-2px] [&_.photo-camera-badge]:h-8 [&_.photo-camera-badge]:w-8"
+                    >
                       <span className="relative block h-24 w-24 overflow-hidden rounded-[28px]">
                         {photo ? (
                           <img className="grid h-24 w-24 shrink-0 place-items-center rounded-[28px] border-[3px] border-surface bg-[var(--avatar-bg)] text-[1.7rem] font-bold text-[var(--avatar-fg)] object-cover shadow-[0_8px_20px_rgba(18,32,51,0.08)]" src={photo} alt="" />
@@ -393,7 +406,7 @@ export default function EmployeeProfile() {
                           </span>
                         ) : null}
                       </span>
-                      <span className={`${photoCameraBadge}`} aria-hidden>
+                      <span className={`${photoCameraBadge} photo-camera-badge`} aria-hidden>
                         <HugeiconsIcon icon={Camera01Icon} size={16} color="currentColor" strokeWidth={1.8} />
                       </span>
                       <span className="sr-only">{photoUploading ? 'Uploading profile photo' : 'Change profile photo'}</span>

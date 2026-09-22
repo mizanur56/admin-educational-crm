@@ -115,7 +115,7 @@ export default function RowActionMenu({ items }: { items: RowActionItem[] }) {
                   key={item.key}
                   type="button"
                   role="menuitem"
-                  className={item.danger ? 'is-danger' : undefined}
+                  className={item.danger ? rowActionMenuItemDanger : rowActionMenuItem}
                   onClick={() => {
                     setOpen(false)
                     item.onSelect()

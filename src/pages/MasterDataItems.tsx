@@ -1,4 +1,32 @@
-import { adminCard, adminFilters, adminFiltersMaster, adminForm, adminFormFields, adminFormSpan, adminPage, adminTable, appToastClass, fieldLabelClass, formActions, modalBackdrop, modalClose, modalHeader, modalPanel, muted, rowActions, statusConfirmCopy, statusConfirmPanel, tableWrap } from '../styles/admin'
+import {
+  adminCard,
+  adminFilters,
+  adminFiltersMaster,
+  adminForm,
+  adminFormFields,
+  adminFormSpan,
+  adminPage,
+  adminTable,
+  appToastClass,
+  fieldLabelClass,
+  formActions,
+  historyKindDot,
+  mdHistoryDetailIcon,
+  mdHistoryEvent,
+  mdHistoryEventActive,
+  mdHistoryRole,
+  mdTab,
+  mdTabActive,
+  modalBackdrop,
+  modalClose,
+  modalHeader,
+  modalPanel,
+  muted,
+  rowActions,
+  statusConfirmCopy,
+  statusConfirmPanel,
+  tableWrap,
+} from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, Navigate, NavLink, useLocation, useOutletContext, useParams } from 'react-router-dom'
@@ -102,7 +130,7 @@ const DATE_PICKER_POPUP = {
   },
   onOpenChange: (open: boolean) => {
     if (!open) return
-    const panel = document.querySelector('.modal-backdrop .modal-panel')
+    const panel = document.querySelector('[data-admin-modal-backdrop] [data-admin-modal-panel]')
     if (!(panel instanceof HTMLElement)) return
     const top = panel.scrollTop
     requestAnimationFrame(() => {
@@ -375,7 +403,7 @@ function HistoryFieldList({
   return (
     <section className="rounded-2xl border border-border bg-surface p-4 shadow-soft [&_h4]:mb-3 [&_h4]:mt-0 [&_h4]:text-[0.72rem] [&_h4]:font-bold [&_h4]:tracking-[0.04em] [&_h4]:text-[#8b97a8] [&_h4]:uppercase">
       <h4>{title}</h4>
-      <div className="md-history-table">
+      <div>
         {showHead ? (
           <div className="grid grid-cols-3 gap-2 border-b border-border-subtle px-1 pb-2 text-[0.72rem] font-bold tracking-[0.04em] text-text-muted uppercase">
             <span>Field</span>
@@ -790,7 +818,7 @@ export default function MasterDataItems() {
           <NavLink
             key={tab.key}
             to={`/master-data/${navGroup.slug}/${tab.key}`}
-            className={({ isActive }) => `md-tab${isActive ? ' is-active' : ''}`}
+            className={({ isActive }) => `${mdTab}${isActive ? ` ${mdTabActive}` : ''}`}
           >
             {tab.name}
           </NavLink>
@@ -985,9 +1013,10 @@ export default function MasterDataItems() {
 
       {formOpen
         ? createPortal(
-            <div className={`${modalBackdrop}`} onClick={() => !formSaving && setFormOpen(false)}>
+            <div className={`${modalBackdrop}`} data-admin-modal-backdrop onClick={() => !formSaving && setFormOpen(false)}>
               <div
                 className={`${modalPanel}`}
+                data-admin-modal-panel
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="md-modal-title"
@@ -1196,10 +1225,13 @@ export default function MasterDataItems() {
                             <li key={entry.id}>
                               <button
                                 type="button"
-                                className={`md-history-event is-${kind}${active ? ' is-active' : ''}`}
+                                className={`${mdHistoryEvent} ${historyKindDot[kind] || ''} ${active ? mdHistoryEventActive : ''}`}
                                 onClick={() => setHistoryEntryId(entry.id)}
                               >
-                                <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#94a3b8]" aria-hidden>
+                                <span
+                                  className={`mt-1 inline-flex h-2.5 w-2.5 shrink-0 items-center justify-center rounded-full ${historyKindDot[kind] || 'bg-[#94a3b8]'}`}
+                                  aria-hidden
+                                >
                                   <HugeiconsIcon icon={historyKindIcon(kind)} size={12} color="currentColor" strokeWidth={2} />
                                 </span>
                                 <span className="min-w-0 flex-1 [&_strong]:block [&_strong]:text-[0.88rem] [&_time]:text-[0.72rem] [&_time]:text-text-muted">
@@ -1230,7 +1262,7 @@ export default function MasterDataItems() {
                         <div className="flex min-h-0 flex-col overflow-auto p-4">
                           <div className="mb-4 flex items-start justify-between gap-3">
                             <div className="flex min-w-0 items-start gap-3 [&_strong]:block [&_strong]:text-[0.95rem] [&_p]:mt-1 [&_p]:mb-0 [&_p]:text-[0.8rem] [&_p]:text-text-muted [&_p_span]:text-text-faint">
-                              <span className={`md-history-detail-icon is-${kind}`} aria-hidden>
+                              <span className={`${mdHistoryDetailIcon} ${historyKindDot[kind] || ''}`} aria-hidden>
                                 <HugeiconsIcon icon={historyKindIcon(kind)} size={16} color="currentColor" strokeWidth={1.8} />
                               </span>
                               <div>
@@ -1242,7 +1274,7 @@ export default function MasterDataItems() {
                                   <span>
                                     <HugeiconsIcon icon={UserIcon} size={13} color="currentColor" strokeWidth={1.8} />
                                     {active.user?.fullName || 'System'}
-                                    <em className={`md-history-role is-${roleLabel.toLowerCase().replace(/\s+/g, '-')}`}>
+                                    <em className={mdHistoryRole}>
                                       {roleLabel}
                                     </em>
                                   </span>

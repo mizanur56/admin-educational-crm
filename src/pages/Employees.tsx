@@ -1,4 +1,31 @@
-import { adminBanner, adminCard, adminEmpty, adminFilters, adminFiltersEmployees, adminForm, adminPage, adminTable, appToastClass, crmAccessPillClass, fieldLabelClass, formActions, linkBtn, modalBackdrop, modalClose, modalHeader, modalPanel, muted, rowActions, statusConfirmCopy, statusConfirmMeta, statusConfirmPanel, tableWrap } from '../styles/admin'
+import {
+  adminBanner,
+  adminCard,
+  adminEmpty,
+  adminFilters,
+  adminFiltersEmployees,
+  adminForm,
+  adminPage,
+  adminTable,
+  appToastClass,
+  crmAccessPillClass,
+  employeeAvatar,
+  employeeAvatarLg,
+  employeeAvatarSm,
+  fieldLabelClass,
+  formActions,
+  linkBtn,
+  modalBackdrop,
+  modalClose,
+  modalHeader,
+  modalPanel,
+  muted,
+  rowActions,
+  statusConfirmCopy,
+  statusConfirmMeta,
+  statusConfirmPanel,
+  tableWrap,
+} from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
@@ -144,9 +171,13 @@ function EmployeeAvatar({
 }) {
   const src = employeePhotoSrc(employeeId, photoUrl)
   if (src) {
-    return <img className={`employee-avatar employee-avatar-${size}`} src={src} alt="" />
+    return <img className={`${employeeAvatar} ${size === 'lg' ? employeeAvatarLg : employeeAvatarSm}`} src={src} alt="" />
   }
-  return <span className={`employee-avatar employee-avatar-${size}`}>{employeeInitials(name)}</span>
+  return (
+    <span className={`${employeeAvatar} ${size === 'lg' ? employeeAvatarLg : employeeAvatarSm}`}>
+      {employeeInitials(name)}
+    </span>
+  )
 }
 
 export default function Employees() {

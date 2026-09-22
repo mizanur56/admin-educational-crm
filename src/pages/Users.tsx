@@ -1,4 +1,44 @@
-import { adminCard, adminFilters, adminForm, adminFormFields, adminFormSpan, adminPage, adminTable, appToastClass, fieldHint, fieldLabelClass, formActions, modalBackdrop, modalClose, modalHeader, modalPanel, muted, photoCameraBadge, photoPicker, photoPickerButton, photoPreview, photoUpload, rowActions, scopeGrid, scopeSkeleton, sessionRow, statusConfirmCopy, statusConfirmMeta, statusConfirmPanel, tableWrap, userStatusPillClass } from '../styles/admin'
+import {
+  adminCard,
+  adminFilters,
+  adminForm,
+  adminFormFields,
+  adminFormSpan,
+  adminPage,
+  adminTable,
+  appToastClass,
+  fieldHint,
+  fieldLabelClass,
+  formActions,
+  modalBackdrop,
+  modalClose,
+  modalHeader,
+  modalPanel,
+  muted,
+  photoCameraBadge,
+  photoPicker,
+  photoPickerButton,
+  photoPreviewFrame,
+  photoUpload,
+  rowActions,
+  scopeGrid,
+  scopeSkeleton,
+  sessionRow,
+  statusConfirmCopy,
+  statusConfirmMeta,
+  statusConfirmPanel,
+  tableWrap,
+  userStatusPillClass,
+  userViewActivity,
+  userViewActivityIcon,
+  userViewActivityIconAdd,
+  userViewNavBtn,
+  userViewNavBtnActive,
+  userViewNavBtnIdle,
+  userViewPanel,
+  userViewScopeBase,
+  userViewScopeTone,
+} from '../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useOutletContext, useLocation } from 'react-router-dom'
@@ -364,7 +404,7 @@ function UserViewLayout({
               <button
                 key={tab.id}
                 type="button"
-                className={viewTab === tab.id ? 'bg-[#eef1ff] font-semibold text-[#4f5de4] dark:bg-[rgba(91,103,232,0.18)] dark:text-[#aab3ff]' : 'hover:bg-[#f5f7fb]'}
+                className={`${userViewNavBtn} ${viewTab === tab.id ? userViewNavBtnActive : userViewNavBtnIdle}`}
                 onClick={() => onTabChange(tab.id)}
               >
                 <HugeiconsIcon icon={tab.icon} size={16} color="currentColor" strokeWidth={1.7} />
@@ -547,12 +587,14 @@ function UserViewLayout({
                   ) : activity.length === 0 ? (
                     <p className={`${muted}`}>No recent activity yet.</p>
                   ) : (
-                    <ul className="m-0 grid list-none p-0">
+                    <ul className={userViewActivity}>
                       {activity.slice(0, 8).map((item) => {
                         const copy = activityCopy(item.action)
                         return (
                           <li key={item.id}>
-                            <span className={`user-view-activity-icon ${item.action === 'USER_CREATED' ? 'is-add' : ''}`}>
+                            <span
+                              className={`${userViewActivityIcon} ${item.action === 'USER_CREATED' ? userViewActivityIconAdd : ''}`}
+                            >
                               <HugeiconsIcon
                                 icon={item.action === 'USER_CREATED' ? Add01Icon : PencilEdit02Icon}
                                 size={14}
@@ -748,9 +790,9 @@ function ScopePreviewCard({
   copy: string
 }) {
   return (
-    <div className={`user-view-scope ${tone}`}>
+    <div className={`${userViewScopeBase} ${userViewScopeTone[tone]}`}>
       <div className="mb-2 flex items-center gap-2 [&_span]:inline-flex [&_span]:h-7 [&_span]:w-7 [&_span]:items-center [&_span]:justify-center [&_span]:rounded-lg [&_span]:bg-white [&_b]:flex-1 [&_b]:text-[0.88rem] [&_b]:text-[#24324d] dark:[&_b]:text-text-strong [&_em]:rounded-full [&_em]:bg-white [&_em]:px-2 [&_em]:py-0.5 [&_em]:text-[0.72rem] [&_em]:font-bold [&_em]:not-italic [&_em]:text-[#4f5de4]">
-        <span>
+        <span className="user-view-scope-icon">
           <HugeiconsIcon icon={icon} size={16} color="currentColor" strokeWidth={1.7} />
         </span>
         <b>{title}</b>
@@ -1267,7 +1309,7 @@ export default function Users() {
         ? createPortal(
             <div className={`${modalBackdrop}`} onClick={closeForm}>
               <div
-                className={formMode === 'view' ? 'modal-panel user-view-panel' : 'modal-panel'}
+                className={formMode === 'view' ? userViewPanel : modalPanel}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="user-modal-title"
@@ -1363,7 +1405,7 @@ export default function Users() {
                     onChange={onPhotoChange}
                   />
                   <label htmlFor="user-photo" className={`${photoPickerButton}`}>
-                    <span className={`${photoPreview}`}>
+                    <span className={photoPreviewFrame}>
                       {photoPreview ? (
                         <img src={photoPreview} alt="" />
                       ) : (
