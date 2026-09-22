@@ -10,7 +10,7 @@ import {
   appToastClass,
   fieldLabelClass,
   formActions,
-  historyKindDot,
+  historyKindTone,
   mdHistoryDetailIcon,
   mdHistoryEvent,
   mdHistoryEventActive,
@@ -1225,11 +1225,11 @@ export default function MasterDataItems() {
                             <li key={entry.id}>
                               <button
                                 type="button"
-                                className={`${mdHistoryEvent} ${historyKindDot[kind] || ''} ${active ? mdHistoryEventActive : ''}`}
+                                className={`${mdHistoryEvent} ${active ? mdHistoryEventActive : ''}`}
                                 onClick={() => setHistoryEntryId(entry.id)}
                               >
                                 <span
-                                  className={`mt-1 inline-flex h-2.5 w-2.5 shrink-0 items-center justify-center rounded-full ${historyKindDot[kind] || 'bg-[#94a3b8]'}`}
+                                  className={`mt-1 inline-flex size-2.5 shrink-0 items-center justify-center rounded-full ${historyKindTone[kind] || 'bg-[#94a3b8]'}`}
                                   aria-hidden
                                 >
                                   <HugeiconsIcon icon={historyKindIcon(kind)} size={12} color="currentColor" strokeWidth={2} />
@@ -1262,7 +1262,7 @@ export default function MasterDataItems() {
                         <div className="flex min-h-0 flex-col overflow-auto p-4">
                           <div className="mb-4 flex items-start justify-between gap-3">
                             <div className="flex min-w-0 items-start gap-3 [&_strong]:block [&_strong]:text-[0.95rem] [&_p]:mt-1 [&_p]:mb-0 [&_p]:text-[0.8rem] [&_p]:text-text-muted [&_p_span]:text-text-faint">
-                              <span className={`${mdHistoryDetailIcon} ${historyKindDot[kind] || ''}`} aria-hidden>
+                              <span className={`${mdHistoryDetailIcon} ${historyKindTone[kind] || ''}`} aria-hidden>
                                 <HugeiconsIcon icon={historyKindIcon(kind)} size={16} color="currentColor" strokeWidth={1.8} />
                               </span>
                               <div>

@@ -251,12 +251,12 @@ export const mdHistoryDetailIcon =
 export const mdHistoryRole =
   'rounded-full bg-[color-mix(in_srgb,#2f6fed_12%,var(--color-surface))] px-2 py-0.5 text-[0.72rem] font-semibold dark:bg-[color-mix(in_srgb,#2f6fed_18%,var(--color-surface))]'
 
-export const historyKindDot: Record<string, string> = {
-  updated: 'bg-[#2f6fed] text-[#2f6fed]',
-  created: 'bg-[#17824b] text-[#17824b]',
-  status: 'bg-[#d46b08] text-[#d46b08]',
-  assigned: 'bg-[#4f5de4] text-[#4f5de4]',
-  deleted: 'bg-[#b42318] text-[#b42318]',
+export const historyKindTone: Record<string, string> = {
+  updated: 'bg-[#2f6fed] text-white',
+  created: 'bg-[#17824b] text-white',
+  status: 'bg-[#d46b08] text-white',
+  assigned: 'bg-[#4f5de4] text-white',
+  deleted: 'bg-[#b42318] text-white',
 }
 
 export const employeeAvatar =
