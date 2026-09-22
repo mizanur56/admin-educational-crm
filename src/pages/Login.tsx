@@ -1,12 +1,9 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { getMe, login } from '../api/client'
+import { useState, type FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { login } from '../api/client'
 import { isAuthSession } from '../lib/auth-session'
 import Button from '../components/Button'
 import Input from '../components/Input'
-import PageLoader from '../components/PageLoader'
-
-type SessionState = 'checking' | 'authenticated' | 'anonymous'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -15,35 +12,6 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false)
   const [message, setMessage] = useState('')
   const [pending, setPending] = useState(false)
-  const [session, setSession] = useState<SessionState>('checking')
-
-  useEffect(() => {
-    let cancelled = false
-
-    getMe()
-      .then((result) => {
-        if (!cancelled) {
-          setSession(result.ok && isAuthSession(result.data) ? 'authenticated' : 'anonymous')
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setSession('anonymous')
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  if (session === 'checking') {
-    return <PageLoader />
-  }
-
-  if (session === 'authenticated') {
-    return <Navigate to="/dashboard" replace />
-  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

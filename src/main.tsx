@@ -1,8 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { RouterProvider } from 'react-router-dom'
 import { ConfigProvider, theme as antdTheme } from 'antd'
-import App from './App'
+import router from './routes/routes'
 import { ThemeProvider, useTheme } from './theme/ThemeProvider'
 import './index.css'
 
@@ -36,9 +36,7 @@ function ThemedApp() {
         },
       }}
     >
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </ConfigProvider>
   )
 }

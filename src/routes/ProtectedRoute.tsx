@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { getMe } from '../api/client'
 import PageLoader from '../components/PageLoader'
@@ -10,7 +10,13 @@ type RouteState =
   | { status: 'authenticated'; auth: AuthSession }
   | { status: 'unauthenticated'; auth: null }
 
-export default function ProtectedRoute() {
+type ProtectedRouteProps = {
+  /** Login / forgot / reset: redirect away if already signed in. */
+  guestOnly?: boolean
+  children?: ReactNode
+}
+
+export default function ProtectedRoute({ guestOnly = false, children }: ProtectedRouteProps) {
   const location = useLocation()
   const [state, setState] = useState<RouteState>({ status: 'loading', auth: null })
 
@@ -42,6 +48,10 @@ export default function ProtectedRoute() {
   }, [location.key])
 
   useEffect(() => {
+    if (guestOnly) {
+      return
+    }
+
     function onAuthUserPatch(event: Event) {
       const patch = (event as CustomEvent<Partial<AuthUser>>).detail
       if (!patch) {
@@ -63,14 +73,25 @@ export default function ProtectedRoute() {
 
     window.addEventListener(AUTH_USER_PATCH_EVENT, onAuthUserPatch)
     return () => window.removeEventListener(AUTH_USER_PATCH_EVENT, onAuthUserPatch)
-  }, [])
+  }, [guestOnly])
 
   if (state.status === 'loading') {
     return <PageLoader />
   }
 
+  if (guestOnly) {
+    if (state.status === 'authenticated') {
+      return <Navigate to="/dashboard" replace />
+    }
+    return children ? <>{children}</> : <Outlet />
+  }
+
   if (state.status === 'unauthenticated') {
     return <Navigate to="/login" replace />
+  }
+
+  if (children) {
+    return <>{children}</>
   }
 
   return <Outlet context={state.auth} />
