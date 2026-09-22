@@ -2,6 +2,7 @@ import { adminCard, adminPage } from '../styles/admin'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import Button from '../components/Button'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import UserAvatar from '../components/UserAvatar'
 import type { AuthSession } from '../types'
 const USER_STATUS_LABELS: Record<string, string> = {
@@ -23,6 +24,7 @@ export default function Profile() {
 
   return (
     <div className={`${adminPage}`}>
+      <PageMeta title="Profile" description="Your account details for this CRM session." />
       <PageHeader
         title="Profile"
         subtitle="Your account details for this CRM session."

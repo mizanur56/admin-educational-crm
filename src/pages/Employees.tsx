@@ -47,6 +47,7 @@ import Button from '../components/Button'
 import Input from '../components/Input'
 import Select from '../components/Select'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 import RowActionMenu, { type RowActionItem } from '../components/RowActionMenu'
 import { hasPermission } from '../lib/access'
 import { readUrlSearchQuery } from '../lib/url-search'
@@ -368,6 +369,10 @@ export default function Employees() {
 
   return (
     <div className={`${adminPage}`}>
+      <PageMeta
+        title="Employees"
+        description="Manage employee records, assignments, and employment status."
+      />
       <PageHeader
         title="Employees"
         subtitle="Manage employee records, assignments, and employment status."

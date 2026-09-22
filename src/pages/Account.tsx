@@ -4,6 +4,7 @@ import { changePassword } from '../api/client'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import PageHeader from '../components/PageHeader'
+import PageMeta from '../components/PageMeta'
 
 export default function Account() {
   const [currentPassword, setCurrentPassword] = useState('')
@@ -26,6 +27,10 @@ export default function Account() {
 
   return (
     <div className={`${adminPage}`}>
+      <PageMeta
+        title="Password"
+        description="Set or change your password. Passwords are stored hashed, never as plain text."
+      />
       <PageHeader
         title="Password"
         subtitle="Set or change your password. Passwords are stored hashed, never as plain text."
