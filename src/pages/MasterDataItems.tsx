@@ -1214,7 +1214,7 @@ export default function MasterDataItems() {
                   <p className={`${muted} m-0 flex min-h-60 items-center justify-center`}>No history yet.</p>
                 ) : (
                   <div className="grid min-h-0 flex-1 grid-cols-1 min-[721px]:grid-cols-[250px_minmax(0,1fr)]">
-                    <aside className="overflow-auto border-r border-border px-3 py-4 pl-4 [&_h4]:mb-3 [&_h4]:mt-0 [&_h4]:text-[0.72rem] [&_h4]:font-bold [&_h4]:tracking-[0.04em] [&_h4]:text-[#8b97a8] [&_h4]:uppercase [&_ol]:m-0 [&_ol]:list-none [&_ol]:p-0 [&_li]:relative [&_li]:pb-2 [&_li:not(:last-child)]:before:absolute [&_li:not(:last-child)]:before:top-[38px] [&_li:not(:last-child)]:before:bottom-0 [&_li:not(:last-child)]:before:left-[19px] [&_li:not(:last-child)]:before:w-px [&_li:not(:last-child)]:before:bg-border-subtle [&_li:not(:last-child)]:before:content-[""]" aria-label="Timeline">
+                    <aside className="overflow-auto border-r border-border px-3 py-4 pl-4 [&_h4]:mb-3 [&_h4]:mt-0 [&_h4]:text-[0.72rem] [&_h4]:font-bold [&_h4]:tracking-[0.04em] [&_h4]:text-[#8b97a8] [&_h4]:uppercase [&_ol]:m-0 [&_ol]:list-none [&_ol]:p-0 [&_li]:relative [&_li]:pb-2 [&_li:not(:last-child)]:before:absolute [&_li:not(:last-child)]:before:top-[38px] [&_li:not(:last-child)]:before:bottom-0 [&_li:not(:last-child)]:before:left-[19px] [&_li:not(:last-child)]:before:w-px [&_li:not(:last-child)]:before:bg-border-subtle [&_li:not(:last-child)]:before:content-['']" aria-label="Timeline">
                       <h4>Timeline</h4>
                       <ol>
                         {history.map((entry) => {

@@ -434,7 +434,7 @@ function UserViewLayout({
                       </span>
                       <h4>Contact Information</h4>
                     </header>
-                    <dl className="m-0 grid gap-2.5 [&>div]:grid [&>div]:grid-cols-1 [&>div]:items-center [&>div]:gap-2.5 max-[960px]:[&>div]:grid-cols-1 min-[961px]:[&>div]:grid-cols-[110px_minmax(0,1fr)] [&_dt]:text-[0.84rem] [&_dt]:text-[#7b8498] [&_dt]:after:content-[":"] [&_dd]:m-0 [&_dd]:text-[0.9rem] [&_dd]:font-semibold [&_dd]:text-[#24324d] dark:[&_dd]:text-text-strong">
+                    <dl className="m-0 grid gap-2.5 [&>div]:grid [&>div]:grid-cols-1 [&>div]:items-center [&>div]:gap-2.5 max-[960px]:[&>div]:grid-cols-1 min-[961px]:[&>div]:grid-cols-[110px_minmax(0,1fr)] [&_dt]:text-[0.84rem] [&_dt]:text-[#7b8498] [&_dt]:after:content-[':'] [&_dd]:m-0 [&_dd]:text-[0.9rem] [&_dd]:font-semibold [&_dd]:text-[#24324d] dark:[&_dd]:text-text-strong">
                       <div>
                         <dt>Full Name</dt>
                         <dd>{form.fullName || '—'}</dd>
@@ -478,7 +478,7 @@ function UserViewLayout({
                         </span>
                         <h4>Organization</h4>
                       </header>
-                      <dl className="m-0 grid gap-2.5 [&>div]:grid [&>div]:grid-cols-1 [&>div]:items-center [&>div]:gap-2.5 max-[960px]:[&>div]:grid-cols-1 min-[961px]:[&>div]:grid-cols-[110px_minmax(0,1fr)] [&_dt]:text-[0.84rem] [&_dt]:text-[#7b8498] [&_dt]:after:content-[":"] [&_dd]:m-0 [&_dd]:text-[0.9rem] [&_dd]:font-semibold [&_dd]:text-[#24324d] dark:[&_dd]:text-text-strong">
+                      <dl className="m-0 grid gap-2.5 [&>div]:grid [&>div]:grid-cols-1 [&>div]:items-center [&>div]:gap-2.5 max-[960px]:[&>div]:grid-cols-1 min-[961px]:[&>div]:grid-cols-[110px_minmax(0,1fr)] [&_dt]:text-[0.84rem] [&_dt]:text-[#7b8498] [&_dt]:after:content-[':'] [&_dd]:m-0 [&_dd]:text-[0.9rem] [&_dd]:font-semibold [&_dd]:text-[#24324d] dark:[&_dd]:text-text-strong">
                         <div>
                           <dt>Role</dt>
                           <dd>
