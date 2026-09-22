@@ -371,7 +371,7 @@ export default function Employees() {
     <div className={`${adminPage}`}>
       <PageMeta
         title="Employees"
-        description="Manage employee records, assignments, and employment status."
+        description="Manage employee profiles, designations, departments, CRM access, and employment status."
       />
       <PageHeader
         title="Employees"

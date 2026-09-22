@@ -36,8 +36,8 @@ export default function ResetPassword() {
   return (
     <>
       <PageMeta
-        title="Reset password"
-        description="Choose a new password of at least 8 characters."
+        title="Reset Password"
+        description="Choose a new secure password to regain access to your EduConsult CRM account."
       />
       <form
       className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"

@@ -242,7 +242,7 @@ export default function Roles() {
     <div className={`${adminPage}`}>
       <PageMeta
         title="Roles & Permissions"
-        description="Configure role-wise, module-wise, and action-level access."
+        description="Configure role-based permissions for modules and actions across EduConsult CRM."
       />
       <PageHeader
         title="Roles & Permissions"

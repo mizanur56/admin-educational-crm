@@ -380,7 +380,7 @@ export default function ActivityHistory() {
     <div className={adminPage}>
       <PageMeta
         title="Activity History"
-        description="View all activities, communications and actions performed by your team members."
+        description="Browse calls, emails, meetings, documents, and team actions across your consultancy pipeline."
       />
       <PageHeader
         title="Activity History"

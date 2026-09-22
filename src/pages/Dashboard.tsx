@@ -447,7 +447,7 @@ export default function Dashboard() {
     <section className="grid gap-[18px] min-w-0 text-text max-sm:gap-3.5">
       <PageMeta
         title="Dashboard"
-        description="Here's what's happening with your consultancy today."
+        description="Overview of leads, applications, follow-ups, and consultancy performance in EduConsult CRM."
       />
       <PageHeader
         title={`${greetingForHour(now.getHours())}, ${name}`}

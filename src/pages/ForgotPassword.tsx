@@ -35,8 +35,8 @@ export default function ForgotPassword() {
   return (
     <>
       <PageMeta
-        title="Forgot password"
-        description="Enter your email or username. A reset link will be created for an active account."
+        title="Forgot Password"
+        description="Request a secure password reset link for your EduConsult CRM account."
       />
       <form
       className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"

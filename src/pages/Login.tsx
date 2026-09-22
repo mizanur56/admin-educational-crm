@@ -42,7 +42,10 @@ export default function Login() {
 
   return (
     <>
-      <PageMeta title="Sign In" description="Sign in to continue to your dashboard" />
+      <PageMeta
+        title="Sign In"
+        description="Sign in to EduConsult CRM to manage leads, applications, students, and team operations."
+      />
       <form
       className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"
       onSubmit={handleSubmit}

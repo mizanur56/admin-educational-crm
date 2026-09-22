@@ -28,8 +28,8 @@ export default function Account() {
   return (
     <div className={`${adminPage}`}>
       <PageMeta
-        title="Password"
-        description="Set or change your password. Passwords are stored hashed, never as plain text."
+        title="Change Password"
+        description="Update your EduConsult CRM password. Credentials are stored securely and never in plain text."
       />
       <PageHeader
         title="Password"

@@ -16,8 +16,8 @@ export default function PermissionRoute({ permission }: PermissionRouteProps) {
     return (
       <div className={`${adminPage}`}>
         <PageMeta
-          title="Access denied"
-          description="You do not have permission to perform this action."
+          title="Access Denied"
+          description="You do not have permission to view this page in EduConsult CRM. Contact an administrator for access."
         />
         <PageHeader
           title="Access denied"

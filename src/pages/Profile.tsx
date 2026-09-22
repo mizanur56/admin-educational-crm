@@ -24,7 +24,10 @@ export default function Profile() {
 
   return (
     <div className={`${adminPage}`}>
-      <PageMeta title="Profile" description="Your account details for this CRM session." />
+      <PageMeta
+        title="My Profile"
+        description="View your EduConsult CRM account details, role, and contact information."
+      />
       <PageHeader
         title="Profile"
         subtitle="Your account details for this CRM session."

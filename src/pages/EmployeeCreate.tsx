@@ -803,7 +803,9 @@ export default function EmployeeCreate() {
         <PageMeta
           title={pageTitle}
           description={
-            isEdit ? 'You do not have permission to edit employees.' : 'You do not have permission to create employees.'
+            isEdit
+              ? 'You do not have permission to edit employee records in EduConsult CRM.'
+              : 'You do not have permission to create employee records in EduConsult CRM.'
           }
         />
         <PageHeader
@@ -833,7 +835,14 @@ export default function EmployeeCreate() {
 
   return (
     <div className={`${adminPage} [&_textarea.ui-input]:h-auto [&_textarea.ui-input]:min-h-[84px] [&_textarea.ui-input]:px-[11px] [&_textarea.ui-input]:py-2 [&_textarea.ant-input]:h-auto [&_textarea.ant-input]:min-h-[84px] [&_textarea.ant-input]:px-[11px] [&_textarea.ant-input]:py-2`}>
-      <PageMeta title={pageTitle} description={pageDescription} />
+      <PageMeta
+        title={pageTitle}
+        description={
+          isEdit
+            ? 'Update staff details, organization structure, CRM access, and documents for this employee.'
+            : 'Add a new staff record with personal, employment, organization, and CRM access details.'
+        }
+      />
       <PageHeader
         title={pageTitle}
         subtitle={pageDescription}

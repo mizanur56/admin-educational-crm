@@ -554,7 +554,7 @@ export default function AuditLogs() {
     <div className={cx(adminPage, 'gap-[18px]')}>
       <PageMeta
         title="Audit Log"
-        description="Track all important actions, data changes and system events across the CRM."
+        description="Review user actions, data changes, and system events across EduConsult CRM for compliance."
       />
       <PageHeader
         title="Audit Log"

@@ -359,8 +359,8 @@ export default function EmployeeProfile() {
     return (
       <div className={`${adminPage}`}>
         <PageMeta
-          title="Employee Profile"
-          description={error || 'This employee could not be found.'}
+          title="Employee Not Found"
+          description="This employee profile could not be loaded. Return to the employee list to continue."
         />
         <PageHeader
           title="Employee Profile"
@@ -390,8 +390,12 @@ export default function EmployeeProfile() {
   return (
     <div className={`${adminPage} gap-5 overflow-visible [&_.ant-spin-nested-loading]:grid [&_.ant-spin-nested-loading]:gap-6 [&_.ant-spin-nested-loading]:overflow-visible [&_.ant-spin-container]:grid [&_.ant-spin-container]:gap-6 [&_.ant-spin-container]:overflow-visible`}>
       <PageMeta
-        title={employee?.fullName || 'Employee Profile'}
-        description="Employee Details"
+        title={employee?.fullName ? `${employee.fullName} — Employee` : 'Employee Profile'}
+        description={
+          employee
+            ? `View employment, contact, organization, and CRM access details for ${employee.fullName}.`
+            : 'View employee profile details in EduConsult CRM.'
+        }
       />
       <PageHeader
         title={employee?.fullName || 'Employee Profile'}

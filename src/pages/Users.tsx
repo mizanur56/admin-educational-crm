@@ -1136,7 +1136,10 @@ export default function Users() {
 
   return (
     <div className={`${adminPage}`}>
-      <PageMeta title="Users" description="Create users, assign roles, and control login access." />
+      <PageMeta
+        title="Users"
+        description="Create CRM users, assign roles, control login access, and manage account status."
+      />
       <PageHeader
         title="Users"
         subtitle="Create users, assign roles, and control login access."

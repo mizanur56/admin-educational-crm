@@ -786,7 +786,10 @@ export default function MasterDataItems() {
     }
     return (
       <div className={`${adminPage}`}>
-        <PageMeta title="Master Data" description="Category not found." />
+        <PageMeta
+          title="Master Data"
+          description="The requested master data category was not found. Choose a valid category to continue."
+        />
         <PageHeader
           title="Master Data"
           subtitle="Category not found."
@@ -808,7 +811,10 @@ export default function MasterDataItems() {
   if (!category && !metaLoading) {
     return (
       <div className={`${adminPage}`}>
-        <PageMeta title="Master Data" description="Category not found." />
+        <PageMeta
+          title="Master Data"
+          description="The requested master data category was not found. Choose a valid category to continue."
+        />
         <PageHeader
           title="Master Data"
           subtitle="Category not found."
@@ -826,11 +832,11 @@ export default function MasterDataItems() {
   return (
     <div className={`${adminPage}`}>
       <PageMeta
-        title={navGroup.name}
+        title={category ? `${category.name} — Master Data` : `${navGroup.name} — Master Data`}
         description={
           category
-            ? `Manage ${category.name} values.`
-            : 'Create, edit, activate, and import reusable reference values.'
+            ? `Create, edit, and manage ${category.name} reference values used across EduConsult CRM.`
+            : `Manage ${navGroup.name} master data values used across leads, applications, and operations.`
         }
       />
       <PageHeader
