@@ -12,6 +12,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(rootDir, 'src'),
     },
+    dedupe: ['react', 'react-dom'],
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-redux', '@reduxjs/toolkit', 'redux-persist'],
   },
   server: {
     proxy: {

@@ -1,6 +1,6 @@
 import { persistReducer } from 'redux-persist'
-import storage from 'redux-persist/lib/storage'
 import { baseApi } from '../api/baseApi'
+import storage from '../storage'
 import authReducer from './auth/authSlice'
 import sidebarReducer from './sidebar/sidebarSlice'
 
