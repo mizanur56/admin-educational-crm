@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Logout01Icon, UserCircleIcon } from '@hugeicons/core-free-icons'
-import { logout } from '../api/client'
 import { hasPermission } from '../lib/access'
+import { useAuth } from '../hooks/useAuth'
 import type { NavIconName } from '../config/navigation'
 import NavIcon from './NavIcon'
 import UserAvatar from './UserAvatar'
@@ -61,6 +61,7 @@ export default function UserDropdown({
 }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const { logout } = useAuth()
   const rootRef = useRef<HTMLDivElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [shouldRender, setShouldRender] = useState(false)
