@@ -4,6 +4,7 @@ import { changePassword } from '../api/client'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import PageHeader from '../components/PageHeader'
+
 export default function Account() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -27,7 +28,12 @@ export default function Account() {
     <div className={`${adminPage}`}>
       <PageHeader
         title="Password"
-        description="Set or change your password. Passwords are stored hashed, never as plain text."
+        subtitle="Set or change your password. Passwords are stored hashed, never as plain text."
+        breadcrumbs={[
+          { title: 'Dashboard', path: '/dashboard' },
+          { title: 'Profile', path: '/profile' },
+          { title: 'Password' },
+        ]}
       />
       <form className={`${adminCard} ${adminForm} ${accountForm}`} onSubmit={handleSubmit}>
         <label>

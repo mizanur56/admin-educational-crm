@@ -11,6 +11,7 @@ import {
   type DashIconName,
 } from '../data/dashboardDemo'
 import Button from '../components/Button'
+import PageHeader from '../components/PageHeader'
 import type { AuthSession } from '../types'
 
 const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
@@ -443,28 +444,26 @@ export default function Dashboard() {
 
   return (
     <section className="grid gap-[18px] min-w-0 text-text max-sm:gap-3.5">
-      <header className="flex justify-between gap-5 items-start max-[960px]:flex-col">
-        <div>
-          <h2 className="m-0 text-[1.7rem] tracking-[-0.03em] max-[960px]:text-[1.4rem]">
-            {greetingForHour(now.getHours())}, {name}{' '}
-            <span aria-hidden="true">👋</span>
-          </h2>
-          <p className="mt-1 mb-0 text-text-muted">Here&apos;s what&apos;s happening with your consultancy today.</p>
-        </div>
-        <div className="flex gap-3 flex-wrap max-[960px]:w-full">
-          <div className="flex items-center gap-2.5 m-0 py-2.5 px-3.5 bg-surface border border-border rounded-2xl shadow-soft">
-            <Icon name="calendar" />
-            <div>
-              <strong className="block text-[0.9rem]">{dateLabel}</strong>
-              <span className="block text-text-muted text-[0.78rem]">Dhaka, Bangladesh</span>
+      <PageHeader
+        title={`${greetingForHour(now.getHours())}, ${name}`}
+        subtitle="Here's what's happening with your consultancy today."
+        breadcrumbs={[{ title: 'Dashboard' }]}
+        extra={
+          <div className="flex flex-wrap gap-3 max-[960px]:w-full">
+            <div className="m-0 flex items-center gap-2.5 rounded-2xl border border-border bg-surface px-3.5 py-2.5 shadow-soft">
+              <Icon name="calendar" />
+              <div>
+                <strong className="block text-[0.9rem]">{dateLabel}</strong>
+                <span className="block text-[0.78rem] text-text-muted">Dhaka, Bangladesh</span>
+              </div>
             </div>
+            <blockquote className="m-0 flex max-w-[240px] items-center gap-2.5 rounded-2xl border border-border bg-surface px-3.5 py-2.5 text-[#5b8def] shadow-soft max-[960px]:max-w-none max-[960px]:flex-[1_1_180px]">
+              <Icon name="quote" />
+              <p className="m-0 text-[0.78rem] text-[#5b8def] italic">“Great things start with a single step.”</p>
+            </blockquote>
           </div>
-          <blockquote className="flex items-center gap-2.5 m-0 py-2.5 px-3.5 bg-surface border border-border rounded-2xl shadow-soft max-w-[240px] text-[#5b8def] max-[960px]:max-w-none max-[960px]:flex-[1_1_180px]">
-            <Icon name="quote" />
-            <p className="m-0 text-[#5b8def] text-[0.78rem] italic">“Great things start with a single step.”</p>
-          </blockquote>
-        </div>
-      </header>
+        }
+      />
 
       <div className="grid grid-cols-5 gap-3.5 max-[1280px]:grid-cols-3 max-[1100px]:grid-cols-2 max-sm:grid-cols-1">
         {dashboardStats.map((stat) => (

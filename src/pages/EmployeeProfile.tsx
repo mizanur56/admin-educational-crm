@@ -33,6 +33,7 @@ import {
 } from '@hugeicons/core-free-icons'
 import { getEmployee, uploadEmployeePhoto } from '../api/client'
 import Button from '../components/Button'
+import PageHeader from '../components/PageHeader'
 import { hasPermission } from '../lib/access'
 import type { AuthSession, EmployeeCrmAccess, EmployeeRecord } from '../types'
 type ProfileSection = {
@@ -356,6 +357,20 @@ export default function EmployeeProfile() {
   if (!loading && (error || !employee)) {
     return (
       <div className={`${adminPage}`}>
+        <PageHeader
+          title="Employee Profile"
+          subtitle={error || 'This employee could not be found.'}
+          breadcrumbs={[
+            { title: 'Dashboard', path: '/dashboard' },
+            { title: 'Employees', path: '/employees' },
+            { title: 'Profile' },
+          ]}
+          extra={
+            <Button variant="secondary" onClick={() => navigate('/employees')}>
+              Back to Employees
+            </Button>
+          }
+        />
         <div className={`${adminEmpty}`}>
           <strong>Employee profile unavailable</strong>
           <p>{error || 'This employee could not be found.'}</p>
@@ -369,11 +384,37 @@ export default function EmployeeProfile() {
 
   return (
     <div className={`${adminPage} gap-5 overflow-visible [&_.ant-spin-nested-loading]:grid [&_.ant-spin-nested-loading]:gap-6 [&_.ant-spin-nested-loading]:overflow-visible [&_.ant-spin-container]:grid [&_.ant-spin-container]:gap-6 [&_.ant-spin-container]:overflow-visible`}>
-      <nav className="flex items-center gap-2 text-[0.84rem] text-text-muted [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline" aria-label="Breadcrumb">
-        <Link to="/employees">Employees</Link>
-        <span aria-hidden="true">/</span>
-        <span>{employee?.employeeCode || 'Profile'}</span>
-      </nav>
+      <PageHeader
+        title={employee?.fullName || 'Employee Profile'}
+        subtitle="Employee Details"
+        breadcrumbs={[
+          { title: 'Dashboard', path: '/dashboard' },
+          { title: 'Employees', path: '/employees' },
+          { title: employee?.employeeCode || 'Details' },
+        ]}
+        extra={
+          employee ? (
+            <>
+              <Button variant="secondary" onClick={() => navigate('/employees')}>
+                Back to list
+              </Button>
+              {canDocuments ? (
+                <Button variant="secondary" onClick={() => navigate(`/documents?employeeId=${employee.id}`)}>
+                  Manage documents
+                </Button>
+              ) : null}
+              {canEdit ? (
+                <Button onClick={() => navigate(`/employees/${employee.id}/edit`)}>
+                  <span className="ui-btn-icon">
+                    <HugeiconsIcon icon={PencilEdit02Icon} size={16} color="currentColor" strokeWidth={1.6} />
+                  </span>
+                  Edit profile
+                </Button>
+              ) : null}
+            </>
+          ) : undefined
+        }
+      />
 
       <Spin spinning={loading}>
         {employee ? (
@@ -438,24 +479,6 @@ export default function EmployeeProfile() {
                     ) : null}
                   </div>
                 </div>
-              </div>
-              <div className="flex flex-wrap justify-end gap-2.5">
-                <Button variant="secondary" onClick={() => navigate('/employees')}>
-                  Back to list
-                </Button>
-                {canDocuments ? (
-                  <Button variant="secondary" onClick={() => navigate(`/documents?employeeId=${employee.id}`)}>
-                    Manage documents
-                  </Button>
-                ) : null}
-                {canEdit ? (
-                  <Button onClick={() => navigate(`/employees/${employee.id}/edit`)}>
-                    <span className="ui-btn-icon">
-                      <HugeiconsIcon icon={PencilEdit02Icon} size={16} color="currentColor" strokeWidth={1.6} />
-                    </span>
-                    Edit profile
-                  </Button>
-                ) : null}
               </div>
             </section>
 

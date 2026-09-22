@@ -551,8 +551,11 @@ export default function AuditLogs() {
 
   return (
     <div className={cx(adminPage, 'gap-[18px]')}>
-      <PageHeader title="Audit Log" description="Track all important actions, data changes and system events across the CRM.">
-        <div className="flex flex-wrap items-center justify-end gap-2.5 max-[860px]:grid max-[860px]:grid-cols-1">
+      <PageHeader
+        title="Audit Log"
+        subtitle="Track all important actions, data changes and system events across the CRM."
+        breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Audit Log' }]}
+        extra={
           <Dropdown menu={{ items: exportItems }} trigger={['click']}>
             <span>
               <Button className="min-w-[132px]" variant="secondary">
@@ -561,8 +564,8 @@ export default function AuditLogs() {
               </Button>
             </span>
           </Dropdown>
-        </div>
-      </PageHeader>
+        }
+      />
 
       {message ? <p className={adminBanner}>{message}</p> : null}
 

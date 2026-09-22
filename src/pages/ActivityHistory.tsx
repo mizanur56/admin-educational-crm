@@ -17,6 +17,7 @@ import {
 import { createActivity, listActivityFeed, recordActivityExport } from '../api/client'
 import Button from '../components/Button'
 import Input from '../components/Input'
+import PageHeader from '../components/PageHeader'
 import Select from '../components/Select'
 import UserAvatar from '../components/UserAvatar'
 import { hasPermission } from '../lib/access'
@@ -376,19 +377,11 @@ export default function ActivityHistory() {
 
   return (
     <div className={adminPage}>
-      <header className="flex justify-between gap-4 items-start max-[860px]:grid max-[860px]:grid-cols-1">
-        <div className="flex gap-3 items-start">
-          <span className="size-[42px] grid place-items-center rounded-xl bg-[#e8f1ff] text-[#3b82f6]">
-            <HugeiconsIcon icon={Activity01Icon} size={18} />
-          </span>
-          <div>
-            <h2 className="m-0 text-[1.45rem] tracking-[-0.02em]">Activity History</h2>
-            <p className="m-0 mt-1 text-text-muted text-[0.9rem]">
-              View all activities, communications and actions performed by your team members.
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-2.5">
+      <PageHeader
+        title="Activity History"
+        subtitle="View all activities, communications and actions performed by your team members."
+        breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Activity History' }]}
+        extra={
           <Dropdown menu={{ items: exportItems }} trigger={['click']}>
             <span>
               <Button variant="secondary">
@@ -397,8 +390,8 @@ export default function ActivityHistory() {
               </Button>
             </span>
           </Dropdown>
-        </div>
-      </header>
+        }
+      />
 
       <section className="grid grid-cols-[minmax(240px,280px)_minmax(200px,1.4fr)_minmax(160px,280px)] gap-2.5 items-center py-3 px-3.5 bg-surface border border-border rounded-2xl max-[860px]:grid-cols-1 [&_.ant-picker]:w-full [&_.ant-picker]:min-w-0 [&_.ant-picker]:h-[42px] [&_.ant-picker]:rounded-xl [&_.ant-input-affix-wrapper]:w-full [&_.ant-select]:w-full">
         <DatePicker.RangePicker

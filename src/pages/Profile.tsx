@@ -23,11 +23,16 @@ export default function Profile() {
 
   return (
     <div className={`${adminPage}`}>
-      <PageHeader title="Profile" description="Your account details for this CRM session.">
-        <Button variant="secondary" onClick={() => navigate('/account')}>
-          Change password
-        </Button>
-      </PageHeader>
+      <PageHeader
+        title="Profile"
+        subtitle="Your account details for this CRM session."
+        breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Profile' }]}
+        extra={
+          <Button variant="secondary" onClick={() => navigate('/account')}>
+            Change password
+          </Button>
+        }
+      />
 
       <section className={`${adminCard} grid gap-6`}>
         <div className="flex items-center gap-4 [&_h3]:m-0 [&_h3]:text-[1.15rem] [&_h3]:text-text-strong [&_p]:mt-1 [&_p]:mb-0 [&_p]:text-[0.9rem] [&_p]:text-text-muted">

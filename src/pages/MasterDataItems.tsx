@@ -785,7 +785,15 @@ export default function MasterDataItems() {
     }
     return (
       <div className={`${adminPage}`}>
-        <PageHeader title="Master Data" description="Category not found." />
+        <PageHeader
+          title="Master Data"
+          subtitle="Category not found."
+          breadcrumbs={[
+            { title: 'Dashboard', path: '/dashboard' },
+            { title: 'Master Data', path: '/master-data' },
+            { title: 'Not found' },
+          ]}
+        />
         <Link to="/master-data">Back to Master Data</Link>
       </div>
     )
@@ -798,7 +806,15 @@ export default function MasterDataItems() {
   if (!category && !metaLoading) {
     return (
       <div className={`${adminPage}`}>
-        <PageHeader title="Master Data" description="Category not found." />
+        <PageHeader
+          title="Master Data"
+          subtitle="Category not found."
+          breadcrumbs={[
+            { title: 'Dashboard', path: '/dashboard' },
+            { title: 'Master Data', path: '/master-data' },
+            { title: 'Not found' },
+          ]}
+        />
         <Link to="/master-data">Back to categories</Link>
       </div>
     )
@@ -808,10 +824,18 @@ export default function MasterDataItems() {
     <div className={`${adminPage}`}>
       <PageHeader
         title={navGroup.name}
-        description={category ? `Manage ${category.name} values.` : 'Create, edit, activate, and import reusable reference values.'}
-      >
-        {canCreate ? <Button onClick={openCreate}>Add New</Button> : null}
-      </PageHeader>
+        subtitle={
+          category
+            ? `Manage ${category.name} values.`
+            : 'Create, edit, activate, and import reusable reference values.'
+        }
+        breadcrumbs={[
+          { title: 'Dashboard', path: '/dashboard' },
+          { title: 'Master Data', path: '/master-data' },
+          { title: navGroup.name },
+        ]}
+        extra={canCreate ? <Button onClick={openCreate}>Add New</Button> : undefined}
+      />
 
       <nav className="flex max-w-full gap-1 overflow-x-auto border-b border-border" aria-label="Master data categories">
         {navGroup.categories.map((tab) => (

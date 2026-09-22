@@ -241,10 +241,10 @@ export default function Roles() {
     <div className={`${adminPage}`}>
       <PageHeader
         title="Roles & Permissions"
-        description="Configure role-wise, module-wise, and action-level access."
-      >
-        {canCreate ? <Button onClick={openCreate}>Create Role</Button> : null}
-      </PageHeader>
+        subtitle="Configure role-wise, module-wise, and action-level access."
+        breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Roles & Permissions' }]}
+        extra={canCreate ? <Button onClick={openCreate}>Create Role</Button> : undefined}
+      />
 
       <section className={`${adminFilters} ${adminFiltersCompact}`}>
         <Input.Search

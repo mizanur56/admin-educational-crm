@@ -1135,9 +1135,12 @@ export default function Users() {
 
   return (
     <div className={`${adminPage}`}>
-      <PageHeader title="Users" description="Create users, assign roles, and control login access.">
-        {canCreate ? <Button onClick={() => void openCreate()}>Create User</Button> : null}
-      </PageHeader>
+      <PageHeader
+        title="Users"
+        subtitle="Create users, assign roles, and control login access."
+        breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Users' }]}
+        extra={canCreate ? <Button onClick={() => void openCreate()}>Create User</Button> : undefined}
+      />
 
       <section className={`${adminFilters}`}>
         <Input.Search

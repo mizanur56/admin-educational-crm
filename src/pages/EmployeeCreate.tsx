@@ -801,7 +801,14 @@ export default function EmployeeCreate() {
       <div className={`${adminPage}`}>
         <PageHeader
           title={pageTitle}
-          description={isEdit ? 'You do not have permission to edit employees.' : 'You do not have permission to create employees.'}
+          subtitle={
+            isEdit ? 'You do not have permission to edit employees.' : 'You do not have permission to create employees.'
+          }
+          breadcrumbs={[
+            { title: 'Dashboard', path: '/dashboard' },
+            { title: 'Employees', path: '/employees' },
+            { title: pageTitle },
+          ]}
         />
       </div>
     )
@@ -819,16 +826,27 @@ export default function EmployeeCreate() {
 
   return (
     <div className={`${adminPage} [&_textarea.ui-input]:h-auto [&_textarea.ui-input]:min-h-[84px] [&_textarea.ui-input]:px-[11px] [&_textarea.ui-input]:py-2 [&_textarea.ant-input]:h-auto [&_textarea.ant-input]:min-h-[84px] [&_textarea.ant-input]:px-[11px] [&_textarea.ant-input]:py-2`}>
-      <PageHeader title={pageTitle} description={pageDescription}>
-        {isEdit && id ? (
-          <Button variant="secondary" onClick={() => navigate(`/employees/${id}`)}>
-            View profile
-          </Button>
-        ) : null}
-        <Button variant="secondary" onClick={() => navigate('/employees')}>
-          Back to Employees
-        </Button>
-      </PageHeader>
+      <PageHeader
+        title={pageTitle}
+        subtitle={pageDescription}
+        breadcrumbs={[
+          { title: 'Dashboard', path: '/dashboard' },
+          { title: 'Employees', path: '/employees' },
+          { title: pageTitle },
+        ]}
+        extra={
+          <>
+            {isEdit && id ? (
+              <Button variant="secondary" onClick={() => navigate(`/employees/${id}`)}>
+                View profile
+              </Button>
+            ) : null}
+            <Button variant="secondary" onClick={() => navigate('/employees')}>
+              Back to Employees
+            </Button>
+          </>
+        }
+      />
 
       {formError ? <p className={`${adminBanner}`}>{formError}</p> : null}
 

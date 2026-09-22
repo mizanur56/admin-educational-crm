@@ -368,9 +368,12 @@ export default function Employees() {
 
   return (
     <div className={`${adminPage}`}>
-      <PageHeader title="Employees" description="Manage employee records, assignments, and employment status.">
-        {canCreate ? <Button onClick={openCreate}>Create Employee</Button> : null}
-      </PageHeader>
+      <PageHeader
+        title="Employees"
+        subtitle="Manage employee records, assignments, and employment status."
+        breadcrumbs={[{ title: 'Dashboard', path: '/dashboard' }, { title: 'Employees' }]}
+        extra={canCreate ? <Button onClick={openCreate}>Create Employee</Button> : undefined}
+      />
 
       <section className={`${adminFilters} ${adminFiltersEmployees}`}>
         <Input.Search
