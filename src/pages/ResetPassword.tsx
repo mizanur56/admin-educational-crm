@@ -1,28 +1,35 @@
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import Button from '../components/Button'
+import { Alert, Button, Form } from 'antd'
 import Input from '../components/Input'
 import PageMeta from '../components/PageMeta'
 import { useResetPasswordMutation } from '../redux/features/auth/authApi'
+
+type ResetValues = {
+  password: string
+}
+
+const cardClass =
+  'w-full max-w-[400px] rounded-2xl border border-card-border bg-surface px-10 py-10 shadow-card sm:px-12 sm:py-11 [&_.ant-form-item-label>label]:text-[0.9rem] [&_.ant-form-item-label>label]:font-semibold [&_.ant-form-item-label>label]:text-text-strong'
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') || ''
   const [resetPassword, { isLoading }] = useResetPasswordMutation()
-  const [password, setPassword] = useState('')
+  const [form] = Form.useForm<ResetValues>()
   const [message, setMessage] = useState('')
   const [success, setSuccess] = useState(false)
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function onFinish(values: ResetValues) {
     setMessage('')
 
     try {
-      const data = await resetPassword({ token, password }).unwrap()
+      const data = await resetPassword({ token, password: values.password }).unwrap()
       setSuccess(true)
       setMessage(data?.message || 'Password has been reset. Please sign in.')
     } catch (error) {
       const err = error as { data?: { error?: string }; status?: string | number }
+      setSuccess(false)
       setMessage(
         err?.data?.error ||
           (err?.status === 'FETCH_ERROR'
@@ -38,39 +45,53 @@ export default function ResetPassword() {
         title="Reset Password"
         description="Choose a new secure password to regain access to your EduConsult CRM account."
       />
-      <form
-        className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"
-        onSubmit={handleSubmit}
-      >
-        <p className="mb-2 text-[0.85rem] font-bold tracking-[0.04em] text-link uppercase">
-          Education CRM
-        </p>
-        <h1 className="mb-2">Reset password</h1>
-        <p className="mb-6 text-text-muted">Choose a new password of at least 8 characters.</p>
+      <Form form={form} layout="vertical" requiredMark={false} onFinish={onFinish} className={cardClass}>
+        <div className="mb-6 text-center">
+          <h1 className="m-0 mb-1.5 text-[1.55rem] leading-tight font-bold tracking-tight text-text-strong">
+            Reset password
+          </h1>
+          <p className="m-0 text-[0.92rem] text-text-muted">
+            Choose a new password of at least 8 characters.
+          </p>
+        </div>
 
-        <label htmlFor="password">New password</label>
-        <Input.Password
-          id="password"
-          autoComplete="new-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="Enter a new password"
-          required
-          minLength={8}
-        />
+        <Form.Item
+          name="password"
+          label="New password"
+          rules={[
+            { required: true, message: 'Enter a new password' },
+            { min: 8, message: 'Password must be at least 8 characters' },
+          ]}
+        >
+          <Input.Password autoComplete="new-password" placeholder="Enter a new password" />
+        </Form.Item>
 
         {message ? (
-          <p className={success ? 'mb-6 text-text-muted' : 'mb-4 text-danger'}>{message}</p>
+          <Alert type={success ? 'success' : 'error'} showIcon message={message} className="mb-4" />
         ) : null}
 
-        <Button type="submit" fullWidth disabled={isLoading || !token}>
-          {isLoading ? 'Saving…' : 'Reset password'}
-        </Button>
+        <Form.Item className="mb-0!">
+          <Button
+            type="primary"
+            htmlType="submit"
+            block
+            size="large"
+            loading={isLoading}
+            disabled={!token}
+          >
+            Reset password
+          </Button>
+        </Form.Item>
 
-        <p className="mt-4 mb-0 text-[0.85rem] text-text-muted">
-          <Link to="/login">Back to sign in</Link>
+        <p className="mt-5 mb-0 text-center">
+          <Link
+            to="/login"
+            className="text-[0.85rem] font-semibold text-primary! no-underline hover:text-primary-hover! hover:underline"
+          >
+            Back to sign in
+          </Link>
         </p>
-      </form>
+      </Form>
     </>
   )
 }

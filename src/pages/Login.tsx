@@ -1,50 +1,59 @@
-import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import Button from '../components/Button'
-import Input from '../components/Input'
-import PageMeta from '../components/PageMeta'
-import { useAuth } from '../hooks/useAuth'
-import { useLoginMutation } from '../redux/features/auth/authApi'
-import { isAuthSession } from '../lib/auth-session'
+import { Alert, Button, Checkbox, Form } from "antd";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import Input from "../components/Input";
+import PageMeta from "../components/PageMeta";
+import { useAuth } from "../hooks/useAuth";
+import { isAuthSession } from "../lib/auth-session";
+import { useLoginMutation } from "../redux/features/auth/authApi";
+
+type LoginValues = {
+  identifier: string;
+  password: string;
+  rememberMe?: boolean;
+};
+
+const cardClass =
+  "w-full max-w-[400px] rounded-2xl border border-card-border bg-surface px-10 py-10 shadow-card sm:px-12 sm:py-11 [&_.ant-form-item-label>label]:text-[0.9rem] [&_.ant-form-item-label>label]:font-semibold [&_.ant-form-item-label>label]:text-text-strong";
 
 export default function Login() {
-  const navigate = useNavigate()
-  const { applySession } = useAuth()
-  const [login, { isLoading }] = useLoginMutation()
-  const [identifier, setIdentifier] = useState('')
-  const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
-  const [message, setMessage] = useState('')
+  const navigate = useNavigate();
+  const { applySession } = useAuth();
+  const [login, { isLoading }] = useLoginMutation();
+  const [form] = Form.useForm<LoginValues>();
+  const [message, setMessage] = useState("");
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setMessage('')
+  async function onFinish(values: LoginValues) {
+    setMessage("");
 
     try {
       const data = await login({
-        identifier: identifier.trim(),
-        password,
-        rememberMe,
-      }).unwrap()
+        identifier: values.identifier.trim(),
+        password: values.password,
+        rememberMe: Boolean(values.rememberMe),
+      }).unwrap();
 
       if (isAuthSession(data)) {
-        applySession(data)
-        toast.success('Signed in successfully')
-        navigate('/dashboard', { replace: true })
-        return
+        applySession(data);
+        toast.success("Signed in successfully");
+        navigate("/dashboard", { replace: true });
+        return;
       }
 
-      setMessage('Could not sign in.')
+      setMessage("Could not sign in.");
     } catch (error) {
-      const err = error as { data?: { error?: string; message?: string }; status?: string | number }
+      const err = error as {
+        data?: { error?: string; message?: string };
+        status?: string | number;
+      };
       const text =
         err?.data?.error ||
         err?.data?.message ||
-        (err?.status === 'FETCH_ERROR'
-          ? 'Server is not reachable. Start campusly-crm-api.'
-          : 'Could not sign in.')
-      setMessage(text)
+        (err?.status === "FETCH_ERROR"
+          ? "Server is not reachable. Start campusly-crm-api."
+          : "Could not sign in.");
+      setMessage(text);
     }
   }
 
@@ -54,58 +63,74 @@ export default function Login() {
         title="Sign In"
         description="Sign in to EduConsult CRM to manage leads, applications, students, and team operations."
       />
-      <form
-        className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"
-        onSubmit={handleSubmit}
+      <Form
+        form={form}
+        layout="vertical"
+        requiredMark={false}
+        initialValues={{ rememberMe: false }}
+        onFinish={onFinish}
+        className={cardClass}
       >
-        <p className="mb-2 text-[0.85rem] font-bold tracking-[0.04em] text-link uppercase">
-          Education CRM
-        </p>
-        <h1 className="mb-2">Welcome back</h1>
-        <p className="mb-6 text-text-muted">Sign in to continue to your dashboard</p>
+        <div className="mb-6 text-center">
+          <h1 className="m-0 mb-1.5 text-[1.55rem] leading-tight font-bold tracking-tight text-text-strong">
+            Welcome back
+          </h1>
+          <p className="m-0 text-[0.92rem] text-text-muted">
+            Sign in to continue to your dashboard
+          </p>
+        </div>
 
-        <label htmlFor="identifier">Email or Username</label>
-        <Input
-          id="identifier"
-          type="text"
-          autoComplete="username"
-          value={identifier}
-          onChange={(event) => setIdentifier(event.target.value)}
-          placeholder="Email or username"
-          required
-        />
+        <Form.Item
+          name="identifier"
+          label="Email or Username"
+          rules={[{ required: true, message: "Enter email or username" }]}
+        >
+          <Input autoComplete="username" placeholder="Email or username" />
+        </Form.Item>
 
-        <label htmlFor="password">Password</label>
-        <Input.Password
-          id="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="Enter password"
-          required
-        />
-
-        <label className="mb-4 flex items-center gap-2 font-medium" htmlFor="rememberMe">
-          <input
-            id="rememberMe"
-            type="checkbox"
-            className="m-0 w-auto"
-            checked={rememberMe}
-            onChange={(event) => setRememberMe(event.target.checked)}
+        <Form.Item
+          name="password"
+          label="Password"
+          rules={[{ required: true, message: "Enter password" }]}
+        >
+          <Input.Password
+            autoComplete="current-password"
+            placeholder="Enter password"
           />
-          Remember me
-        </label>
+        </Form.Item>
 
-        {message ? <p className="mb-4 text-danger">{message}</p> : null}
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <Form.Item
+            name="rememberMe"
+            valuePropName="checked"
+            className="mb-0!"
+          >
+            <Checkbox className="text-text-muted">Remember me</Checkbox>
+          </Form.Item>
+          <Link
+            to="/forgot-password"
+            className="text-[0.85rem] font-semibold text-primary! no-underline hover:text-primary-hover! hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
-        <Button type="submit" fullWidth disabled={isLoading}>
-          {isLoading ? 'Signing in…' : 'Sign In'}
-        </Button>
+        {message ? (
+          <Alert type="error" showIcon message={message} className="mb-4" />
+        ) : null}
 
-        <p className="mt-4 mb-0 text-[0.85rem] text-text-muted">
-          <Link to="/forgot-password">Forgot password?</Link>
-        </p>
-      </form>
+        <Form.Item className="mb-0!">
+          <Button
+            type="primary"
+            htmlType="submit"
+            block
+            size="large"
+            loading={isLoading}
+          >
+            Sign In
+          </Button>
+        </Form.Item>
+      </Form>
     </>
-  )
+  );
 }

@@ -1,33 +1,50 @@
-import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
-import Button from '../components/Button'
-import Input from '../components/Input'
-import PageMeta from '../components/PageMeta'
-import { useForgotPasswordMutation } from '../redux/features/auth/authApi'
+import { Alert, Button, Card, Form } from "antd";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import Input from "../components/Input";
+import PageMeta from "../components/PageMeta";
+import { useForgotPasswordMutation } from "../redux/features/auth/authApi";
+
+type ForgotValues = {
+  identifier: string;
+};
+
+const cardClass =
+  "w-full max-w-[400px] rounded-2xl border border-card-border bg-surface px-10 py-10 shadow-card sm:px-12 sm:py-11 [&_.ant-form-item-label>label]:text-[0.9rem] [&_.ant-form-item-label>label]:font-semibold [&_.ant-form-item-label>label]:text-text-strong";
 
 export default function ForgotPassword() {
-  const [forgotPassword, { isLoading }] = useForgotPasswordMutation()
-  const [identifier, setIdentifier] = useState('')
-  const [message, setMessage] = useState('')
-  const [resetPath, setResetPath] = useState('')
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
+  const [form] = Form.useForm<ForgotValues>();
+  const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [resetPath, setResetPath] = useState("");
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setMessage('')
-    setResetPath('')
+  async function onFinish(values: ForgotValues) {
+    setMessage("");
+    setIsError(false);
+    setResetPath("");
 
     try {
-      const data = await forgotPassword({ identifier: identifier.trim() }).unwrap()
-      setMessage(data?.message || 'If an account exists, password reset instructions have been sent.')
-      setResetPath(data?.devResetPath || '')
+      const data = await forgotPassword({
+        identifier: values.identifier.trim(),
+      }).unwrap();
+      setMessage(
+        data?.message ||
+          "If an account exists, password reset instructions have been sent.",
+      );
+      setResetPath(data?.devResetPath || "");
     } catch (error) {
-      const err = error as { data?: { error?: string }; status?: string | number }
+      const err = error as {
+        data?: { error?: string };
+        status?: string | number;
+      };
+      setIsError(true);
       setMessage(
         err?.data?.error ||
-          (err?.status === 'FETCH_ERROR'
-            ? 'Server is not reachable. Start campusly-crm-api.'
-            : 'Could not send reset instructions.'),
-      )
+          (err?.status === "FETCH_ERROR"
+            ? "Server is not reachable. Start campusly-crm-api."
+            : "Could not send reset instructions."),
+      );
     }
   }
 
@@ -37,45 +54,68 @@ export default function ForgotPassword() {
         title="Forgot Password"
         description="Request a secure password reset link for your EduConsult CRM account."
       />
-      <form
-        className="w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-8 shadow-card"
-        onSubmit={handleSubmit}
-      >
-        <p className="mb-2 text-[0.85rem] font-bold tracking-[0.04em] text-link uppercase">
-          Education CRM
-        </p>
-        <h1 className="mb-2">Forgot password</h1>
-        <p className="mb-6 text-text-muted">
-          Enter your email or username. A reset link will be created for an active account.
-        </p>
+      <Card>
+        <Form
+          form={form}
+          layout="vertical"
+          requiredMark={false}
+          onFinish={onFinish}
+          className={cardClass}
+        >
+          <div className="mb-6 text-center">
+            <h1 className="m-0 mb-1.5 text-[1.55rem] leading-tight font-bold tracking-tight text-text-strong">
+              Forgot password
+            </h1>
+            <p className="m-0 text-[0.92rem] text-text-muted">
+              Enter your email or username. A reset link will be created for an
+              active account.
+            </p>
+          </div>
 
-        <label htmlFor="identifier">Email or Username</label>
-        <Input
-          id="identifier"
-          type="text"
-          value={identifier}
-          onChange={(event) => setIdentifier(event.target.value)}
-          placeholder="Email or username"
-          required
-        />
+          <Form.Item
+            name="identifier"
+            label="Email or Username"
+            rules={[{ required: true, message: "Enter email or username" }]}
+          >
+            <Input placeholder="Email or username" />
+          </Form.Item>
 
-        {message ? (
-          <p className={resetPath ? 'mb-6 text-text-muted' : 'mb-4 text-danger'}>{message}</p>
-        ) : null}
-        {resetPath ? (
-          <p className="mt-4 mb-0 text-[0.85rem] text-text-muted">
-            Dev reset: <Link to={resetPath}>{resetPath}</Link>
+          {message ? (
+            <Alert
+              type={isError ? "error" : "success"}
+              showIcon
+              message={message}
+              className="mb-4"
+            />
+          ) : null}
+          {resetPath ? (
+            <p className="mb-4 text-[0.85rem] text-text-muted">
+              Dev reset: <Link to={resetPath}>{resetPath}</Link>
+            </p>
+          ) : null}
+
+          <Form.Item className="mb-0!">
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              size="large"
+              loading={isLoading}
+            >
+              Send reset link
+            </Button>
+          </Form.Item>
+
+          <p className="mt-5 mb-0 text-center">
+            <Link
+              to="/login"
+              className="text-[0.85rem] font-semibold text-primary! no-underline hover:text-primary-hover! hover:underline"
+            >
+              Back to sign in
+            </Link>
           </p>
-        ) : null}
-
-        <Button type="submit" fullWidth disabled={isLoading}>
-          {isLoading ? 'Sending…' : 'Send reset link'}
-        </Button>
-
-        <p className="mt-4 mb-0 text-[0.85rem] text-text-muted">
-          <Link to="/login">Back to sign in</Link>
-        </p>
-      </form>
+        </Form>
+      </Card>
     </>
-  )
+  );
 }
