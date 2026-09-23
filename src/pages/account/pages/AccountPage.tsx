@@ -1,10 +1,10 @@
-import { accountForm, adminBanner, adminCard, adminForm, adminPage } from '../../styles/admin'
+import { accountForm, adminBanner, adminCard, adminForm, adminPage } from '../../../styles/admin'
 import { useState, type FormEvent } from 'react'
-import Button from '../../components/Button'
-import Input from '../../components/Input'
-import PageHeader from '../../components/PageHeader'
-import PageMeta from '../../components/PageMeta'
-import { useChangePasswordMutation } from '../../redux/features/auth/authApi'
+import Button from '../../../components/Button'
+import Input from '../../../components/Input'
+import PageHeader from '../../../components/PageHeader'
+import PageMeta from '../../../components/PageMeta'
+import { useChangePasswordMutation } from '../../../redux/features/auth/authApi'
 
 export default function AccountPage() {
   const [changePassword, { isLoading }] = useChangePasswordMutation()

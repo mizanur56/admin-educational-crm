@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Alert, Button, Checkbox, Form } from 'antd'
 import { toast } from 'react-toastify'
-import Input from '../../components/Input'
-import PageMeta from '../../components/PageMeta'
-import { useAuth } from '../../hooks/useAuth'
-import { isAuthSession } from '../../lib/auth-session'
-import { useLoginMutation } from '../../redux/features/auth/authApi'
+import Input from '../../../components/Input'
+import PageMeta from '../../../components/PageMeta'
+import { useAuth } from '../../../hooks/useAuth'
+import { isAuthSession } from '../../../lib/auth-session'
+import { useLoginMutation } from '../../../redux/features/auth/authApi'
 
 type LoginValues = {
   identifier: string

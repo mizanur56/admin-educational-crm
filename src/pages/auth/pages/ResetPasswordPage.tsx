@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Alert, Button, Form } from 'antd'
-import Input from '../../components/Input'
-import PageMeta from '../../components/PageMeta'
-import { useResetPasswordMutation } from '../../redux/features/auth/authApi'
+import Input from '../../../components/Input'
+import PageMeta from '../../../components/PageMeta'
+import { useResetPasswordMutation } from '../../../redux/features/auth/authApi'
 
 type ResetValues = {
   password: string

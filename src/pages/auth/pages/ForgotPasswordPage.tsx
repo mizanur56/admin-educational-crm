@@ -1,9 +1,9 @@
 import { Alert, Button, Form } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Input from "../../components/Input";
-import PageMeta from "../../components/PageMeta";
-import { useForgotPasswordMutation } from "../../redux/features/auth/authApi";
+import Input from "../../../components/Input";
+import PageMeta from "../../../components/PageMeta";
+import { useForgotPasswordMutation } from "../../../redux/features/auth/authApi";
 
 type ForgotValues = {
   identifier: string;

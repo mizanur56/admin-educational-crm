@@ -1,10 +1,10 @@
-import { adminCard, adminPage } from '../../styles/admin'
+import { adminCard, adminPage } from '../../../styles/admin'
 import { useNavigate, useOutletContext } from 'react-router-dom'
-import Button from '../../components/Button'
-import PageHeader from '../../components/PageHeader'
-import PageMeta from '../../components/PageMeta'
-import UserAvatar from '../../components/UserAvatar'
-import type { AuthSession } from '../../types'
+import Button from '../../../components/Button'
+import PageHeader from '../../../components/PageHeader'
+import PageMeta from '../../../components/PageMeta'
+import UserAvatar from '../../../components/UserAvatar'
+import type { AuthSession } from '../../../types'
 const USER_STATUS_LABELS: Record<string, string> = {
   ACTIVE: 'Active',
   INACTIVE: 'Inactive',

@@ -1,11 +1,11 @@
-import { adminCard, adminForm, adminPage, formActions } from '../../styles/admin'
+import { adminCard, adminForm, adminPage, formActions } from '../../../styles/admin'
 import { useState } from 'react'
 import { Switch } from 'antd'
 import { toast } from 'react-toastify'
-import Button from '../../components/Button'
-import Input from '../../components/Input'
-import PageHeader from '../../components/PageHeader'
-import PageMeta from '../../components/PageMeta'
+import Button from '../../../components/Button'
+import Input from '../../../components/Input'
+import PageHeader from '../../../components/PageHeader'
+import PageMeta from '../../../components/PageMeta'
 
 export default function SettingsPage() {
   const [workspaceName, setWorkspaceName] = useState('EduConsult CRM')
