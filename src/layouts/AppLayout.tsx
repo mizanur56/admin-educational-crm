@@ -261,7 +261,7 @@ export default function AppLayout() {
     >
       <header
         className={[
-          'relative z-30 col-span-full grid min-h-16 overflow-visible border-b border-header-border bg-page-bg',
+          'relative z-30 col-span-full grid min-h-16 overflow-visible border-b border-header-border bg-surface',
           shellCols,
           'max-[960px]:sticky max-[960px]:top-0 max-[960px]:z-50 max-[960px]:flex max-[960px]:flex-wrap max-[960px]:items-center max-[960px]:grid-cols-none',
         ].join(' ')}
@@ -272,7 +272,7 @@ export default function AppLayout() {
             collapsed
               ? 'justify-center px-2 py-2.5 max-[960px]:justify-start max-[960px]:px-4'
               : '',
-            'max-[960px]:min-w-0 max-[960px]:flex-[1_1_auto] max-[960px]:border-r-0 max-[960px]:bg-page-bg',
+            'max-[960px]:min-w-0 max-[960px]:flex-[1_1_auto] max-[960px]:border-r-0 max-[960px]:bg-surface',
             'max-[640px]:px-3 max-[640px]:py-2.5',
           ]
             .filter(Boolean)

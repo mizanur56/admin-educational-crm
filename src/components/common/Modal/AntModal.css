@@ -10,7 +10,7 @@
 }
 
 .campusly-ant-modal .ant-modal-close:hover {
-  background: var(--hover-bg, #efece6);
+  background: var(--hover-bg, #e8eef5);
   color: var(--text-strong, #2f3b46);
 }
 
