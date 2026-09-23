@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { DatePicker, Dropdown, Spin } from 'antd'
+import { DatePicker, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
@@ -9,7 +8,6 @@ import {
   Alert02Icon,
   ArrowDown01Icon,
   ArrowRight01Icon,
-  Cancel01Icon,
   DashboardSquare01Icon,
   File01Icon,
   UserMultiple02Icon,
@@ -21,6 +19,8 @@ import Input from '../components/Input'
 import PageHeader from '../components/PageHeader'
 import PageMeta from '../components/PageMeta'
 import Select from '../components/Select'
+import { DataTable } from '../components/common/Tables'
+import { AntModal } from '../components/common/Modal'
 import type { AuditLog } from '../types'
 import { useLocation } from 'react-router-dom'
 import {
@@ -28,11 +28,6 @@ import {
   adminCard,
   adminEmpty,
   adminPage,
-  adminTable,
-  modalBackdrop,
-  modalClose,
-  modalHeader,
-  modalPanel,
 } from '../styles/admin'
 
 type Filters = {
@@ -52,8 +47,6 @@ const EMPTY_FILTERS: Filters = {
   from: '',
   to: '',
 }
-
-const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
 const CRITICAL_RE = /fail|lock|deny|delete|reject|suspend|unauthor/i
 
@@ -100,11 +93,6 @@ const statIconTone: Record<string, string> = {
   violet: 'bg-[#eee8ff] text-[#7c5cfc]',
   green: 'bg-[#e7f8ef] text-[#16a34a]',
 }
-
-const pageBtn =
-  'min-w-8 h-8 px-2 border-0 rounded-lg bg-transparent text-text-muted font-semibold cursor-pointer hover:bg-hover-bg hover:text-text'
-
-const pageBtnActive = 'bg-primary text-on-primary hover:bg-primary hover:text-on-primary'
 
 const filterControl =
   '[&_.ant-input-affix-wrapper]:!h-[42px] [&_.ant-input-affix-wrapper]:!min-h-[42px] [&_.ant-input-affix-wrapper]:!max-h-[42px] [&_.ant-input-affix-wrapper]:!flex [&_.ant-input-affix-wrapper]:!items-center [&_.ant-select]:!h-[42px] [&_.ant-select-selector]:!h-[42px] [&_.ant-select-selector]:!min-h-[42px] [&_.ant-select-selector]:!max-h-[42px] [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-picker]:!h-[42px] [&_.ant-picker]:!min-h-[42px] [&_.ant-picker]:!max-h-[42px] [&_.ant-picker]:!flex [&_.ant-picker]:!items-center [&_.ant-input]:!h-auto [&_.ant-input]:!min-h-0 [&_.ant-input]:!max-h-none [&_.ant-input]:!py-0 [&_.ant-input]:leading-[1.2] [&_.ant-select-selection-item]:leading-[1.2] [&_.ant-select-selection-placeholder]:leading-[1.2] [&_.ant-picker-input_input]:leading-[1.2] [&_.ui-input]:w-full [&_.ui-input]:h-[42px] [&_.ui-select]:w-full [&_.ui-select]:h-[42px] [&_.ant-select]:w-full [&_.ant-picker]:w-full'
@@ -311,26 +299,6 @@ function summaryText(log: AuditLog) {
   return 'System event recorded in the CRM'
 }
 
-function pageItems(current: number, total: number) {
-  if (total <= 7) {
-    return Array.from({ length: total }, (_, index) => index + 1)
-  }
-  const items: Array<number | 'ellipsis'> = [1]
-  const start = Math.max(2, current - 1)
-  const end = Math.min(total - 1, current + 1)
-  if (start > 2) {
-    items.push('ellipsis')
-  }
-  for (let page = start; page <= end; page += 1) {
-    items.push(page)
-  }
-  if (end < total - 1) {
-    items.push('ellipsis')
-  }
-  items.push(total)
-  return items
-}
-
 function csvValue(value: string) {
   if (value.includes(',') || value.includes('"') || value.includes('\n')) {
     return `"${value.replace(/"/g, '""')}"`
@@ -407,7 +375,18 @@ export default function AuditLogs() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [activeId, setActiveId] = useState<string | null>(null)
+  const [clearSelectionTrigger, setClearSelectionTrigger] = useState(0)
+  const [activeLog, setActiveLog] = useState<AuditLog | null>(null)
+  const [detailsOpen, setDetailsOpen] = useState(false)
+
+  function openLogDetails(log: AuditLog) {
+    setActiveLog(log)
+    setDetailsOpen(true)
+  }
+
+  function closeLogDetails() {
+    setDetailsOpen(false)
+  }
 
   async function load() {
     setLoading(true)
@@ -430,6 +409,7 @@ export default function AuditLogs() {
     setFilters((current) => ({ ...current, search: next }))
     setPage(1)
     setSelectedIds([])
+    setClearSelectionTrigger((value) => value + 1)
   }, [location.search])
 
   const moduleOptions = useMemo(() => {
@@ -510,30 +490,83 @@ export default function AuditLogs() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
   const safePage = Math.min(page, totalPages)
-  const pageRows = filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
-  const activeLog = filtered.find((log) => log.id === activeId) || null
-  const pageSelectedCount = pageRows.filter((log) => selectedIds.includes(log.id)).length
+
+  const columns = useMemo(
+    () => [
+      {
+        title: 'Log ID',
+        key: 'logId',
+        width: 110,
+        render: (_: unknown, record: AuditLog) => (
+          <span className="font-bold text-text">{logCode(record.id)}</span>
+        ),
+      },
+      {
+        title: 'Date & Time',
+        key: 'createdAt',
+        width: 170,
+        render: (_: unknown, record: AuditLog) => formatDateTime(record.createdAt),
+      },
+      {
+        title: 'User',
+        key: 'user',
+        width: 140,
+        render: (_: unknown, record: AuditLog) => record.user?.fullName || 'System',
+      },
+      {
+        title: 'Module',
+        key: 'module',
+        width: 130,
+        render: (_: unknown, record: AuditLog) => (
+          <span className={cx(auditPill, moduleToneClass(record.entityType))}>
+            {moduleLabel(record.entityType)}
+          </span>
+        ),
+      },
+      {
+        title: 'Action',
+        key: 'action',
+        width: 140,
+        render: (_: unknown, record: AuditLog) => (
+          <span className={cx(auditPill, actionTone[actionToneKey(record.action)])}>
+            {humanize(record.action)}
+          </span>
+        ),
+      },
+      {
+        title: 'Record ID',
+        key: 'recordId',
+        width: 110,
+        render: (_: unknown, record: AuditLog) => recordCode(record.entityType, record.entityId),
+      },
+      {
+        title: 'IP Address',
+        key: 'ipAddress',
+        width: 120,
+        render: (_: unknown, record: AuditLog) => record.ipAddress || '—',
+      },
+      {
+        title: 'Device',
+        key: 'device',
+        width: 140,
+        render: (_: unknown, record: AuditLog) => parseDevice(record.userAgent),
+      },
+    ],
+    [],
+  )
 
   function updateFilters(patch: Partial<Filters>) {
     setFilters((current) => ({ ...current, ...patch }))
     setPage(1)
     setSelectedIds([])
+    setClearSelectionTrigger((value) => value + 1)
   }
 
   function clearFilters() {
     setFilters(EMPTY_FILTERS)
     setPage(1)
     setSelectedIds([])
-  }
-
-  function toggleSelected(id: string) {
-    setSelectedIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
-  }
-
-  function togglePageSelected() {
-    const ids = pageRows.map((log) => log.id)
-    const allSelected = ids.every((id) => selectedIds.includes(id))
-    setSelectedIds((current) => (allSelected ? current.filter((id) => !ids.includes(id)) : Array.from(new Set([...current, ...ids]))))
+    setClearSelectionTrigger((value) => value + 1)
   }
 
   const exportItems: MenuProps['items'] = [
@@ -659,250 +692,169 @@ export default function AuditLogs() {
           </section>
 
           <section className={cx(adminCard, 'rounded-[18px] p-0 overflow-hidden')}>
-            <div className="pt-3 px-4 text-text-muted text-[0.82rem]">
+            <div className="pt-3 px-4 pb-2 text-text-muted text-[0.82rem]">
               Showing {filtered.length === 0 ? 0 : (safePage - 1) * pageSize + 1}–
               {Math.min(safePage * pageSize, filtered.length)} of {filtered.length.toLocaleString()} logs
             </div>
-            <Spin spinning={loading}>
-              {!loading && filtered.length === 0 ? (
-                <div className={adminEmpty}>
-                  <strong>{message ? 'Unable to load audit logs' : 'No matching audit events'}</strong>
-                  <p>
-                    {message
-                      ? message
-                      : 'Try a different search, module, user, or date range, or clear the current filters.'}
-                  </p>
-                  <Button variant="secondary" onClick={clearFilters}>
-                    Clear filters
-                  </Button>
-                </div>
-              ) : (
-                <div className="overflow-auto max-w-full">
-                  <table className={cx(adminTable, 'min-w-[1080px] [&_th]:align-middle [&_th]:whitespace-nowrap [&_th]:text-[0.82rem] [&_td]:align-middle [&_td]:whitespace-nowrap [&_td]:text-[0.82rem] [&_th:first-child]:w-[42px] [&_th:first-child]:pl-4 [&_td:first-child]:w-[42px] [&_td:first-child]:pl-4 [&_th:last-child]:w-11 [&_th:last-child]:text-right [&_th:last-child]:pr-3 [&_td:last-child]:w-11 [&_td:last-child]:text-right [&_td:last-child]:pr-3')}>
-                    <thead>
-                      <tr>
-                        <th>
-                          <input
-                            className="size-4 accent-[#6366f1] cursor-pointer"
-                            type="checkbox"
-                            checked={pageRows.length > 0 && pageSelectedCount === pageRows.length}
-                            onChange={togglePageSelected}
-                            aria-label="Select page"
-                          />
-                        </th>
-                        <th>Log ID</th>
-                        <th>Date & Time</th>
-                        <th>User</th>
-                        <th>Module</th>
-                        <th>Action</th>
-                        <th>Record ID</th>
-                        <th>IP Address</th>
-                        <th>Device</th>
-                        <th>Details</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pageRows.map((log) => {
-                        const selected = selectedIds.includes(log.id)
-                        const active = activeLog?.id === log.id
-                        return (
-                          <tr
-                            key={log.id}
-                            className={cx(
-                              'cursor-pointer',
-                              active && 'bg-indigo-500/10',
-                            )}
-                            onClick={() => setActiveId(log.id)}
-                          >
-                            <td onClick={(event) => event.stopPropagation()}>
-                              <input
-                                className="size-4 accent-[#6366f1] cursor-pointer"
-                                type="checkbox"
-                                checked={selected}
-                                onChange={() => toggleSelected(log.id)}
-                                aria-label={`Select ${logCode(log.id)}`}
-                              />
-                            </td>
-                            <td className="font-bold text-text">{logCode(log.id)}</td>
-                            <td>{formatDateTime(log.createdAt)}</td>
-                            <td>{log.user?.fullName || 'System'}</td>
-                            <td>
-                              <span className={cx(auditPill, moduleToneClass(log.entityType))}>
-                                {moduleLabel(log.entityType)}
-                              </span>
-                            </td>
-                            <td>
-                              <span className={cx(auditPill, actionTone[actionToneKey(log.action)])}>
-                                {humanize(log.action)}
-                              </span>
-                            </td>
-                            <td>{recordCode(log.entityType, log.entityId)}</td>
-                            <td>{log.ipAddress || '—'}</td>
-                            <td>{parseDevice(log.userAgent)}</td>
-                            <td>
-                              <button
-                                type="button"
-                                className={cx(
-                                  'grid place-items-center size-7 ml-auto border-0 rounded-lg bg-transparent text-text-muted cursor-pointer hover:text-[#6366f1] hover:bg-indigo-500/10',
-                                  active && 'text-[#6366f1] bg-indigo-500/10',
-                                )}
-                                aria-label="View details"
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  setActiveId(log.id)
-                                }}
-                              >
-                                <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </Spin>
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 px-4 pb-4">
-              <div className="flex flex-wrap gap-1.5">
-                {pageItems(safePage, totalPages).map((item, index) =>
-                  item === 'ellipsis' ? (
-                    <span key={`e-${index}`} className="min-w-8 h-8 px-2 grid place-items-center text-text-muted font-semibold">
-                      …
-                    </span>
-                  ) : (
-                    <button
-                      key={item}
-                      type="button"
-                      className={cx(pageBtn, item === safePage && pageBtnActive)}
-                      onClick={() => setPage(item)}
-                    >
-                      {item}
-                    </button>
-                  ),
-                )}
+            {!loading && filtered.length === 0 ? (
+              <div className={adminEmpty}>
+                <strong>{message ? 'Unable to load audit logs' : 'No matching audit events'}</strong>
+                <p>
+                  {message
+                    ? message
+                    : 'Try a different search, module, user, or date range, or clear the current filters.'}
+                </p>
+                <Button variant="secondary" onClick={clearFilters}>
+                  Clear filters
+                </Button>
               </div>
-              <label className="flex items-center gap-2 text-text-muted text-[0.82rem] mb-0 [&_.ant-select]:w-[84px]">
-                <Select
-                  value={pageSize}
-                  options={PAGE_SIZE_OPTIONS.map((value) => ({ value, label: String(value) }))}
-                  onChange={(value) => {
-                    setPageSize(Number(value))
+            ) : (
+              <div className="px-2 pb-3">
+                <DataTable
+                  loading={loading}
+                  data={filtered}
+                  columns={columns}
+                  rowKey="id"
+                  showRowNumber={false}
+                  selectRow
+                  clearSelectionTrigger={clearSelectionTrigger}
+                  onSelectRowsChange={(rows) =>
+                    setSelectedIds(rows.map((row) => String((row as AuditLog).id)))
+                  }
+                  isPaginate
+                  currentPage={safePage}
+                  setCurrentPage={setPage}
+                  limit={pageSize}
+                  setLimit={(size) => {
+                    setPageSize(size)
                     setPage(1)
                   }}
+                  showSizeChanger={filtered.length > 10}
+                  actionsMode="icons"
+                  actions={[
+                    {
+                      key: 'details',
+                      label: 'View details',
+                      icon: <HugeiconsIcon icon={ArrowRight01Icon} size={16} />,
+                      onClick: (record) => openLogDetails(record as unknown as AuditLog),
+                    },
+                  ]}
+                  onRow={(record) => ({
+                    onClick: () => openLogDetails(record as unknown as AuditLog),
+                    style: {
+                      cursor: 'pointer',
+                      ...(activeLog?.id === record.id && detailsOpen
+                        ? { background: 'rgb(99 102 241 / 0.1)' }
+                        : {}),
+                    },
+                  })}
                 />
-                per page
-              </label>
-            </div>
+              </div>
+            )}
           </section>
         </div>
       </div>
 
-      {activeLog
-        ? createPortal(
-            <div className={modalBackdrop} onClick={() => setActiveId(null)}>
-              <div
-                className={cx(modalPanel, 'grid content-start gap-4 w-[min(100%,560px)]')}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="audit-details-title"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <div className={cx(modalHeader, 'mb-0')}>
-                  <div className="flex flex-1 items-center justify-between gap-2.5 min-w-0">
-                    <h3 id="audit-details-title" className="m-0 text-base">
-                      Log Details
-                    </h3>
-                    <span className="text-text-faint text-[0.78rem] font-semibold">{logCode(activeLog.id)}</span>
-                  </div>
-                  <button type="button" className={modalClose} aria-label="Close" onClick={() => setActiveId(null)}>
-                    <HugeiconsIcon icon={Cancel01Icon} size={18} color="currentColor" strokeWidth={1.5} />
-                  </button>
-                </div>
-                <div className="grid gap-1.5">
-                  <h4 className="m-0 text-[1.02rem]">{humanize(activeLog.action)}</h4>
-                  <p className="m-0 text-text-muted text-[0.84rem]">{summaryText(activeLog)}</p>
-                </div>
-                <dl className="grid gap-2.5 m-0">
-                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
-                    <dt className="m-0 text-text-muted">Date & Time</dt>
-                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">{formatDateTime(activeLog.createdAt)}</dd>
-                  </div>
-                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
-                    <dt className="m-0 text-text-muted">User</dt>
-                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
-                      <div className="grid gap-px">
-                        <span>{activeLog.user?.fullName || 'System'}</span>
-                        {activeLog.user?.email ? (
-                          <small className="text-text-faint font-medium">{activeLog.user.email}</small>
-                        ) : null}
-                      </div>
-                    </dd>
-                  </div>
-                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
-                    <dt className="m-0 text-text-muted">Module</dt>
-                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
-                      <span className={cx(auditPill, moduleToneClass(activeLog.entityType))}>
-                        {moduleLabel(activeLog.entityType)}
-                      </span>
-                    </dd>
-                  </div>
-                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
-                    <dt className="m-0 text-text-muted">Record ID</dt>
-                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
-                      {recordCode(activeLog.entityType, activeLog.entityId)}
-                    </dd>
-                  </div>
-                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
-                    <dt className="m-0 text-text-muted">IP Address</dt>
-                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">{activeLog.ipAddress || '—'}</dd>
-                  </div>
-                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
-                    <dt className="m-0 text-text-muted">Device</dt>
-                    <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">{parseDevice(activeLog.userAgent)}</dd>
-                  </div>
-                </dl>
-                {changePairs(activeLog.metadata).length ? (
-                  <>
-                    <h4 className="mt-1 mb-0 text-text text-[0.92rem]">Change Details</h4>
-                    {changePairs(activeLog.metadata).map((change) => (
-                      <div key={change.label} className="flex flex-wrap items-center gap-2">
-                        <span className="w-full text-text-muted text-[0.8rem]">{change.label}</span>
-                        <span className={cx(auditPill, actionTone.rejected)}>{change.from}</span>
-                        <span className="text-text-faint">→</span>
-                        <span className={cx(auditPill, actionTone.created)}>{change.to}</span>
-                        <div className="flex justify-between gap-3 w-full text-text-faint text-[0.7rem]">
-                          <span>Previous Value</span>
-                          <span>New Value</span>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                ) : null}
-                {extraMetadata(activeLog.metadata).length ? (
-                  <>
-                    <h4 className="mt-1 mb-0 text-text text-[0.92rem]">Additional Info</h4>
-                    <dl className="grid gap-2">
-                      {extraMetadata(activeLog.metadata).map(([key, value]) => (
-                        <div key={key} className="flex justify-between gap-3 text-[0.84rem]">
-                          <dt className="m-0 text-text-muted">{humanize(key)}</dt>
-                          <dd className="m-0 font-semibold text-right [overflow-wrap:anywhere]">{stringifyMeta(value)}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </>
-                ) : null}
-                <div className="flex gap-2.5 items-start mt-1 p-3 rounded-xl bg-[#eef2ff] text-[#4338ca] text-[0.8rem] leading-[1.45] dark:bg-indigo-500/20 dark:text-[#c7d2fe]">
-                  <span className="shrink-0 size-[18px] grid place-items-center mt-px rounded-full bg-[#c7d2fe] font-extrabold text-[0.72rem] dark:bg-indigo-500/40">
-                    i
-                  </span>
-                  This log is immutable and cannot be edited or deleted by regular users.
-                </div>
+      <AntModal
+        open={detailsOpen}
+        onClose={closeLogDetails}
+        afterClose={() => setActiveLog(null)}
+        title="Log Details"
+        titleExtra={activeLog ? logCode(activeLog.id) : undefined}
+        width={560}
+      >
+        {activeLog ? (
+          <div className="grid content-start gap-4">
+            <div className="grid gap-1.5">
+              <h4 className="m-0 text-[1.02rem] font-semibold text-text">{humanize(activeLog.action)}</h4>
+              <p className="m-0 text-text-muted text-[0.84rem]">{summaryText(activeLog)}</p>
+            </div>
+            <dl className="grid gap-2.5 m-0">
+              <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                <dt className="m-0 text-text-muted">Date & Time</dt>
+                <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
+                  {formatDateTime(activeLog.createdAt)}
+                </dd>
               </div>
-            </div>,
-            document.body,
-          )
-        : null}
+              <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                <dt className="m-0 text-text-muted">User</dt>
+                <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
+                  <div className="grid gap-px">
+                    <span>{activeLog.user?.fullName || 'System'}</span>
+                    {activeLog.user?.email ? (
+                      <small className="text-text-faint font-medium">{activeLog.user.email}</small>
+                    ) : null}
+                  </div>
+                </dd>
+              </div>
+              <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                <dt className="m-0 text-text-muted">Module</dt>
+                <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
+                  <span className={cx(auditPill, moduleToneClass(activeLog.entityType))}>
+                    {moduleLabel(activeLog.entityType)}
+                  </span>
+                </dd>
+              </div>
+              <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                <dt className="m-0 text-text-muted">Record ID</dt>
+                <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
+                  {recordCode(activeLog.entityType, activeLog.entityId)}
+                </dd>
+              </div>
+              <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                <dt className="m-0 text-text-muted">IP Address</dt>
+                <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
+                  {activeLog.ipAddress || '—'}
+                </dd>
+              </div>
+              <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2.5 items-start text-[0.84rem]">
+                <dt className="m-0 text-text-muted">Device</dt>
+                <dd className="m-0 text-text font-semibold [overflow-wrap:anywhere]">
+                  {parseDevice(activeLog.userAgent)}
+                </dd>
+              </div>
+            </dl>
+            {changePairs(activeLog.metadata).length ? (
+              <>
+                <h4 className="mt-1 mb-0 text-text text-[0.92rem]">Change Details</h4>
+                {changePairs(activeLog.metadata).map((change) => (
+                  <div key={change.label} className="flex flex-wrap items-center gap-2">
+                    <span className="w-full text-text-muted text-[0.8rem]">{change.label}</span>
+                    <span className={cx(auditPill, actionTone.rejected)}>{change.from}</span>
+                    <span className="text-text-faint">→</span>
+                    <span className={cx(auditPill, actionTone.created)}>{change.to}</span>
+                    <div className="flex justify-between gap-3 w-full text-text-faint text-[0.7rem]">
+                      <span>Previous Value</span>
+                      <span>New Value</span>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : null}
+            {extraMetadata(activeLog.metadata).length ? (
+              <>
+                <h4 className="mt-1 mb-0 text-text text-[0.92rem]">Additional Info</h4>
+                <dl className="grid gap-2">
+                  {extraMetadata(activeLog.metadata).map(([key, value]) => (
+                    <div key={key} className="flex justify-between gap-3 text-[0.84rem]">
+                      <dt className="m-0 text-text-muted">{humanize(key)}</dt>
+                      <dd className="m-0 font-semibold text-right [overflow-wrap:anywhere]">
+                        {stringifyMeta(value)}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </>
+            ) : null}
+            <div className="flex gap-2.5 items-start mt-1 p-3 rounded-xl bg-[#eef2ff] text-[#4338ca] text-[0.8rem] leading-[1.45] dark:bg-indigo-500/20 dark:text-[#c7d2fe]">
+              <span className="shrink-0 size-[18px] grid place-items-center mt-px rounded-full bg-[#c7d2fe] font-extrabold text-[0.72rem] dark:bg-indigo-500/40">
+                i
+              </span>
+              This log is immutable and cannot be edited or deleted by regular users.
+            </div>
+          </div>
+        ) : null}
+      </AntModal>
     </div>
   )
 }

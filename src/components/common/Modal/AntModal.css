@@ -1,0 +1,50 @@
+/* Smooth open / close for Campusly AntModal */
+
+.campusly-ant-modal .ant-modal-close {
+  top: 14px;
+  inset-inline-end: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--icon-color, #4a5560);
+}
+
+.campusly-ant-modal .ant-modal-close:hover {
+  background: var(--hover-bg, #efece6);
+  color: var(--text-strong, #2f3b46);
+}
+
+.campusly-ant-modal__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding-inline-end: 28px;
+}
+
+.campusly-ant-modal__title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text, #16324f);
+}
+
+.campusly-ant-modal__title-extra {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-faint, #8b97a1);
+}
+
+[data-theme='dark'] .campusly-ant-modal .ant-modal-content {
+  background: var(--surface);
+}
+
+[data-theme='dark'] .campusly-ant-modal__title {
+  color: var(--text);
+}
+
+[data-theme='dark'] .campusly-ant-modal__title-extra {
+  color: var(--text-faint);
+}
