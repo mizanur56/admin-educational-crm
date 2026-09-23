@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form } from "antd";
+import { Alert, Button, Form } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Input from "../components/Input";
@@ -10,7 +10,10 @@ type ForgotValues = {
 };
 
 const cardClass =
-  "w-full max-w-[400px] rounded-2xl border border-card-border bg-surface px-10 py-10 shadow-card sm:px-12 sm:py-11 [&_.ant-form-item-label>label]:text-[0.9rem] [&_.ant-form-item-label>label]:font-semibold [&_.ant-form-item-label>label]:text-text-strong";
+  "w-full max-w-[400px] rounded-2xl border border-card-border bg-surface p-6 shadow-card";
+
+const formClass =
+  "[&_.ant-form-item-label>label]:text-[0.9rem] [&_.ant-form-item-label>label]:font-semibold [&_.ant-form-item-label>label]:text-text-strong";
 
 export default function ForgotPassword() {
   const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
@@ -54,13 +57,13 @@ export default function ForgotPassword() {
         title="Forgot Password"
         description="Request a secure password reset link for your EduConsult CRM account."
       />
-      <Card>
+      <div className={cardClass}>
         <Form
           form={form}
           layout="vertical"
           requiredMark={false}
           onFinish={onFinish}
-          className={cardClass}
+          className={formClass}
         >
           <div className="mb-6 text-center">
             <h1 className="m-0 mb-1.5 text-[1.55rem] leading-tight font-bold tracking-tight text-text-strong">
@@ -115,7 +118,7 @@ export default function ForgotPassword() {
             </Link>
           </p>
         </Form>
-      </Card>
+      </div>
     </>
   );
 }
