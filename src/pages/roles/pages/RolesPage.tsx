@@ -3,14 +3,15 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { useOutletContext, useLocation } from 'react-router-dom'
 import {
-  createRole,
-  deleteRole,
-  listPermissions,
-  listRoles,
-  setRolePermissions,
-  updateRole,
-  updateRoleStatus,
-} from '../../api/client'
+  useCreateRoleMutation,
+  useDeleteRoleMutation,
+  useLazyListPermissionsQuery,
+  useLazyListRolesQuery,
+  useSetRolePermissionsMutation,
+  useUpdateRoleMutation,
+  useUpdateRoleStatusMutation,
+} from '@/redux/features/roles/rolesApi'
+import { getApiError } from '@/utils/apiError'
 import { HugeiconsIcon } from '@hugeicons/react'
 import type { IconSvgElement } from '@hugeicons/react'
 import {
@@ -83,6 +84,14 @@ export default function RolesPage() {
   const syncedSearch = useRef(false)
   const formLocked = formMode === 'view'
 
+  const [listRoles] = useLazyListRolesQuery()
+  const [listPermissions] = useLazyListPermissionsQuery()
+  const [createRole] = useCreateRoleMutation()
+  const [updateRole] = useUpdateRoleMutation()
+  const [updateRoleStatus] = useUpdateRoleStatusMutation()
+  const [deleteRole] = useDeleteRoleMutation()
+  const [setRolePermissions] = useSetRolePermissionsMutation()
+
   const grouped = useMemo(() => {
     const query = permissionSearch.trim().toLowerCase()
     const map = new Map<string, PermissionRecord[]>()
@@ -109,11 +118,11 @@ export default function RolesPage() {
     if (!options?.silent) {
       setLoading(true)
     }
-    const result = await listRoles({ search: options?.search ?? search, status })
-    if (result.ok) {
-      setRoles(result.data.roles)
-    } else {
-      showToast(result.data?.error || 'Unable to load roles.', 'error')
+    try {
+      const data = await listRoles({ search: options?.search ?? search, status }).unwrap()
+      setRoles(data.roles)
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to load roles.'), 'error')
     }
     if (!options?.silent) {
       setLoading(false)
@@ -134,12 +143,11 @@ export default function RolesPage() {
   }, [location.search])
 
   useEffect(() => {
-    listPermissions().then((result) => {
-      if (result.ok) {
-        setPermissions(result.data.permissions)
-      }
-    })
-  }, [])
+    void listPermissions()
+      .unwrap()
+      .then((data) => setPermissions(data.permissions))
+      .catch(() => undefined)
+  }, [listPermissions])
 
   useEffect(
     () => () => {
@@ -181,29 +189,33 @@ export default function RolesPage() {
 
   async function saveRole(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const result = selected ? await updateRole(selected.id, form) : await createRole(form)
-    if (!result.ok) {
-      showToast(result.data?.error || 'Unable to save role.', 'error')
-      return
+    try {
+      if (selected) {
+        await updateRole({ id: selected.id, body: form }).unwrap()
+      } else {
+        await createRole(form).unwrap()
+      }
+      showToast(selected ? 'Role updated.' : 'Role created.')
+      setFormOpen(false)
+      await load()
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to save role.'), 'error')
     }
-    showToast(selected ? 'Role updated.' : 'Role created.')
-    setFormOpen(false)
-    await load()
   }
 
   async function removeRole(role: RoleRecord) {
-    const result = await deleteRole(role.id)
-    if (!result.ok) {
-      showToast(result.data?.error || 'This role is currently assigned to users.', 'error')
-      return
+    try {
+      await deleteRole(role.id).unwrap()
+      showToast('Role deleted.')
+      if (selected?.id === role.id) {
+        setSelected(null)
+        setFormOpen(false)
+        setPermissionOpen(false)
+      }
+      await load()
+    } catch (err) {
+      showToast(getApiError(err, 'This role is currently assigned to users.'), 'error')
     }
-    showToast('Role deleted.')
-    if (selected?.id === role.id) {
-      setSelected(null)
-      setFormOpen(false)
-      setPermissionOpen(false)
-    }
-    await load()
   }
 
   async function setRoleActive(role: RoleRecord, next: RecordStatus) {
@@ -212,13 +224,11 @@ export default function RolesPage() {
     }
     setStatusUpdatingId(role.id)
     try {
-      const result = await updateRoleStatus(role.id, next)
-      if (!result.ok) {
-        showToast(result.data?.error || 'Unable to update status.', 'error')
-        return
-      }
+      await updateRoleStatus({ id: role.id, status: next }).unwrap()
       showToast(`Role successfully ${next === 'ACTIVE' ? 'activated' : 'deactivated'}.`)
       await load({ silent: true })
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to update status.'), 'error')
     } finally {
       setStatusUpdatingId(null)
     }
@@ -228,14 +238,14 @@ export default function RolesPage() {
     if (!selected) {
       return
     }
-    const result = await setRolePermissions(selected.id, checked)
-    if (!result.ok) {
-      showToast(result.data?.error || 'Unable to save permissions.', 'error')
-      return
+    try {
+      await setRolePermissions({ id: selected.id, permissionIds: checked }).unwrap()
+      showToast('Permissions saved. Changes apply on the next request.')
+      setPermissionOpen(false)
+      await load()
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to save permissions.'), 'error')
     }
-    showToast('Permissions saved. Changes apply on the next request.')
-    setPermissionOpen(false)
-    await load()
   }
 
   return (

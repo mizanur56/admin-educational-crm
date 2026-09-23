@@ -10,4 +10,4 @@ const auditLogsApi = baseApi.injectEndpoints({
   }),
 })
 
-export const { useListAuditLogsQuery } = auditLogsApi
+export const { useListAuditLogsQuery, useLazyListAuditLogsQuery } = auditLogsApi

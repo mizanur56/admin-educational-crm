@@ -127,15 +127,19 @@ const usersApi = baseApi.injectEndpoints({
 
 export const {
   useListUsersQuery,
+  useLazyListUsersQuery,
   useGetUserQuery,
+  useLazyGetUserQuery,
   useCreateUserMutation,
   useUpdateUserMutation,
   useUpdateUserStatusMutation,
   useListUserSessionsQuery,
+  useLazyListUserSessionsQuery,
   useRevokeUserSessionMutation,
   useForceLogoutUserMutation,
   useAdminPasswordResetMutation,
   useSetUserOverridesMutation,
   useSetUserScopesMutation,
   useListUserActivityQuery,
+  useLazyListUserActivityQuery,
 } = usersApi

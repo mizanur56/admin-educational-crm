@@ -12,7 +12,8 @@ import {
   File01Icon,
   UserMultiple02Icon,
 } from '@hugeicons/core-free-icons'
-import { listAuditLogs } from '../../api/client'
+import { useLazyListAuditLogsQuery } from '@/redux/features/auditLogs/auditLogsApi'
+import { getApiError } from '@/utils/apiError'
 import { readUrlSearchQuery } from '../../lib/url-search'
 import Button from '../../components/Button'
 import Input from '../../components/Input'
@@ -378,6 +379,7 @@ export default function AuditLogsPage() {
   const [clearSelectionTrigger, setClearSelectionTrigger] = useState(0)
   const [activeLog, setActiveLog] = useState<AuditLog | null>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
+  const [listAuditLogs] = useLazyListAuditLogsQuery()
 
   function openLogDetails(log: AuditLog) {
     setActiveLog(log)
@@ -390,12 +392,12 @@ export default function AuditLogsPage() {
 
   async function load() {
     setLoading(true)
-    const result = await listAuditLogs()
-    if (result.ok) {
-      setLogs(result.data.logs)
+    try {
+      const data = await listAuditLogs().unwrap()
+      setLogs(data.logs)
       setMessage('')
-    } else {
-      setMessage(result.data?.error || 'You do not have permission to perform this action.')
+    } catch (err) {
+      setMessage(getApiError(err, 'You do not have permission to perform this action.'))
     }
     setLoading(false)
   }

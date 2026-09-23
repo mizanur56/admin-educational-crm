@@ -128,17 +128,36 @@ const employeesApi = baseApi.injectEndpoints({
         { type: 'Employees', id: 'LIST' },
       ],
     }),
+    fetchEmployeeDocumentBlob: builder.query<
+      { blob: Blob; mimeType: string },
+      { employeeId: string; documentId: string }
+    >({
+      query: ({ employeeId, documentId }) => ({
+        url: `/employees/${employeeId}/documents/${documentId}`,
+        responseHandler: async (response) => {
+          const blob = await response.blob()
+          return {
+            blob,
+            mimeType: response.headers.get('content-type') || blob.type,
+          }
+        },
+      }),
+    }),
   }),
 })
 
 export const {
   useListEmployeesQuery,
+  useLazyListEmployeesQuery,
   useListEmployeeOptionsQuery,
+  useLazyListEmployeeOptionsQuery,
   useGetEmployeeQuery,
+  useLazyGetEmployeeQuery,
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
   useUploadEmployeePhotoMutation,
   useUploadEmployeeDocumentMutation,
   useDeleteEmployeeDocumentMutation,
   useUpdateEmployeeStatusMutation,
+  useLazyFetchEmployeeDocumentBlobQuery,
 } = employeesApi
