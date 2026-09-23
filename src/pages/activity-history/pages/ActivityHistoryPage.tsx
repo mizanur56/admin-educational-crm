@@ -28,7 +28,7 @@ import Select from '../../../components/Select'
 import UserAvatar from '../../../components/UserAvatar'
 import { hasPermission } from '../../../lib/access'
 import { readUrlSearchQuery } from '../../../lib/url-search'
-import type { ActivityFeedCategory, ActivityFeedItem, ActivityFeedResponse, ActivitySummaryStat, AuthSession } from '../../types'
+import type { ActivityFeedCategory, ActivityFeedItem, ActivityFeedResponse, ActivitySummaryStat, AuthSession } from '../../../types'
 import { useLocation, useOutletContext } from 'react-router-dom'
 import {
   adminBanner,

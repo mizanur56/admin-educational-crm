@@ -61,7 +61,7 @@ import type {
   EmployeeCrmAccess,
   EmployeeOptions,
   EmployeeRecord,
-} from '../../types'
+} from '../../../types'
 type ToastState = { text: string; type: 'success' | 'error' }
 
 type Filters = {

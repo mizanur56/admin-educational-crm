@@ -107,7 +107,7 @@ import type {
   UserActivity,
   UserSession,
   UserStatus,
-} from '../../types'
+} from '../../../types'
 type FormMode = 'create' | 'view' | 'edit'
 type ViewTab = 'overview' | 'permissions' | 'leads' | 'applications' | 'documents' | 'performance'
 type ToastState = { text: string; type: 'success' | 'error' }

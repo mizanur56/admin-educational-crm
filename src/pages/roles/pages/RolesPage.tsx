@@ -30,7 +30,7 @@ import PageMeta from '../../../components/PageMeta'
 import RowActionMenu, { type RowActionItem } from '../../../components/RowActionMenu'
 import { hasPermission } from '../../../lib/access'
 import { readUrlSearchQuery } from '../../../lib/url-search'
-import type { AuthSession, PermissionRecord, RecordStatus, RoleRecord } from '../../types'
+import type { AuthSession, PermissionRecord, RecordStatus, RoleRecord } from '../../../types'
 type FormMode = 'create' | 'view' | 'edit'
 type ToastState = { text: string; type: 'success' | 'error' }
 

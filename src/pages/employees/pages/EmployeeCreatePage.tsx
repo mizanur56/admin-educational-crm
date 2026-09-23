@@ -69,7 +69,7 @@ import Select from '../../../components/Select'
 import PageHeader from '../../../components/PageHeader'
 import PageMeta from '../../../components/PageMeta'
 import { hasPermission } from '../../../lib/access'
-import type { AuthSession, EmployeeOptions, EmployeeRecord, UserStatus } from '../../types'
+import type { AuthSession, EmployeeOptions, EmployeeRecord, UserStatus } from '../../../types'
 type FieldErrors = Record<string, string>
 type ToastState = { text: string; type: 'success' | 'error' }
 type ExistingDocument = { id: string; fileName: string; mimeType: string }

@@ -40,7 +40,7 @@ import Button from '../../../components/Button'
 import PageHeader from '../../../components/PageHeader'
 import PageMeta from '../../../components/PageMeta'
 import { hasPermission } from '../../../lib/access'
-import type { AuthSession, EmployeeCrmAccess, EmployeeRecord } from '../../types'
+import type { AuthSession, EmployeeCrmAccess, EmployeeRecord } from '../../../types'
 type ProfileSection = {
   id: string
   label: string

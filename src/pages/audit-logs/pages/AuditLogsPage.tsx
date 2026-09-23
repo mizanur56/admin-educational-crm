@@ -22,7 +22,7 @@ import PageMeta from '../../../components/PageMeta'
 import Select from '../../../components/Select'
 import { DataTable } from '../../../components/common/Tables'
 import { AntModal } from '../../../components/common/Modal'
-import type { AuditLog } from '../../types'
+import type { AuditLog } from '../../../types'
 import { useLocation } from 'react-router-dom'
 import {
   adminBanner,

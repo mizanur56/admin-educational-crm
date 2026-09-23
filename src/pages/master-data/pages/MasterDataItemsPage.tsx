@@ -80,7 +80,7 @@ import type {
   MasterDataImportResult,
   MasterDataItem,
   RecordStatus,
-} from '../../types'
+} from '../../../types'
 type FormMode = 'create' | 'edit'
 type ToastState = { text: string; type: 'success' | 'error' }
 
