@@ -39,7 +39,7 @@ import {
   userViewScopeBase,
   userViewScopeTone,
   adminTableRowStatusUpdated,
-} from '../../styles/admin'
+} from '../../../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useOutletContext, useLocation } from 'react-router-dom'
@@ -60,7 +60,7 @@ import {
 import { useLazyListRolesQuery } from '@/redux/features/roles/rolesApi'
 import { useLazyListDepartmentsQuery } from '@/redux/features/masterData/masterDataApi'
 import { getApiError } from '@/utils/apiError'
-import { patchCurrentAuthUser } from '../../lib/auth-session'
+import { patchCurrentAuthUser } from '../../../lib/auth-session'
 import { HugeiconsIcon } from '@hugeicons/react'
 import type { IconSvgElement } from '@hugeicons/react'
 import {
@@ -89,14 +89,14 @@ import {
   ViewIcon,
 } from '@hugeicons/core-free-icons'
 import { Skeleton, Spin, Switch } from 'antd'
-import Button from '../../components/Button'
-import RowActionMenu, { type RowActionItem } from '../../components/RowActionMenu'
-import Input from '../../components/Input'
-import Select from '../../components/Select'
-import PageHeader from '../../components/PageHeader'
-import PageMeta from '../../components/PageMeta'
-import { hasPermission } from '../../lib/access'
-import { readUrlSearchQuery } from '../../lib/url-search'
+import Button from '../../../components/Button'
+import RowActionMenu, { type RowActionItem } from '../../../components/RowActionMenu'
+import Input from '../../../components/Input'
+import Select from '../../../components/Select'
+import PageHeader from '../../../components/PageHeader'
+import PageMeta from '../../../components/PageMeta'
+import { hasPermission } from '../../../lib/access'
+import { readUrlSearchQuery } from '../../../lib/url-search'
 import type {
   AdminUser,
   AuthSession,

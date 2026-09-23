@@ -26,7 +26,7 @@ import {
   statusConfirmCopy,
   statusConfirmPanel,
   tableWrap,
-} from '../../styles/admin'
+} from '../../../styles/admin'
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, Navigate, NavLink, useLocation, useOutletContext, useParams } from 'react-router-dom'
@@ -52,12 +52,12 @@ import {
 import { DatePicker, Spin, Switch } from 'antd'
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
-import Button from '../../components/Button'
-import Input from '../../components/Input'
-import Select from '../../components/Select'
-import PageHeader from '../../components/PageHeader'
-import PageMeta from '../../components/PageMeta'
-import RowActionMenu, { type RowActionItem } from '../../components/RowActionMenu'
+import Button from '../../../components/Button'
+import Input from '../../../components/Input'
+import Select from '../../../components/Select'
+import PageHeader from '../../../components/PageHeader'
+import PageMeta from '../../../components/PageMeta'
+import RowActionMenu, { type RowActionItem } from '../../../components/RowActionMenu'
 import {
   useCreateMasterDataItemMutation,
   useDeleteMasterDataItemMutation,
@@ -70,9 +70,9 @@ import {
   useUpdateMasterDataItemMutation,
 } from '@/redux/features/masterData/masterDataApi'
 import { getApiError } from '@/utils/apiError'
-import { hasPermission } from '../../lib/access'
-import { getMasterDataGroupByCategory, getMasterDataNavGroup } from '../../config/masterData'
-import { readUrlSearchQuery } from '../../lib/url-search'
+import { hasPermission } from '../../../lib/access'
+import { getMasterDataGroupByCategory, getMasterDataNavGroup } from '../../../config/masterData'
+import { readUrlSearchQuery } from '../../../lib/url-search'
 import type {
   AuthSession,
   MasterDataCategory,

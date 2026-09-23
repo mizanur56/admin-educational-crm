@@ -30,7 +30,7 @@ import {
   photoUploadSpin,
   statusConfirmCopy,
   statusConfirmPanel,
-} from '../../styles/admin'
+} from '../../../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
@@ -63,12 +63,12 @@ import {
   useUploadEmployeePhotoMutation,
 } from '@/redux/features/employees/employeesApi'
 import { getApiError, getApiErrorFields } from '@/utils/apiError'
-import Button from '../../components/Button'
-import Input from '../../components/Input'
-import Select from '../../components/Select'
-import PageHeader from '../../components/PageHeader'
-import PageMeta from '../../components/PageMeta'
-import { hasPermission } from '../../lib/access'
+import Button from '../../../components/Button'
+import Input from '../../../components/Input'
+import Select from '../../../components/Select'
+import PageHeader from '../../../components/PageHeader'
+import PageMeta from '../../../components/PageMeta'
+import { hasPermission } from '../../../lib/access'
 import type { AuthSession, EmployeeOptions, EmployeeRecord, UserStatus } from '../../types'
 type FieldErrors = Record<string, string>
 type ToastState = { text: string; type: 'success' | 'error' }
@@ -695,9 +695,8 @@ export default function EmployeeCreatePage() {
       url: '',
       loading: true,
     })
-    const result = await fetchEmployeeDocumentBlob({ employeeId: id, documentId: existing.id })
     try {
-      const data = await result.unwrap()
+      const data = await fetchEmployeeDocumentBlob({ employeeId: id, documentId: existing.id }).unwrap()
       const url = URL.createObjectURL(data.blob)
       previewUrl.current = url
       setPreview({

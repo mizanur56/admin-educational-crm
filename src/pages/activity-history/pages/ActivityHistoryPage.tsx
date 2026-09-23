@@ -20,14 +20,14 @@ import {
   useRecordActivityExportMutation,
 } from '@/redux/features/activities/activitiesApi'
 import { getApiError } from '@/utils/apiError'
-import Button from '../../components/Button'
-import Input from '../../components/Input'
-import PageHeader from '../../components/PageHeader'
-import PageMeta from '../../components/PageMeta'
-import Select from '../../components/Select'
-import UserAvatar from '../../components/UserAvatar'
-import { hasPermission } from '../../lib/access'
-import { readUrlSearchQuery } from '../../lib/url-search'
+import Button from '../../../components/Button'
+import Input from '../../../components/Input'
+import PageHeader from '../../../components/PageHeader'
+import PageMeta from '../../../components/PageMeta'
+import Select from '../../../components/Select'
+import UserAvatar from '../../../components/UserAvatar'
+import { hasPermission } from '../../../lib/access'
+import { readUrlSearchQuery } from '../../../lib/url-search'
 import type { ActivityFeedCategory, ActivityFeedItem, ActivityFeedResponse, ActivitySummaryStat, AuthSession } from '../../types'
 import { useLocation, useOutletContext } from 'react-router-dom'
 import {
@@ -40,7 +40,7 @@ import {
   modalClose,
   modalHeader,
   modalPanel,
-} from '../../styles/admin'
+} from '../../../styles/admin'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
 

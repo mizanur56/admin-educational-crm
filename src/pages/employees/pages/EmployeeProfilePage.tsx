@@ -8,7 +8,7 @@ import {
   photoCameraBadge,
   photoUploadSpin,
   statusPill,
-} from '../../styles/admin'
+} from '../../../styles/admin'
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { Spin } from 'antd'
@@ -36,10 +36,10 @@ import {
   useUploadEmployeePhotoMutation,
 } from '@/redux/features/employees/employeesApi'
 import { getApiError } from '@/utils/apiError'
-import Button from '../../components/Button'
-import PageHeader from '../../components/PageHeader'
-import PageMeta from '../../components/PageMeta'
-import { hasPermission } from '../../lib/access'
+import Button from '../../../components/Button'
+import PageHeader from '../../../components/PageHeader'
+import PageMeta from '../../../components/PageMeta'
+import { hasPermission } from '../../../lib/access'
 import type { AuthSession, EmployeeCrmAccess, EmployeeRecord } from '../../types'
 type ProfileSection = {
   id: string

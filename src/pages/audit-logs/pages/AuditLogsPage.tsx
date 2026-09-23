@@ -14,14 +14,14 @@ import {
 } from '@hugeicons/core-free-icons'
 import { useLazyListAuditLogsQuery } from '@/redux/features/auditLogs/auditLogsApi'
 import { getApiError } from '@/utils/apiError'
-import { readUrlSearchQuery } from '../../lib/url-search'
-import Button from '../../components/Button'
-import Input from '../../components/Input'
-import PageHeader from '../../components/PageHeader'
-import PageMeta from '../../components/PageMeta'
-import Select from '../../components/Select'
-import { DataTable } from '../../components/common/Tables'
-import { AntModal } from '../../components/common/Modal'
+import { readUrlSearchQuery } from '../../../lib/url-search'
+import Button from '../../../components/Button'
+import Input from '../../../components/Input'
+import PageHeader from '../../../components/PageHeader'
+import PageMeta from '../../../components/PageMeta'
+import Select from '../../../components/Select'
+import { DataTable } from '../../../components/common/Tables'
+import { AntModal } from '../../../components/common/Modal'
 import type { AuditLog } from '../../types'
 import { useLocation } from 'react-router-dom'
 import {
@@ -29,7 +29,7 @@ import {
   adminCard,
   adminEmpty,
   adminPage,
-} from '../../styles/admin'
+} from '../../../styles/admin'
 
 type Filters = {
   search: string

@@ -26,7 +26,7 @@ import {
   statusConfirmPanel,
   tableWrap,
   adminTableRowStatusUpdated,
-} from '../../styles/admin'
+} from '../../../styles/admin'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
@@ -48,14 +48,14 @@ import {
 import { DatePicker, Spin, Switch } from 'antd'
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
-import Button from '../../components/Button'
-import Input from '../../components/Input'
-import Select from '../../components/Select'
-import PageHeader from '../../components/PageHeader'
-import PageMeta from '../../components/PageMeta'
-import RowActionMenu, { type RowActionItem } from '../../components/RowActionMenu'
-import { hasPermission } from '../../lib/access'
-import { readUrlSearchQuery } from '../../lib/url-search'
+import Button from '../../../components/Button'
+import Input from '../../../components/Input'
+import Select from '../../../components/Select'
+import PageHeader from '../../../components/PageHeader'
+import PageMeta from '../../../components/PageMeta'
+import RowActionMenu, { type RowActionItem } from '../../../components/RowActionMenu'
+import { hasPermission } from '../../../lib/access'
+import { readUrlSearchQuery } from '../../../lib/url-search'
 import type {
   AuthSession,
   EmployeeCrmAccess,
