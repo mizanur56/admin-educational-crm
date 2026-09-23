@@ -31,7 +31,11 @@ import {
   UserIcon,
   UserGroupIcon,
 } from '@hugeicons/core-free-icons'
-import { getEmployee, uploadEmployeePhoto } from '../../api/client'
+import {
+  useLazyGetEmployeeQuery,
+  useUploadEmployeePhotoMutation,
+} from '@/redux/features/employees/employeesApi'
+import { getApiError } from '@/utils/apiError'
 import Button from '../../components/Button'
 import PageHeader from '../../components/PageHeader'
 import PageMeta from '../../components/PageMeta'
@@ -265,6 +269,8 @@ export default function EmployeeProfilePage() {
   const [photoUploading, setPhotoUploading] = useState(false)
   const [photoError, setPhotoError] = useState('')
   const [localPhotoPreview, setLocalPhotoPreview] = useState('')
+  const [getEmployee] = useLazyGetEmployeeQuery()
+  const [uploadEmployeePhoto] = useUploadEmployeePhotoMutation()
 
   useEffect(() => {
     let cancelled = false
@@ -276,16 +282,19 @@ export default function EmployeeProfilePage() {
         return
       }
       setLoading(true)
-      const result = await getEmployee(id)
-      if (cancelled) {
-        return
-      }
-      if (result.ok) {
-        setEmployee(result.data.employee)
+      try {
+        const data = await getEmployee(id).unwrap()
+        if (cancelled) {
+          return
+        }
+        setEmployee(data.employee)
         setError('')
-      } else {
+      } catch (err) {
+        if (cancelled) {
+          return
+        }
         setEmployee(null)
-        setError(result.data?.error || 'Unable to load employee profile.')
+        setError(getApiError(err, 'Unable to load employee profile.'))
       }
       setLoading(false)
     }
@@ -294,7 +303,7 @@ export default function EmployeeProfilePage() {
     return () => {
       cancelled = true
     }
-  }, [id])
+  }, [id, getEmployee])
 
   const age = useMemo(() => ageFromDate(employee?.dateOfBirth), [employee?.dateOfBirth])
   const photo = localPhotoPreview || (employee ? photoSrc(employee) : '')
@@ -329,25 +338,25 @@ export default function EmployeeProfilePage() {
     })
     setPhotoError('')
     setPhotoUploading(true)
-    const result = await uploadEmployeePhoto(employee.id, file)
-    setPhotoUploading(false)
-    if (!result.ok) {
-      setPhotoError(result.data?.error || 'Unable to upload the profile photo.')
+    try {
+      const data = await uploadEmployeePhoto({ id: employee.id, file }).unwrap()
+      setEmployee(data.employee)
       setLocalPhotoPreview((current) => {
         if (current) {
           URL.revokeObjectURL(current)
         }
         return ''
       })
-      return
+    } catch (err) {
+      setPhotoError(getApiError(err, 'Unable to upload the profile photo.'))
+      setLocalPhotoPreview((current) => {
+        if (current) {
+          URL.revokeObjectURL(current)
+        }
+        return ''
+      })
     }
-    setEmployee(result.data.employee)
-    setLocalPhotoPreview((current) => {
-      if (current) {
-        URL.revokeObjectURL(current)
-      }
-      return ''
-    })
+    setPhotoUploading(false)
   }
 
   function scrollToSection(sectionId: string) {

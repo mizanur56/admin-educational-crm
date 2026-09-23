@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { globalSearch } from '../api/client'
+import { useLazyGlobalSearchQuery } from '@/redux/features/search/searchApi'
 import { APP_NAV_GROUPS, flattenSearchablePages, type NavItem } from '../config/navigation'
 import { hasPermission } from '../lib/access'
 import type { AuthSession, GlobalSearchHit } from '../types'
@@ -76,6 +76,7 @@ export default function GlobalSearch({ auth }: Props) {
   const [records, setRecords] = useState<GlobalSearchHit[]>([])
   const [isMac, setIsMac] = useState(false)
   const requestId = useRef(0)
+  const [triggerGlobalSearch] = useLazyGlobalSearchQuery()
   const permissionIndex = useMemo(
     () => collectPermissions(APP_NAV_GROUPS.flatMap((group) => group.items)),
     [],
@@ -175,35 +176,39 @@ export default function GlobalSearch({ auth }: Props) {
       return undefined
     }
 
-    const controller = new AbortController()
-    const timer = window.setTimeout(async () => {
+    let request: ReturnType<typeof triggerGlobalSearch> | undefined
+    const timer = window.setTimeout(() => {
       const current = ++requestId.current
       setLoading(true)
-      try {
-        const result = await globalSearch(needle, controller.signal)
-        if (current !== requestId.current) {
-          return
-        }
-        setRecords(result.ok ? result.data.results : [])
-      } catch (error) {
-        if ((error as { name?: string }).name === 'AbortError') {
-          return
-        }
-        if (current === requestId.current) {
-          setRecords([])
-        }
-      } finally {
-        if (current === requestId.current) {
-          setLoading(false)
-        }
-      }
+      request = triggerGlobalSearch(needle)
+      void request
+        .unwrap()
+        .then((data) => {
+          if (current !== requestId.current) {
+            return
+          }
+          setRecords(data.results)
+        })
+        .catch((error: unknown) => {
+          if ((error as { name?: string }).name === 'AbortError') {
+            return
+          }
+          if (current === requestId.current) {
+            setRecords([])
+          }
+        })
+        .finally(() => {
+          if (current === requestId.current) {
+            setLoading(false)
+          }
+        })
     }, 220)
 
     return () => {
       window.clearTimeout(timer)
-      controller.abort()
+      request?.abort()
     }
-  }, [open, query])
+  }, [open, query, triggerGlobalSearch])
 
   useEffect(() => {
     setActiveIndex(0)

@@ -59,16 +59,17 @@ import PageHeader from '../../components/PageHeader'
 import PageMeta from '../../components/PageMeta'
 import RowActionMenu, { type RowActionItem } from '../../components/RowActionMenu'
 import {
-  createMasterDataItem,
-  deleteMasterDataItem,
-  exportMasterData,
-  importMasterData,
-  listMasterDataCategories,
-  listMasterDataHistory,
-  listMasterDataItems,
-  listMasterDataOptions,
-  updateMasterDataItem,
-} from '../../api/client'
+  useCreateMasterDataItemMutation,
+  useDeleteMasterDataItemMutation,
+  useExportMasterDataMutation,
+  useImportMasterDataMutation,
+  useLazyListMasterDataCategoriesQuery,
+  useLazyListMasterDataHistoryQuery,
+  useLazyListMasterDataItemsQuery,
+  useLazyListMasterDataOptionsQuery,
+  useUpdateMasterDataItemMutation,
+} from '@/redux/features/masterData/masterDataApi'
+import { getApiError } from '@/utils/apiError'
 import { hasPermission } from '../../lib/access'
 import { getMasterDataGroupByCategory, getMasterDataNavGroup } from '../../config/masterData'
 import { readUrlSearchQuery } from '../../lib/url-search'
@@ -473,6 +474,15 @@ export default function MasterDataItemsPage() {
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const syncedSearch = useRef(false)
   const entityName = category?.name || 'Master data'
+  const [listMasterDataCategories] = useLazyListMasterDataCategoriesQuery()
+  const [listMasterDataItems] = useLazyListMasterDataItemsQuery()
+  const [listMasterDataOptions] = useLazyListMasterDataOptionsQuery()
+  const [listMasterDataHistory] = useLazyListMasterDataHistoryQuery()
+  const [createMasterDataItem] = useCreateMasterDataItemMutation()
+  const [updateMasterDataItem] = useUpdateMasterDataItemMutation()
+  const [deleteMasterDataItem] = useDeleteMasterDataItemMutation()
+  const [exportMasterData] = useExportMasterDataMutation()
+  const [importMasterData] = useImportMasterDataMutation()
 
   function showToast(text: string, type: ToastState['type'] = 'success') {
     setToast({ text, type })
@@ -491,11 +501,15 @@ export default function MasterDataItemsPage() {
     }
     setParentsLoading(true)
     try {
-      const options = await listMasterDataOptions(parentCategoryKey)
+      const data = await listMasterDataOptions({ category: parentCategoryKey }).unwrap()
       if (requestId !== parentsRequest.current) {
         return
       }
-      setParents(options.ok ? options.data.items : [])
+      setParents(data.items)
+    } catch {
+      if (requestId === parentsRequest.current) {
+        setParents([])
+      }
     } finally {
       if (requestId === parentsRequest.current) {
         setParentsLoading(false)
@@ -506,21 +520,20 @@ export default function MasterDataItemsPage() {
   async function loadCategory() {
     setMetaLoading(true)
     setParents([])
-    const result = await listMasterDataCategories()
-    if (!result.ok) {
-      showToast(result.data?.error || 'You are not authorized to manage master data.', 'error')
-      setMetaLoading(false)
+    try {
+      const data = await listMasterDataCategories().unwrap()
+      const match = data.groups.flatMap((group) => group.categories).find((item) => item.key === categoryKey)
+      if (match?.parentCategoryKey) {
+        setParentsLoading(true)
+      } else {
+        setParentsLoading(false)
+      }
+      setCategory(match || null)
+      await loadParents(match?.parentCategoryKey)
+    } catch (err) {
+      showToast(getApiError(err, 'You are not authorized to manage master data.'), 'error')
       setParentsLoading(false)
-      return
     }
-    const match = result.data.groups.flatMap((group) => group.categories).find((item) => item.key === categoryKey)
-    if (match?.parentCategoryKey) {
-      setParentsLoading(true)
-    } else {
-      setParentsLoading(false)
-    }
-    setCategory(match || null)
-    await loadParents(match?.parentCategoryKey)
     setMetaLoading(false)
   }
 
@@ -530,7 +543,7 @@ export default function MasterDataItemsPage() {
     }
     setLoading(true)
     try {
-      const result = await listMasterDataItems({
+      const data = await listMasterDataItems({
         category: categoryKey,
         search: searchValue,
         status,
@@ -539,12 +552,10 @@ export default function MasterDataItemsPage() {
         createdTo,
         sortBy,
         sortDir: 'asc',
-      })
-      if (result.ok) {
-        setItems(result.data.items)
-      } else {
-        showToast(result.data?.error || 'Unable to process the request. Please try again.', 'error')
-      }
+      }).unwrap()
+      setItems(data.items)
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to process the request. Please try again.'), 'error')
     } finally {
       setLoading(false)
       setSearching(false)
@@ -621,17 +632,21 @@ export default function MasterDataItemsPage() {
     setHistoryEntryId(null)
     setHistoryLoading(true)
     setHistoryOpen(true)
-    const result = await listMasterDataHistory(item.id, categoryKey)
-    if (requestId !== historyRequest.current) {
-      return
+    try {
+      const data = await listMasterDataHistory({ id: item.id, category: categoryKey }).unwrap()
+      if (requestId !== historyRequest.current) {
+        return
+      }
+      setHistoryLoading(false)
+      setHistory(data.history)
+      setHistoryEntryId(data.history[0]?.id ?? null)
+    } catch (err) {
+      if (requestId !== historyRequest.current) {
+        return
+      }
+      setHistoryLoading(false)
+      showToast(getApiError(err, 'Unable to load history.'), 'error')
     }
-    setHistoryLoading(false)
-    if (!result.ok) {
-      showToast(result.data?.error || 'Unable to load history.', 'error')
-      return
-    }
-    setHistory(result.data.history)
-    setHistoryEntryId(result.data.history[0]?.id ?? null)
   }
 
   function closeHistory() {
@@ -681,14 +696,16 @@ export default function MasterDataItemsPage() {
     }
     setFormSaving(true)
     try {
-      const result = selected ? await updateMasterDataItem(selected.id, payload) : await createMasterDataItem(payload)
-      if (!result.ok) {
-        showToast(result.data?.error || 'Unable to process the request. Please try again.', 'error')
-        return
+      if (selected) {
+        await updateMasterDataItem({ id: selected.id, body: payload }).unwrap()
+      } else {
+        await createMasterDataItem(payload).unwrap()
       }
       showToast(`${entityName} successfully ${selected ? 'updated' : 'created'}.`)
       setFormOpen(false)
       await loadItems()
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to process the request. Please try again.'), 'error')
     } finally {
       setFormSaving(false)
     }
@@ -700,24 +717,25 @@ export default function MasterDataItemsPage() {
     }
     setStatusUpdatingId(item.id)
     try {
-      const result = await updateMasterDataItem(item.id, {
-        categoryKey,
-        name: item.name,
-        code: item.code || '',
-        description: item.description || '',
-        status: next,
-        sortOrder: item.sortOrder,
-        parentId: item.parentId,
-        behaviorKey: item.behaviorKey,
-        startDate: extraText(item.extras, 'startDate'),
-        endDate: extraText(item.extras, 'endDate'),
-      })
-      if (!result.ok) {
-        showToast(result.data?.error || 'Unable to process the request. Please try again.', 'error')
-        return
-      }
+      await updateMasterDataItem({
+        id: item.id,
+        body: {
+          categoryKey,
+          name: item.name,
+          code: item.code || '',
+          description: item.description || '',
+          status: next,
+          sortOrder: item.sortOrder,
+          parentId: item.parentId,
+          behaviorKey: item.behaviorKey,
+          startDate: extraText(item.extras, 'startDate'),
+          endDate: extraText(item.extras, 'endDate'),
+        },
+      }).unwrap()
       showToast(`${entityName} successfully ${next === 'ACTIVE' ? 'activated' : 'deactivated'}.`)
       await loadItems()
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to process the request. Please try again.'), 'error')
     } finally {
       setStatusUpdatingId(null)
     }
@@ -733,42 +751,37 @@ export default function MasterDataItemsPage() {
     }
     setDeleteSaving(true)
     try {
-      const result = await deleteMasterDataItem(deleteTarget.id, categoryKey)
-      if (!result.ok) {
-        showToast(
-          result.data?.error || 'This value is already being used and cannot be deleted.',
-          'error',
-        )
-        return
-      }
+      await deleteMasterDataItem({ id: deleteTarget.id, category: categoryKey }).unwrap()
       showToast(`${entityName} successfully deleted.`)
       setDeleteTarget(null)
       await loadItems()
+    } catch (err) {
+      showToast(getApiError(err, 'This value is already being used and cannot be deleted.'), 'error')
     } finally {
       setDeleteSaving(false)
     }
   }
 
   async function handleExport(format: 'csv' | 'xlsx') {
-    const result = await exportMasterData(categoryKey, format)
-    if (!result.ok) {
-      showToast(result.data?.error || 'Unable to process the request. Please try again.', 'error')
-      return
+    try {
+      const data = await exportMasterData({ category: categoryKey, format }).unwrap()
+      downloadBlob(data.blob, data.fileName)
+      showToast(`Exported ${category?.name || 'master data'}.`)
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to process the request. Please try again.'), 'error')
     }
-    downloadBlob(result.data.blob, result.data.fileName)
-    showToast(`Exported ${category?.name || 'master data'}.`)
   }
 
   async function handleImport(file: File) {
-    const result = await importMasterData(categoryKey, file)
-    if (!result.ok) {
-      showToast(result.data?.error || 'Unable to import the selected data.', 'error')
-      return
+    try {
+      const data = await importMasterData({ category: categoryKey, file }).unwrap()
+      setImportResult(data)
+      setImportOpen(true)
+      showToast(`Imported ${data.successful} of ${data.total} records.`)
+      await loadItems()
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to import the selected data.'), 'error')
     }
-    setImportResult(result.data)
-    setImportOpen(true)
-    showToast(`Imported ${result.data.successful} of ${result.data.total} records.`)
-    await loadItems()
   }
 
   function downloadErrors() {

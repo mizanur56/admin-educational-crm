@@ -53,15 +53,16 @@ import {
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
-  createEmployee,
-  deleteEmployeeDocument,
-  fetchEmployeeDocumentBlob,
-  getEmployee,
-  listEmployeeOptions,
-  updateEmployee,
-  uploadEmployeeDocument,
-  uploadEmployeePhoto,
-} from '../../api/client'
+  useCreateEmployeeMutation,
+  useDeleteEmployeeDocumentMutation,
+  useLazyFetchEmployeeDocumentBlobQuery,
+  useLazyGetEmployeeQuery,
+  useLazyListEmployeeOptionsQuery,
+  useUpdateEmployeeMutation,
+  useUploadEmployeeDocumentMutation,
+  useUploadEmployeePhotoMutation,
+} from '@/redux/features/employees/employeesApi'
+import { getApiError, getApiErrorFields } from '@/utils/apiError'
 import Button from '../../components/Button'
 import Input from '../../components/Input'
 import Select from '../../components/Select'
@@ -447,6 +448,14 @@ export default function EmployeeCreatePage() {
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const previewUrl = useRef('')
   const hasExistingCrmAccount = Boolean(employee?.user)
+  const [listEmployeeOptions] = useLazyListEmployeeOptionsQuery()
+  const [getEmployee] = useLazyGetEmployeeQuery()
+  const [createEmployee] = useCreateEmployeeMutation()
+  const [updateEmployee] = useUpdateEmployeeMutation()
+  const [uploadEmployeePhoto] = useUploadEmployeePhotoMutation()
+  const [uploadEmployeeDocument] = useUploadEmployeeDocumentMutation()
+  const [deleteEmployeeDocument] = useDeleteEmployeeDocumentMutation()
+  const [fetchEmployeeDocumentBlob] = useLazyFetchEmployeeDocumentBlobQuery()
 
   const teams = useMemo(
     () => options?.departments.find((item) => item.id === form.departmentId)?.teams ?? [],
@@ -482,21 +491,22 @@ export default function EmployeeCreatePage() {
     : 'Add a staff record in clear sections. Employee ID is assigned automatically on save.'
 
   useEffect(() => {
-    listEmployeeOptions().then((result) => {
-      if (result.ok) {
-        const activeStatus = result.data.employmentStatuses.find((item) => item.code === 'ACTIVE')
-        setOptions(result.data)
+    void listEmployeeOptions()
+      .unwrap()
+      .then((data) => {
+        const activeStatus = data.employmentStatuses.find((item) => item.code === 'ACTIVE')
+        setOptions(data)
         if (!isEdit) {
           setForm((current) => ({
             ...current,
             employmentStatusId: current.employmentStatusId || activeStatus?.id || '',
           }))
         }
-      } else {
-        setFormError(result.data?.error || 'Unable to load employee options.')
-      }
-    })
-  }, [isEdit])
+      })
+      .catch((err: unknown) => {
+        setFormError(getApiError(err, 'Unable to load employee options.'))
+      })
+  }, [isEdit, listEmployeeOptions])
 
   useEffect(() => {
     if (!id) {
@@ -505,17 +515,18 @@ export default function EmployeeCreatePage() {
       return
     }
     setLoading(true)
-    getEmployee(id).then((result) => {
-      if (result.ok) {
-        setEmployee(result.data.employee)
-        setForm(formFromEmployee(result.data.employee))
+    void getEmployee(id)
+      .unwrap()
+      .then((data) => {
+        setEmployee(data.employee)
+        setForm(formFromEmployee(data.employee))
         setFormError('')
-      } else {
-        setFormError(result.data?.error || 'Unable to load employee.')
-      }
-      setLoading(false)
-    })
-  }, [id])
+      })
+      .catch((err: unknown) => {
+        setFormError(getApiError(err, 'Unable to load employee.'))
+      })
+      .finally(() => setLoading(false))
+  }, [id, getEmployee])
 
   useEffect(() => {
     if (!photo) {
@@ -598,20 +609,20 @@ export default function EmployeeCreatePage() {
       const preview = URL.createObjectURL(file)
       setPhotoPreview(preview)
       setPhotoUploading(true)
-      const result = await uploadEmployeePhoto(id, file)
-      setPhotoUploading(false)
-      URL.revokeObjectURL(preview)
-      if (!result.ok) {
+      try {
+        const data = await uploadEmployeePhoto({ id, file }).unwrap()
+        setEmployee(data.employee)
+        setPhoto(null)
+        setPhotoPreview(existingPhotoSrc(data.employee))
+        showToast('Profile photo updated.')
+      } catch (err) {
         setPhotoPreview(employee ? existingPhotoSrc(employee) : '')
-        const message = result.data?.error || 'Unable to upload the profile photo.'
+        const message = getApiError(err, 'Unable to upload the profile photo.')
         setErrors((current) => ({ ...current, photo: message }))
         showToast(message, 'error')
-        return
       }
-      setEmployee(result.data.employee)
-      setPhoto(null)
-      setPhotoPreview(existingPhotoSrc(result.data.employee))
-      showToast('Profile photo updated.')
+      setPhotoUploading(false)
+      URL.revokeObjectURL(preview)
       return
     }
 
@@ -639,15 +650,15 @@ export default function EmployeeCreatePage() {
     setDocumentUploading((current) => ({ ...current, [key]: true }))
     try {
       if (isEdit && id) {
-        const result = await uploadEmployeeDocument(id, key, file)
-        if (!result.ok) {
-          const message = result.data?.error || 'Unable to upload the document.'
+        try {
+          const data = await uploadEmployeeDocument({ id, field: key, file }).unwrap()
+          setEmployee(data.employee)
+          showToast('Document uploaded.')
+        } catch (err) {
+          const message = getApiError(err, 'Unable to upload the document.')
           setErrors((current) => ({ ...current, [key]: message }))
           showToast(message, 'error')
-          return
         }
-        setEmployee(result.data.employee)
-        showToast('Document uploaded.')
         return
       }
       await new Promise((resolve) => window.setTimeout(resolve, 250))
@@ -684,21 +695,22 @@ export default function EmployeeCreatePage() {
       url: '',
       loading: true,
     })
-    const result = await fetchEmployeeDocumentBlob(id, existing.id)
-    if (!result.ok) {
+    const result = await fetchEmployeeDocumentBlob({ employeeId: id, documentId: existing.id })
+    try {
+      const data = await result.unwrap()
+      const url = URL.createObjectURL(data.blob)
+      previewUrl.current = url
+      setPreview({
+        title: item.label,
+        fileName: existing.fileName,
+        mimeType: data.mimeType || existing.mimeType,
+        url,
+        loading: false,
+      })
+    } catch (err) {
       setPreview(null)
-      showToast(result.error, 'error')
-      return
+      showToast(getApiError(err, 'Unable to load the document.'), 'error')
     }
-    const url = URL.createObjectURL(result.blob)
-    previewUrl.current = url
-    setPreview({
-      title: item.label,
-      fileName: existing.fileName,
-      mimeType: result.mimeType || existing.mimeType,
-      url,
-      loading: false,
-    })
   }
 
   async function confirmDeleteDocument() {
@@ -707,16 +719,15 @@ export default function EmployeeCreatePage() {
     }
     if (deleteTarget.documentId && isEdit && id) {
       setDeletingDocument(true)
-      const result = await deleteEmployeeDocument(id, deleteTarget.documentId)
-      setDeletingDocument(false)
-      if (!result.ok) {
-        const message = result.data?.error || 'Unable to delete the document.'
-        showToast(message, 'error')
-        return
+      try {
+        const data = await deleteEmployeeDocument({ id, documentId: deleteTarget.documentId }).unwrap()
+        setEmployee(data.employee)
+        setDeleteTarget(null)
+        showToast('Document deleted.')
+      } catch (err) {
+        showToast(getApiError(err, 'Unable to delete the document.'), 'error')
       }
-      setEmployee(result.data.employee)
-      setDeleteTarget(null)
-      showToast('Document deleted.')
+      setDeletingDocument(false)
       return
     }
     setDocuments((current) => ({ ...current, [deleteTarget.key]: null }))
@@ -773,28 +784,30 @@ export default function EmployeeCreatePage() {
       }
     })
 
-    const result = isEdit && id ? await updateEmployee(id, body) : await createEmployee(body)
-    if (!result.ok) {
+    try {
+      const data =
+        isEdit && id
+          ? await updateEmployee({ id, body }).unwrap()
+          : await createEmployee(body).unwrap()
+      const saved = data.employee
+      const extra = data.reset?.devResetPath ? ` Reset link: ${data.reset.devResetPath}` : ''
+      showToast(`${saved.fullName} (${saved.employeeCode}) was ${isEdit ? 'updated' : 'created'}.${extra}`)
+      navigate('/employees', {
+        replace: true,
+        state: {
+          toast: isEdit
+            ? `Employee ${saved.employeeCode} updated successfully.`
+            : `Employee ${saved.employeeCode} created successfully.`,
+        },
+      })
+    } catch (err) {
       submitting.current = false
       setSaving(false)
-      setErrors(result.data?.fields || {})
-      const message = result.data?.error || (isEdit ? 'Unable to update employee.' : 'Unable to create employee.')
+      setErrors(getApiErrorFields(err))
+      const message = getApiError(err, isEdit ? 'Unable to update employee.' : 'Unable to create employee.')
       setFormError(message)
       showToast(message, 'error')
-      return
     }
-
-    const saved = result.data.employee
-    const extra = result.data.reset?.devResetPath ? ` Reset link: ${result.data.reset.devResetPath}` : ''
-    showToast(`${saved.fullName} (${saved.employeeCode}) was ${isEdit ? 'updated' : 'created'}.${extra}`)
-    navigate('/employees', {
-      replace: true,
-      state: {
-        toast: isEdit
-          ? `Employee ${saved.employeeCode} updated successfully.`
-          : `Employee ${saved.employeeCode} created successfully.`,
-      },
-    })
   }
 
   if (!allowed) {

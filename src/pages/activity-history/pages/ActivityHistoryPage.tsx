@@ -14,7 +14,12 @@ import {
   Message01Icon,
   UserMultiple02Icon,
 } from '@hugeicons/core-free-icons'
-import { createActivity, listActivityFeed, recordActivityExport } from '../../api/client'
+import {
+  useCreateActivityMutation,
+  useLazyListActivityFeedQuery,
+  useRecordActivityExportMutation,
+} from '@/redux/features/activities/activitiesApi'
+import { getApiError } from '@/utils/apiError'
 import Button from '../../components/Button'
 import Input from '../../components/Input'
 import PageHeader from '../../components/PageHeader'
@@ -224,6 +229,9 @@ export default function ActivityHistoryPage() {
   const [saving, setSaving] = useState(false)
   const syncedSearch = useRef(false)
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const [listActivityFeed] = useLazyListActivityFeedQuery()
+  const [createActivity] = useCreateActivityMutation()
+  const [recordActivityExport] = useRecordActivityExportMutation()
 
   function applySearch(next: string) {
     setSearch(next)
@@ -236,22 +244,22 @@ export default function ActivityHistoryPage() {
 
   async function load(next = { from, to, category, search, userId }) {
     setLoading(true)
-    const result = await listActivityFeed({
-      from: next.from,
-      to: next.to,
-      category: next.category === 'all' ? '' : next.category,
-      search: next.search,
-      userId: next.userId,
-    })
-    if (result.ok) {
-      setItems(result.data.items)
-      setCounts(result.data.counts)
-      setSummary(result.data.summary)
+    try {
+      const data = await listActivityFeed({
+        from: next.from,
+        to: next.to,
+        category: next.category === 'all' ? '' : next.category,
+        search: next.search,
+        userId: next.userId,
+      }).unwrap()
+      setItems(data.items)
+      setCounts(data.counts)
+      setSummary(data.summary)
       setMessage('')
-    } else {
+    } catch (err) {
       setItems([])
       setCounts(EMPTY_COUNTS)
-      setMessage(result.data?.error || 'Unable to load activity history.')
+      setMessage(getApiError(err, 'Unable to load activity history.'))
     }
     setLoading(false)
   }
@@ -341,7 +349,7 @@ export default function ActivityHistoryPage() {
     link.download = `activity-history-${dayjs().format('YYYY-MM-DD')}.csv`
     link.click()
     URL.revokeObjectURL(url)
-    void recordActivityExport(items.length)
+    void recordActivityExport({ count: items.length })
   }
 
   const exportItems: MenuProps['items'] = [
@@ -350,21 +358,21 @@ export default function ActivityHistoryPage() {
 
   async function submitLog() {
     setSaving(true)
-    const result = await createActivity({
-      type: logType,
-      relatedName: logName || active?.relatedName || undefined,
-      durationMin: logType === 'CALL' || logType === 'MEETING' ? Number(logDuration) || null : null,
-      outcome: logOutcome,
-      notes: logNotes,
-    })
-    setSaving(false)
-    if (result.ok) {
+    try {
+      await createActivity({
+        type: logType,
+        relatedName: logName || active?.relatedName || undefined,
+        durationMin: logType === 'CALL' || logType === 'MEETING' ? Number(logDuration) || null : null,
+        outcome: logOutcome,
+        notes: logNotes,
+      }).unwrap()
       setLogOpen(false)
       setLogNotes('')
       await load()
-    } else {
-      setMessage(result.data?.error || 'Unable to save activity.')
+    } catch (err) {
+      setMessage(getApiError(err, 'Unable to save activity.'))
     }
+    setSaving(false)
   }
 
   const cards = [

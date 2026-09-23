@@ -30,7 +30,12 @@ import {
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
-import { listEmployeeOptions, listEmployees, updateEmployeeStatus } from '../../api/client'
+import {
+  useLazyListEmployeeOptionsQuery,
+  useLazyListEmployeesQuery,
+  useUpdateEmployeeStatusMutation,
+} from '@/redux/features/employees/employeesApi'
+import { getApiError } from '@/utils/apiError'
 import { HugeiconsIcon } from '@hugeicons/react'
 import type { IconSvgElement } from '@hugeicons/react'
 import {
@@ -206,6 +211,9 @@ export default function EmployeesPage() {
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const statusFlashTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const syncedSearch = useRef(false)
+  const [listEmployeeOptions] = useLazyListEmployeeOptionsQuery()
+  const [listEmployees] = useLazyListEmployeesQuery()
+  const [updateEmployeeStatus] = useUpdateEmployeeStatusMutation()
 
   const filterTeams = useMemo(() => {
     if (filters.departmentId) {
@@ -252,9 +260,11 @@ export default function EmployeesPage() {
   }
 
   async function loadOptions() {
-    const result = await listEmployeeOptions()
-    if (result.ok) {
-      setOptions(result.data)
+    try {
+      const data = await listEmployeeOptions().unwrap()
+      setOptions(data)
+    } catch {
+      // keep previous options
     }
   }
 
@@ -262,23 +272,23 @@ export default function EmployeesPage() {
     if (!opts?.silent) {
       setLoading(true)
     }
-    const result = await listEmployees({
-      search: (opts?.search ?? filters.search).trim() || undefined,
-      departmentId: filters.departmentId || undefined,
-      teamId: filters.teamId || undefined,
-      designationId: filters.designationId || undefined,
-      roleId: filters.roleId || undefined,
-      employmentTypeId: filters.employmentTypeId || undefined,
-      employmentStatusId: filters.employmentStatusId || undefined,
-      reportingManagerId: filters.reportingManagerId || undefined,
-      joiningFrom: filters.joiningFrom || undefined,
-      joiningTo: filters.joiningTo || undefined,
-    })
-    if (result.ok) {
-      setEmployees(result.data.employees)
+    try {
+      const data = await listEmployees({
+        search: (opts?.search ?? filters.search).trim() || undefined,
+        departmentId: filters.departmentId || undefined,
+        teamId: filters.teamId || undefined,
+        designationId: filters.designationId || undefined,
+        roleId: filters.roleId || undefined,
+        employmentTypeId: filters.employmentTypeId || undefined,
+        employmentStatusId: filters.employmentStatusId || undefined,
+        reportingManagerId: filters.reportingManagerId || undefined,
+        joiningFrom: filters.joiningFrom || undefined,
+        joiningTo: filters.joiningTo || undefined,
+      }).unwrap()
+      setEmployees(data.employees)
       setError('')
-    } else {
-      setError(result.data?.error || 'Unable to load employees.')
+    } catch (err) {
+      setError(getApiError(err, 'Unable to load employees.'))
     }
     if (!opts?.silent) {
       setLoading(false)
@@ -331,16 +341,16 @@ export default function EmployeesPage() {
       return
     }
     setStatusUpdatingId(employee.id)
-    const result = await updateEmployeeStatus(employee.id, { status: next })
-    setStatusUpdatingId(null)
-    if (!result.ok) {
-      showToast(result.data?.error || 'Unable to change status.', 'error')
-      return
+    try {
+      const data = await updateEmployeeStatus({ id: employee.id, body: { status: next } }).unwrap()
+      const nextName = data.employee.employmentStatus?.name || (next === 'ACTIVE' ? 'Active' : 'Inactive')
+      showToast(`${employee.fullName} is now ${nextName}.`)
+      flashStatusRow(employee.id)
+      await Promise.all([loadList({ silent: true }), loadOptions()])
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to change status.'), 'error')
     }
-    const nextName = result.data.employee.employmentStatus?.name || (next === 'ACTIVE' ? 'Active' : 'Inactive')
-    showToast(`${employee.fullName} is now ${nextName}.`)
-    flashStatusRow(employee.id)
-    await Promise.all([loadList({ silent: true }), loadOptions()])
+    setStatusUpdatingId(null)
   }
 
   async function changeStatus() {
@@ -348,19 +358,20 @@ export default function EmployeesPage() {
       return
     }
     setStatusSaving(true)
-    const result = await updateEmployeeStatus(statusPrompt.employee.id, {
-      employmentStatusId: statusPrompt.nextStatusId,
-    })
-    setStatusSaving(false)
-    if (!result.ok) {
-      showToast(result.data?.error || 'Unable to change status.', 'error')
-      return
+    try {
+      const data = await updateEmployeeStatus({
+        id: statusPrompt.employee.id,
+        body: { employmentStatusId: statusPrompt.nextStatusId },
+      }).unwrap()
+      const nextName = data.employee.employmentStatus?.name || 'updated'
+      showToast(`${statusPrompt.employee.fullName} is now ${nextName}.`)
+      flashStatusRow(statusPrompt.employee.id)
+      setStatusPrompt(null)
+      await Promise.all([loadList({ silent: true }), loadOptions()])
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to change status.'), 'error')
     }
-    const nextName = result.data.employee.employmentStatus?.name || 'updated'
-    showToast(`${statusPrompt.employee.fullName} is now ${nextName}.`)
-    flashStatusRow(statusPrompt.employee.id)
-    setStatusPrompt(null)
-    await Promise.all([loadList({ silent: true }), loadOptions()])
+    setStatusSaving(false)
   }
 
   const promptStatus = statusPrompt

@@ -44,21 +44,22 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent,
 import { createPortal } from 'react-dom'
 import { useOutletContext, useLocation } from 'react-router-dom'
 import {
-  adminPasswordReset,
-  createUser,
-  forceLogoutUser,
-  getUser,
-  listDepartments,
-  listRoles,
-  listUserActivity,
-  listUserSessions,
-  listUsers,
-  revokeUserSession,
-  setUserScopes,
-  updateUser,
-  updateUserStatus,
+  useAdminPasswordResetMutation,
+  useCreateUserMutation,
+  useForceLogoutUserMutation,
+  useLazyGetUserQuery,
+  useLazyListUserActivityQuery,
+  useLazyListUserSessionsQuery,
+  useLazyListUsersQuery,
+  useRevokeUserSessionMutation,
+  useSetUserScopesMutation,
+  useUpdateUserMutation,
+  useUpdateUserStatusMutation,
   type UserPayload,
-} from '../../api/client'
+} from '@/redux/features/users/usersApi'
+import { useLazyListRolesQuery } from '@/redux/features/roles/rolesApi'
+import { useLazyListDepartmentsQuery } from '@/redux/features/masterData/masterDataApi'
+import { getApiError } from '@/utils/apiError'
 import { patchCurrentAuthUser } from '../../lib/auth-session'
 import { HugeiconsIcon } from '@hugeicons/react'
 import type { IconSvgElement } from '@hugeicons/react'
