@@ -44,6 +44,7 @@ const activitiesApi = baseApi.injectEndpoints({
 
 export const {
   useListActivityFeedQuery,
+  useLazyListActivityFeedQuery,
   useCreateActivityMutation,
   useRecordActivityExportMutation,
 } = activitiesApi

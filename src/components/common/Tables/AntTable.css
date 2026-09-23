@@ -1,0 +1,498 @@
+/* List tables — aligned with Amzadfood admin typography */
+.ant-table-wrapper .ant-table-thead > tr > th {
+  background-color: #f4f5f6 !important;
+  color: #374151;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 12px 14px;
+  border-inline-end: 1px solid #e5e7eb !important;
+  border-bottom: 2px solid #e5e7eb !important;
+}
+
+.ant-table-wrapper .ant-table-thead > tr:first-child > th {
+  border-top: 1px solid #e5e7eb !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  background-color: #fff;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 20px;
+  padding: 10px 14px;
+  letter-spacing: 0%;
+}
+
+/* Small table overrides */
+.ant-table-wrapper .ant-table-small .ant-table-thead > tr > th {
+  padding: 10px 12px !important;
+  font-size: 11px !important;
+}
+
+.ant-table-wrapper .ant-table-small .ant-table-tbody > tr > td {
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td,
+.ant-table-wrapper .ant-table-tbody .ant-table-row > .ant-table-cell-row-hover {
+  background: #edeeef81 !important;
+}
+
+/* .ant-table-wrapper .ant-table-tbody > tr:last-child > td {
+  border-bottom: none;
+} */
+
+.ant-table-wrapper {
+  background-color: #fff;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ant-table-wrapper .ant-table {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.ant-table-wrapper.border {
+  border: 1px solid #c7cacf;
+  border-radius: 8px;
+}
+
+.ant-table-wrapper.rounded-lg {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ant-table-container {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .ant-table-wrapper.sidebar-expanded {
+    max-width: calc(100vw - 295px);
+  }
+
+  .ant-table-wrapper.sidebar-collapsed {
+    max-width: calc(100vw - 125px);
+  }
+}
+
+.fix-right-column {
+  right: -2px !important;
+}
+/* --- Pagination (DataTable) — card style: ~40px controls, green active, light gray borders (ref. design) --- */
+.ant-table-wrapper .ant-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 8px;
+  margin: 20px 0 0 0;
+}
+
+/* Page numbers — min 40px wide, can grow for 2–3 digits */
+.ant-table-wrapper .ant-pagination .ant-pagination-item {
+  min-width: 40px;
+  width: auto;
+  height: 40px;
+  line-height: 38px;
+  margin-inline: 0 !important;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  overflow: hidden;
+}
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-jump-next
+  .ant-pagination-item-container {
+  position: relative;
+  right: 6px !important;
+  transition: right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-jump-next:hover
+  .ant-pagination-item-container {
+  right: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ant-table-wrapper
+    .ant-pagination
+    .ant-pagination-jump-next
+    .ant-pagination-item-container {
+    transition: none;
+  }
+}
+
+/* Prev / next / ellipsis — fixed 40×40 */
+.ant-table-wrapper .ant-pagination .ant-pagination-prev,
+.ant-table-wrapper .ant-pagination .ant-pagination-next,
+.ant-table-wrapper .ant-pagination .ant-pagination-jump-prev,
+.ant-table-wrapper .ant-pagination .ant-pagination-jump-next {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  line-height: 38px;
+  margin-inline: 0 !important;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  overflow: hidden;
+}
+
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-item
+  .ant-pagination-item-link,
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-prev
+  .ant-pagination-item-link,
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-next
+  .ant-pagination-item-link,
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-jump-prev
+  .ant-pagination-item-link,
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-jump-next
+  .ant-pagination-item-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  line-height: 1;
+  border: none !important;
+  background: transparent !important;
+  font-weight: 600;
+  color: #1f2937;
+  border-radius: 0;
+  padding: 0 6px;
+}
+
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-item
+  .ant-pagination-item-link,
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-item
+  a.ant-pagination-item-link {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Active page — solid brand green, white label */
+.ant-table-wrapper .ant-pagination .ant-pagination-item-active {
+  background: #237d3b !important;
+  border-color: #237d3b !important;
+}
+
+.ant-table-wrapper .ant-pagination .ant-pagination-item-active a {
+  color: #ffffff;
+}
+
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-item-active
+  .ant-pagination-item-link,
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-item-active
+  a.ant-pagination-item-link {
+  color: #fff !important;
+  background: transparent !important;
+}
+
+/* Hover — inactive page numbers */
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-item:not(.ant-pagination-item-active):hover {
+  border-color: #9ca3af;
+  background: #fafafa;
+}
+
+/* Hover — enabled arrows */
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-prev:not(.ant-pagination-disabled):hover,
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-next:not(.ant-pagination-disabled):hover {
+  border-color: #9ca3af;
+  background: #fafafa;
+}
+
+/* Disabled arrows — muted bg + light icon (page 1 prev, last page next) */
+.ant-table-wrapper
+  .ant-pagination
+  li.ant-pagination-disabled.ant-pagination-prev,
+.ant-table-wrapper
+  .ant-pagination
+  li.ant-pagination-disabled.ant-pagination-next {
+  background: #f9fafb !important;
+  border-color: #e5e7eb !important;
+}
+
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-disabled
+  .ant-pagination-item-link {
+  color: #9ca3af !important;
+  background: transparent !important;
+}
+
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-disabled
+  .ant-pagination-item-link
+  .anticon {
+  color: #9ca3af;
+}
+
+/* Ellipsis */
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-jump-prev
+  .ant-pagination-item-link,
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-jump-next
+  .ant-pagination-item-link {
+  color: #6b7280 !important;
+}
+
+.ant-table-wrapper .ant-pagination .ant-pagination-item-ellipsis {
+  color: #6b7280;
+}
+
+/* Page size dropdown */
+.ant-table-wrapper .ant-pagination .ant-pagination-options {
+  margin-left: 8px;
+}
+
+.ant-table-wrapper
+  .ant-pagination
+  .ant-pagination-options
+  .ant-select-selector {
+  min-height: 40px !important;
+  border-radius: 10px !important;
+  border-color: #d1d5db !important;
+  align-items: center;
+}
+
+/* ── Horizontal scroll area ── */
+.ant-table-body,
+.ant-table-content {
+  cursor: grab;
+  user-select: none;
+}
+.ant-table-body:active,
+.ant-table-content:active {
+  cursor: grabbing;
+}
+
+/* Hide horizontal scrollbar */
+.ant-table-body::-webkit-scrollbar,
+.ant-table-content::-webkit-scrollbar {
+  display: none;
+}
+.ant-table-body,
+.ant-table-content {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Row alternating light tint */
+.ant-table-wrapper .ant-table-tbody > tr:nth-child(even) > td {
+  background-color: #fafafa;
+}
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td,
+.ant-table-wrapper .ant-table-tbody .ant-table-row > .ant-table-cell-row-hover {
+  background: #f0fdf4 !important;
+}
+
+/* Drag-and-drop reorder — rows stay visually unchanged */
+.ant-table-wrapper .ant-table-tbody > tr.document-row-drop-target > td {
+  transition: background-color 0.15s ease;
+}
+
+.ant-table-wrapper
+  .ant-table-tbody
+  > tr.document-row-drop-target.document-row-drag-over
+  > td {
+  background: rgba(35, 125, 59, 0.1) !important;
+  border-top: 1px solid rgba(35, 125, 59, 0.3) !important;
+  border-bottom: 1px solid rgba(35, 125, 59, 0.3) !important;
+}
+
+.ant-table-wrapper
+  .ant-table-tbody
+  > tr.document-row-drop-target.document-row-drag-over
+  > td:first-child {
+  border-left: 1px solid rgba(35, 125, 59, 0.3) !important;
+}
+
+.ant-table-wrapper
+  .ant-table-tbody
+  > tr.document-row-drop-target.document-row-drag-over
+  > td:last-child {
+  border-right: 1px solid rgba(35, 125, 59, 0.3) !important;
+}
+
+.ant-table-wrapper .doc-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  cursor: grab;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+  user-select: none;
+  touch-action: none;
+}
+
+.ant-table-wrapper .doc-drag-handle:hover {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.12);
+}
+
+.ant-table-wrapper .doc-drag-handle:active {
+  cursor: grabbing;
+  background: #dcfce7;
+  border-color: #4ade80;
+  color: #166534;
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+}
+
+/* Windows-like floating clone of the full row */
+.document-drag-float {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  overflow: hidden;
+  border-radius: 10px;
+  padding: 0.25rem 1rem;
+  background: var(--primary, #237d3b);
+  box-shadow: 0 14px 30px rgba(35, 125, 59, 0.35);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.document-drag-float__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.document-drag-float__row > td {
+  background: var(--primary, #237d3b) !important;
+  color: #fff !important;
+  border-bottom: none !important;
+  vertical-align: middle;
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+.document-drag-float .ant-tag {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+}
+
+.document-drag-float .doc-sort-badge {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #fff !important;
+}
+
+.document-drag-float .doc-drag-handle {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+
+.document-drag-float .text-gray-400 {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.course-doc-stage-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.course-doc-stage-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid #eef2f7;
+}
+
+.course-doc-stage-card__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  letter-spacing: 0.01em;
+}
+
+.course-doc-stage-card__meta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.course-doc-stage-card .ant-table-wrapper {
+  margin: 0;
+}
+
+.course-doc-stage-card .ant-table-thead > tr > th {
+  background: #fafafa !important;
+}
+
+.doc-sort-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

@@ -115,17 +115,37 @@ const masterDataApi = baseApi.injectEndpoints({
         'MasterDataCategories',
       ],
     }),
+    exportMasterData: builder.mutation<
+      { blob: Blob; fileName: string },
+      { category: string; format: 'csv' | 'xlsx' }
+    >({
+      query: ({ category, format }) => ({
+        url: `/master-data/items/export?category=${encodeURIComponent(category)}&format=${format}`,
+        responseHandler: async (response) => {
+          const blob = await response.blob()
+          const disposition = response.headers.get('Content-Disposition') || ''
+          const match = disposition.match(/filename="([^"]+)"/)
+          return { blob, fileName: match?.[1] || `master-data.${format}` }
+        },
+      }),
+    }),
   }),
 })
 
 export const {
   useListMasterDataCategoriesQuery,
+  useLazyListMasterDataCategoriesQuery,
   useListMasterDataItemsQuery,
+  useLazyListMasterDataItemsQuery,
   useListMasterDataOptionsQuery,
+  useLazyListMasterDataOptionsQuery,
   useCreateMasterDataItemMutation,
   useUpdateMasterDataItemMutation,
   useDeleteMasterDataItemMutation,
   useListMasterDataHistoryQuery,
+  useLazyListMasterDataHistoryQuery,
   useListDepartmentsQuery,
+  useLazyListDepartmentsQuery,
   useImportMasterDataMutation,
+  useExportMasterDataMutation,
 } = masterDataApi

@@ -1,22 +1,24 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AppLayout from '../layouts/AppLayout'
 import AuthLayout from '../layouts/AuthLayout'
-import Account from '../pages/Account'
-import ActivityHistory from '../pages/ActivityHistory'
-import AuditLogs from '../pages/AuditLogs'
-import ComingSoon from '../pages/ComingSoon'
-import Dashboard from '../pages/Dashboard'
-import EmployeeCreate from '../pages/EmployeeCreate'
-import EmployeeProfile from '../pages/EmployeeProfile'
-import Employees from '../pages/Employees'
-import ForgotPassword from '../pages/ForgotPassword'
-import Login from '../pages/Login'
-import MasterData from '../pages/MasterData'
-import MasterDataItems from '../pages/MasterDataItems'
-import Profile from '../pages/Profile'
-import ResetPassword from '../pages/ResetPassword'
-import Roles from '../pages/Roles'
-import Users from '../pages/Users'
+import { AccountPage } from '../pages/account'
+import { ActivityHistoryPage } from '../pages/activity-history'
+import { ApplicationsPage } from '../pages/applications'
+import { AuditLogsPage } from '../pages/audit-logs'
+import { LoginPage, ForgotPasswordPage, ResetPasswordPage } from '../pages/auth'
+import { DashboardPage } from '../pages/dashboard'
+import { DocumentsPage } from '../pages/documents'
+import { EmployeesPage, EmployeeCreatePage, EmployeeProfilePage } from '../pages/employees'
+import { FollowUpsPage } from '../pages/follow-ups'
+import { LeadsPage } from '../pages/leads'
+import { MasterDataPage, MasterDataItemsPage } from '../pages/master-data'
+import { PaymentsPage } from '../pages/payments'
+import { ProfilePage } from '../pages/profile'
+import { ReportsPage } from '../pages/reports'
+import { RolesPage } from '../pages/roles'
+import { SettingsPage } from '../pages/settings'
+import { StudentsPage } from '../pages/students'
+import { UsersPage } from '../pages/users'
 import PermissionRoute from './PermissionRoute'
 import ProtectedRoute from './ProtectedRoute'
 
@@ -28,79 +30,79 @@ const routes = [
         element: <AppLayout />,
         children: [
           { path: '/', element: <Navigate to="/dashboard" replace /> },
-          { path: '/dashboard', element: <Dashboard /> },
-          { path: '/profile', element: <Profile /> },
-          { path: '/account', element: <Account /> },
+          { path: '/dashboard', element: <DashboardPage /> },
+          { path: '/profile', element: <ProfilePage /> },
+          { path: '/account', element: <AccountPage /> },
 
           {
             element: <PermissionRoute permission="lead:view" />,
-            children: [{ path: '/leads', element: <ComingSoon title="Leads" /> }],
+            children: [{ path: '/leads', element: <LeadsPage /> }],
           },
           {
             element: <PermissionRoute permission="lead:convert" />,
             children: [
-              { path: '/applications', element: <ComingSoon title="Applications" /> },
-              { path: '/students', element: <ComingSoon title="Students" /> },
+              { path: '/applications', element: <ApplicationsPage /> },
+              { path: '/students', element: <StudentsPage /> },
             ],
           },
           {
             element: <PermissionRoute permission="document:view" />,
-            children: [{ path: '/documents', element: <ComingSoon title="Documents" /> }],
+            children: [{ path: '/documents', element: <DocumentsPage /> }],
           },
           {
             element: <PermissionRoute permission="payment:view" />,
-            children: [{ path: '/payments', element: <ComingSoon title="Payments" /> }],
+            children: [{ path: '/payments', element: <PaymentsPage /> }],
           },
           {
             element: <PermissionRoute permission="follow_up:view" />,
-            children: [{ path: '/follow-ups', element: <ComingSoon title="Follow-ups" /> }],
+            children: [{ path: '/follow-ups', element: <FollowUpsPage /> }],
           },
           {
             element: <PermissionRoute permission="activity:view" />,
-            children: [{ path: '/activity-history', element: <ActivityHistory /> }],
+            children: [{ path: '/activity-history', element: <ActivityHistoryPage /> }],
           },
           {
             element: <PermissionRoute permission="report:view" />,
-            children: [{ path: '/reports', element: <ComingSoon title="Reports" /> }],
+            children: [{ path: '/reports', element: <ReportsPage /> }],
           },
           {
             element: <PermissionRoute permission="employee:create" />,
-            children: [{ path: '/employees/new', element: <EmployeeCreate /> }],
+            children: [{ path: '/employees/new', element: <EmployeeCreatePage /> }],
           },
           {
             element: <PermissionRoute permission="employee:edit" />,
-            children: [{ path: '/employees/:id/edit', element: <EmployeeCreate /> }],
+            children: [{ path: '/employees/:id/edit', element: <EmployeeCreatePage /> }],
           },
           {
             element: <PermissionRoute permission="employee:view" />,
             children: [
-              { path: '/employees', element: <Employees /> },
-              { path: '/employees/:id', element: <EmployeeProfile /> },
+              { path: '/employees', element: <EmployeesPage /> },
+              { path: '/employees/:id', element: <EmployeeProfilePage /> },
             ],
           },
           {
             element: <PermissionRoute permission="user:view" />,
-            children: [{ path: '/users', element: <Users /> }],
+            children: [{ path: '/users', element: <UsersPage /> }],
           },
           {
             element: <PermissionRoute permission="role:view" />,
-            children: [{ path: '/roles', element: <Roles /> }],
+            children: [{ path: '/roles', element: <RolesPage /> }],
           },
           {
             element: <PermissionRoute permission="audit:view" />,
-            children: [{ path: '/audit-logs', element: <AuditLogs /> }],
+            children: [{ path: '/audit-logs', element: <AuditLogsPage /> }],
           },
           {
             element: <PermissionRoute permission="master_data:view" />,
             children: [
-              { path: '/master-data', element: <MasterData /> },
-              { path: '/master-data/:groupSlug', element: <MasterDataItems /> },
-              { path: '/master-data/:groupSlug/:categoryKey', element: <MasterDataItems /> },
+              { path: '/master-data', element: <MasterDataPage /> },
+              { path: '/master-data/:groupSlug', element: <MasterDataItemsPage /> },
+              { path: '/master-data/:groupSlug/:categoryKey', element: <MasterDataItemsPage /> },
             ],
           },
           {
             element: <PermissionRoute permission="settings:view" />,
-            children: [{ path: '/settings', element: <ComingSoon title="Settings" /> }],
+            children: [{ path: '/settings', element: <SettingsPage /> }],
           },
         ],
       },
@@ -114,7 +116,7 @@ const routes = [
         path: '/login',
         element: (
           <ProtectedRoute guestOnly>
-            <Login />
+            <LoginPage />
           </ProtectedRoute>
         ),
       },
@@ -122,7 +124,7 @@ const routes = [
         path: '/forgot-password',
         element: (
           <ProtectedRoute guestOnly>
-            <ForgotPassword />
+            <ForgotPasswordPage />
           </ProtectedRoute>
         ),
       },
@@ -130,7 +132,7 @@ const routes = [
         path: '/reset-password',
         element: (
           <ProtectedRoute guestOnly>
-            <ResetPassword />
+            <ResetPasswordPage />
           </ProtectedRoute>
         ),
       },

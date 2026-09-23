@@ -38,9 +38,9 @@ function ThemedApp() {
           controlHeight: 42,
           controlHeightLG: 42,
           controlHeightSM: 34,
-          colorBgLayout: isDark ? '#101418' : '#fcfbf8',
+          colorBgLayout: isDark ? '#101418' : '#fafafa',
           colorBgContainer: isDark ? '#1c232b' : '#ffffff',
-          colorBorder: isDark ? '#2a343e' : '#e6edf5',
+          colorBorder: isDark ? '#2a343e' : '#e2e8f0',
           colorText: isDark ? '#e7edf3' : '#16324f',
         },
       }}

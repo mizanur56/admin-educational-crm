@@ -89,6 +89,7 @@ const rolesApi = baseApi.injectEndpoints({
 
 export const {
   useListRolesQuery,
+  useLazyListRolesQuery,
   useGetRoleQuery,
   useCreateRoleMutation,
   useUpdateRoleMutation,
@@ -96,4 +97,5 @@ export const {
   useDeleteRoleMutation,
   useSetRolePermissionsMutation,
   useListPermissionsQuery,
+  useLazyListPermissionsQuery,
 } = rolesApi

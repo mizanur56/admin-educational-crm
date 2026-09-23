@@ -66,8 +66,6 @@ export default function UserDropdown({
   const [isOpen, setIsOpen] = useState(false)
   const [shouldRender, setShouldRender] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  const [pending, setPending] = useState(false)
-
   const user = auth.user
   const roleName = auth.role?.name?.trim()
 
@@ -120,14 +118,10 @@ export default function UserDropdown({
     }
   }, [isOpen])
 
-  async function handleLogout() {
+  function handleLogout() {
     setIsOpen(false)
-    setPending(true)
-    try {
-      await logout()
-    } finally {
-      navigate('/login', { replace: true })
-    }
+    logout()
+    navigate('/login', { replace: true })
   }
 
   return (
@@ -231,11 +225,10 @@ export default function UserDropdown({
             <button
               type="button"
               className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-2 py-1.5 font-[inherit] text-[13px] font-medium text-red-600 transition-colors duration-150 ease-in-out hover:bg-[color-mix(in_srgb,#dc2626_8%,transparent)] disabled:cursor-wait disabled:opacity-70 dark:text-red-400 dark:hover:bg-[color-mix(in_srgb,#f87171_12%,transparent)]"
-              onClick={() => void handleLogout()}
-              disabled={pending}
+              onClick={handleLogout}
             >
               <HugeiconsIcon icon={Logout01Icon} size={15} color="currentColor" strokeWidth={1.5} />
-              {pending ? 'Signing out…' : 'Logout'}
+              Logout
             </button>
           </div>
         </div>

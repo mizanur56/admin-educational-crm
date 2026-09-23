@@ -8,20 +8,40 @@ import {
   setSession,
   useAppDispatch,
   useAppSelector,
+  type AppDispatch,
 } from '@/redux'
-import { useLogoutMutation } from '@/redux/features/auth/authApi'
+import { baseApi } from '@/redux/api/baseApi'
+import { clearAuthPersistStorage, notifyServerLogout } from '@/lib/authStorage'
 import { hasPermission as checkPermission } from '@/lib/access'
 import type { AuthSession, AuthUser } from '@/types'
+
+/**
+ * Instant client teardown — mirrors campus-transfer logout:
+ * clear auth slice, wipe RTK Query cache, remove persist blob.
+ * Server logout is non-blocking.
+ */
+export function clearClientAuthState(
+  dispatch: AppDispatch,
+  options?: { notifyServer?: boolean },
+) {
+  if (options?.notifyServer !== false) {
+    notifyServerLogout()
+  }
+  dispatch(clearSession())
+  dispatch(baseApi.util.resetApiState())
+  clearAuthPersistStorage()
+}
 
 export function useAuth() {
   const dispatch = useAppDispatch()
   const session = useAppSelector(selectAuthSession)
   const hydrated = useAppSelector(selectAuthHydrated)
   const permissions = useAppSelector(selectPermissions)
-  const [logoutMutation] = useLogoutMutation()
 
   const applySession = useCallback(
     (next: AuthSession) => {
+      // Drop any previous user's cached API data before binding the new session
+      dispatch(baseApi.util.resetApiState())
       dispatch(setSession(next))
     },
     [dispatch],
@@ -34,15 +54,9 @@ export function useAuth() {
     [dispatch],
   )
 
-  const logout = useCallback(async () => {
-    try {
-      await logoutMutation().unwrap()
-    } catch {
-      /* still clear local session */
-    } finally {
-      dispatch(clearSession())
-    }
-  }, [dispatch, logoutMutation])
+  const logout = useCallback(() => {
+    clearClientAuthState(dispatch)
+  }, [dispatch])
 
   const can = useCallback(
     (permission: string) => (session ? checkPermission(session, permission) : false),

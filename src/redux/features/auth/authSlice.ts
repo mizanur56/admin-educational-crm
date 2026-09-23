@@ -42,4 +42,6 @@ export default authSlice.reducer
 export const selectAuthSession = (state: AuthRoot) => state.auth.session
 export const selectCurrentUser = (state: AuthRoot) => state.auth.session?.user ?? null
 export const selectAuthHydrated = (state: AuthRoot) => state.auth.hydrated
-export const selectPermissions = (state: AuthRoot) => state.auth.session?.permissions ?? []
+
+const EMPTY_PERMISSIONS: string[] = []
+export const selectPermissions = (state: AuthRoot) => state.auth.session?.permissions ?? EMPTY_PERMISSIONS
