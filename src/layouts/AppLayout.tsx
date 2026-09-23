@@ -204,7 +204,7 @@ export default function AppLayout() {
     }
 
     return (
-      <div key={item.to} className="grid gap-0.5">
+      <div key={item.to} className="grid gap-1.5">
         <button
           type="button"
           className={[
@@ -353,14 +353,14 @@ export default function AppLayout() {
         ].join(' ')}
       >
         <nav
-          className="grid flex-1 content-start gap-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="grid flex-1 content-start gap-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           aria-label="Application"
         >
           {navGroups.map((group) => {
             const isOpen = collapsed || openGroups[group.id]
 
             return (
-              <section key={group.id} className="grid gap-0.5">
+              <section key={group.id} className="grid gap-1.5">
                 <button
                   type="button"
                   className={`${groupTitleHidden} w-full cursor-pointer items-center justify-between border-0 bg-transparent px-2.5 py-1 text-[0.68rem] font-bold tracking-[0.08em] text-nav-group uppercase`}
@@ -381,7 +381,7 @@ export default function AppLayout() {
                   className="grid transition-[grid-template-rows] duration-[280ms] ease-in-out"
                   style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
                 >
-                  <div className="grid min-h-0 gap-0.5 overflow-hidden">
+                  <div className="grid min-h-0 gap-1.5 overflow-hidden">
                     {group.items.map((item) => renderNavItem(item))}
                   </div>
                 </div>

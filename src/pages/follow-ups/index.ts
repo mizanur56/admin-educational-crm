@@ -1,0 +1,5 @@
+export { default as FollowUpsPage } from './pages/FollowUpsPage'
+export { default as FollowUpFilters } from './components/FollowUpFilters'
+export { default as FollowUpsTable } from './components/FollowUpsTable'
+export { default as FollowUpFormModal } from './components/FollowUpFormModal'
+export type { FollowUpRow, FollowUpFormValues } from './types'
