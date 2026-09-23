@@ -320,6 +320,25 @@ function asSelectString(value: unknown) {
   return typeof value === 'string' ? value : ''
 }
 
+function userPayloadForm(body: UserPayload, photo?: File | null) {
+  const form = new FormData()
+  form.set('fullName', body.fullName)
+  form.set('email', body.email)
+  form.set('mobile', body.mobile)
+  form.set('username', body.username)
+  form.set('roleId', body.roleId)
+  form.set('status', body.status)
+  form.set('departmentId', body.departmentId || '')
+  form.set('teamId', body.teamId || '')
+  if (body.password) {
+    form.set('password', body.password)
+  }
+  if (photo) {
+    form.set('photo', photo)
+  }
+  return form
+}
+
 function UserViewLayout({
   form,
   selected,
@@ -849,6 +868,19 @@ export default function UsersPage() {
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null)
   const [statusFlashId, setStatusFlashId] = useState<string | null>(null)
   const statusFlashTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [listUsers] = useLazyListUsersQuery()
+  const [getUser] = useLazyGetUserQuery()
+  const [listUserSessions] = useLazyListUserSessionsQuery()
+  const [listUserActivity] = useLazyListUserActivityQuery()
+  const [createUser] = useCreateUserMutation()
+  const [updateUser] = useUpdateUserMutation()
+  const [updateUserStatus] = useUpdateUserStatusMutation()
+  const [setUserScopes] = useSetUserScopesMutation()
+  const [revokeUserSession] = useRevokeUserSessionMutation()
+  const [forceLogoutUser] = useForceLogoutUserMutation()
+  const [adminPasswordReset] = useAdminPasswordResetMutation()
+  const [listRoles] = useLazyListRolesQuery()
+  const [listDepartments] = useLazyListDepartmentsQuery()
 
   const filterTeams = useMemo(() => {
     if (filters.departmentId) {
@@ -909,12 +941,10 @@ export default function UsersPage() {
       setSearching(true)
     }
     try {
-      const result = await listUsers({ ...filters, search: options?.search ?? filters.search })
-      if (result.ok) {
-        setUsers(result.data.users)
-      } else {
-        showToast(result.data?.error || 'Unable to load users.', 'error')
-      }
+      const data = await listUsers({ ...filters, search: options?.search ?? filters.search }).unwrap()
+      setUsers(data.users)
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to load users.'), 'error')
     } finally {
       if (!options?.silent) {
         setLoading(false)
@@ -926,9 +956,15 @@ export default function UsersPage() {
   }
 
   useEffect(() => {
-    listRoles().then((result) => result.ok && setRoles(result.data.roles))
-    listDepartments().then((result) => result.ok && setDepartments(result.data.departments))
-  }, [])
+    void listRoles()
+      .unwrap()
+      .then((data) => setRoles(data.roles))
+      .catch(() => undefined)
+    void listDepartments()
+      .unwrap()
+      .then((data) => setDepartments(data.departments))
+      .catch(() => undefined)
+  }, [listRoles, listDepartments])
 
   useEffect(() => {
     void loadList(readUrlSearchQuery(location.search) ? { fromSearch: true, search: readUrlSearchQuery(location.search) } : undefined)
@@ -984,38 +1020,41 @@ export default function UsersPage() {
     setScopeDraft(DEFAULT_SCOPES)
     setDetailLoading(mode === 'view')
 
-    const [detailResult, sessionResult, activityResult] = await Promise.all([
-      getUser(user.id),
-      mode === 'view' ? listUserSessions(user.id) : Promise.resolve(null),
-      mode === 'view' ? listUserActivity(user.id) : Promise.resolve(null),
-    ])
-    if (detailRequestId.current !== requestId) {
-      return
-    }
-    if (!detailResult.ok) {
-      setDetailLoading(false)
-      showToast(detailResult.data?.error || 'Unable to load user.', 'error')
-      return
-    }
+    try {
+      const [detailData, sessionData, activityData] = await Promise.all([
+        getUser(user.id).unwrap(),
+        mode === 'view' ? listUserSessions(user.id).unwrap() : Promise.resolve(null),
+        mode === 'view' ? listUserActivity(user.id).unwrap() : Promise.resolve(null),
+      ])
+      if (detailRequestId.current !== requestId) {
+        return
+      }
 
-    const detail = detailResult.data.user
-    setForm(formFromUser(detail))
-    setSelected(detail)
-    if (!photoPreviewUrl.current.startsWith('blob:')) {
-      applyPhotoPreview(userPhotoSrc(detail.photoUrl))
+      const detail = detailData.user
+      setForm(formFromUser(detail))
+      setSelected(detail)
+      if (!photoPreviewUrl.current.startsWith('blob:')) {
+        applyPhotoPreview(userPhotoSrc(detail.photoUrl))
+      }
+      setScopeDraft({
+        lead: detail.dataScopes?.lead || 'OWN',
+        document: detail.dataScopes?.document || detail.dataScopes?.lead || 'OWN',
+        employee_performance: detail.dataScopes?.employee_performance || detail.dataScopes?.lead || 'OWN',
+      })
+      if (sessionData) {
+        setSessions(sessionData.sessions)
+      }
+      if (activityData) {
+        setActivity(activityData.activity)
+      }
+      setDetailLoading(false)
+    } catch (err) {
+      if (detailRequestId.current !== requestId) {
+        return
+      }
+      setDetailLoading(false)
+      showToast(getApiError(err, 'Unable to load user.'), 'error')
     }
-    setScopeDraft({
-      lead: detail.dataScopes?.lead || 'OWN',
-      document: detail.dataScopes?.document || detail.dataScopes?.lead || 'OWN',
-      employee_performance: detail.dataScopes?.employee_performance || detail.dataScopes?.lead || 'OWN',
-    })
-    if (sessionResult?.ok) {
-      setSessions(sessionResult.data.sessions)
-    }
-    if (activityResult?.ok) {
-      setActivity(activityResult.data.activity)
-    }
-    setDetailLoading(false)
   }
 
   async function saveUser(event: FormEvent<HTMLFormElement>) {
@@ -1042,34 +1081,37 @@ export default function UsersPage() {
     }
 
     setFormSaving(true)
-    const result = editingId ? await updateUser(editingId, payload, photoFile) : await createUser(payload, photoFile)
-    if (!result.ok) {
-      setFormSaving(false)
-      showToast(result.data?.error || 'Unable to save user.', 'error')
-      return
-    }
+    try {
+      const body = photoFile ? userPayloadForm(payload, photoFile) : payload
+      const data = editingId
+        ? await updateUser({ id: editingId, body }).unwrap()
+        : await createUser({ body }).unwrap()
 
-    if (!editingId && result.data.reset?.devResetPath) {
-      showToast(`User created. Dev reset link: ${result.data.reset.devResetPath}`)
-    } else {
-      showToast(editingId ? 'User updated.' : 'User created.')
+      if (!editingId && data.reset?.devResetPath) {
+        showToast(`User created. Dev reset link: ${data.reset.devResetPath}`)
+      } else {
+        showToast(editingId ? 'User updated.' : 'User created.')
+      }
+      if (editingId === auth.user.id && data.user) {
+        const saved = data.user
+        patchCurrentAuthUser({
+          fullName: saved.fullName,
+          email: saved.email,
+          username: saved.username,
+          mobile: saved.mobile,
+          photoUrl: saved.photoUrl
+            ? `${saved.photoUrl}${saved.photoUrl.includes('?') ? '&' : '?'}v=${Date.now()}`
+            : null,
+          status: saved.status,
+        })
+      }
+      await loadList()
+      setFormSaving(false)
+      closeForm()
+    } catch (err) {
+      setFormSaving(false)
+      showToast(getApiError(err, 'Unable to save user.'), 'error')
     }
-    if (editingId === auth.user.id && result.data.user) {
-      const saved = result.data.user
-      patchCurrentAuthUser({
-        fullName: saved.fullName,
-        email: saved.email,
-        username: saved.username,
-        mobile: saved.mobile,
-        photoUrl: saved.photoUrl
-          ? `${saved.photoUrl}${saved.photoUrl.includes('?') ? '&' : '?'}v=${Date.now()}`
-          : null,
-        status: saved.status,
-      })
-    }
-    await loadList()
-    setFormSaving(false)
-    closeForm()
   }
 
   function flashStatusRow(userId: string) {
@@ -1086,32 +1128,29 @@ export default function UsersPage() {
     }
     setStatusSaving(true)
     setStatusUpdatingId(user.id)
-    const result = await updateUserStatus(user.id, status)
-    if (!result.ok) {
-      setStatusSaving(false)
-      setStatusUpdatingId(null)
-      showToast(result.data?.error || 'Unable to update status.', 'error')
-      return
-    }
+    try {
+      const data = await updateUserStatus({ id: user.id, status }).unwrap()
+      const updated = data.user
+      const nextStatus = updated?.status || status
+      setUsers((current) =>
+        current.map((item) => (item.id === user.id ? { ...item, ...(updated || {}), status: nextStatus } : item)),
+      )
+      if (selected?.id === user.id) {
+        setSelected(updated || { ...selected, status: nextStatus })
+        setForm((current) => ({ ...current, status: nextStatus }))
+      }
 
-    const updated = result.data.user
-    const nextStatus = updated?.status || status
-    setUsers((current) =>
-      current.map((item) => (item.id === user.id ? { ...item, ...(updated || {}), status: nextStatus } : item)),
-    )
-    if (selected?.id === user.id) {
-      setSelected(updated || { ...selected, status: nextStatus })
-      setForm((current) => ({ ...current, status: nextStatus }))
+      const copy = statusChangeCopy(user, nextStatus)
+      const hiddenByFilter = Boolean(filters.status && filters.status !== nextStatus)
+      showToast(hiddenByFilter ? `${copy.success} Hidden by the current status filter.` : copy.success)
+      flashStatusRow(user.id)
+      setStatusPrompt(null)
+      await loadList({ silent: true })
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to update status.'), 'error')
     }
-
-    const copy = statusChangeCopy(user, nextStatus)
-    const hiddenByFilter = Boolean(filters.status && filters.status !== nextStatus)
-    showToast(hiddenByFilter ? `${copy.success} Hidden by the current status filter.` : copy.success)
-    flashStatusRow(user.id)
-    setStatusPrompt(null)
     setStatusSaving(false)
     setStatusUpdatingId(null)
-    await loadList({ silent: true })
   }
 
   function closeForm() {
@@ -1125,13 +1164,12 @@ export default function UsersPage() {
     if (!selected) {
       return
     }
-    const result = await setUserScopes(selected.id, scopeDraft)
-    showToast(
-      result.ok ? 'Data scope saved.' : result.data?.error || 'Unable to save data scope.',
-      result.ok ? 'success' : 'error',
-    )
-    if (result.ok) {
-      setSelected(result.data.user)
+    try {
+      const data = await setUserScopes({ id: selected.id, scopes: scopeDraft }).unwrap()
+      showToast('Data scope saved.')
+      setSelected(data.user)
+    } catch (err) {
+      showToast(getApiError(err, 'Unable to save data scope.'), 'error')
     }
   }
 
@@ -1344,39 +1382,40 @@ export default function UsersPage() {
                       if (!selected) {
                         return
                       }
-                      const result = await revokeUserSession(selected.id, sessionId)
-                      showToast(
-                        result.ok ? 'Session terminated.' : result.data?.error || 'Unable to terminate the selected session.',
-                        result.ok ? 'success' : 'error',
-                      )
-                      const refreshed = await listUserSessions(selected.id)
-                      if (refreshed.ok) {
-                        setSessions(refreshed.data.sessions)
+                      try {
+                        await revokeUserSession({ userId: selected.id, sessionId }).unwrap()
+                        showToast('Session terminated.')
+                        const refreshed = await listUserSessions(selected.id).unwrap()
+                        setSessions(refreshed.sessions)
+                      } catch (err) {
+                        showToast(getApiError(err, 'Unable to terminate the selected session.'), 'error')
                       }
                     }}
                     onForceLogout={async () => {
                       if (!selected) {
                         return
                       }
-                      const result = await forceLogoutUser(selected.id)
-                      showToast(
-                        result.ok ? 'All sessions terminated.' : result.data?.error || 'Unable to terminate the selected session.',
-                        result.ok ? 'success' : 'error',
-                      )
+                      try {
+                        await forceLogoutUser(selected.id).unwrap()
+                        showToast('All sessions terminated.')
+                      } catch (err) {
+                        showToast(getApiError(err, 'Unable to terminate the selected session.'), 'error')
+                      }
                     }}
                     onPasswordReset={async () => {
                       if (!selected) {
                         return
                       }
-                      const result = await adminPasswordReset(selected.id)
-                      showToast(
-                        result.ok
-                          ? result.data.devResetPath
-                            ? `Reset created. Dev link: ${result.data.devResetPath}`
-                            : result.data.message || 'Password reset started.'
-                          : result.data?.error || 'Unable to start password reset.',
-                        result.ok ? 'success' : 'error',
-                      )
+                      try {
+                        const data = await adminPasswordReset(selected.id).unwrap()
+                        showToast(
+                          data.devResetPath
+                            ? `Reset created. Dev link: ${data.devResetPath}`
+                            : data.message || 'Password reset started.',
+                        )
+                      } catch (err) {
+                        showToast(getApiError(err, 'Unable to start password reset.'), 'error')
+                      }
                     }}
                     onScopeChange={(resource, value) =>
                       setScopeDraft((current) => ({ ...current, [resource]: value }))
