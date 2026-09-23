@@ -21,7 +21,7 @@
   --color-border: #e2e8f0;
   --color-border-subtle: #eef2f6;
   --color-hover-bg: #e8eef5;
-  --color-nav-hover-bg: #f8fafc;
+  --color-nav-hover-bg: color-mix(in srgb, #35ad0b 10%, transparent);
   --color-nav-active-bg: #e4f6dc;
   --color-nav-active: #2b8e09;
   --color-nav: #3a4650;
@@ -111,7 +111,7 @@
   --color-border: #2a343e;
   --color-border-subtle: #24303a;
   --color-hover-bg: #24303a;
-  --color-nav-hover-bg: #24303a;
+  --color-nav-hover-bg: color-mix(in srgb, #44c218 14%, transparent);
   --color-nav-active-bg: rgb(53 173 11 / 0.18);
   --color-nav-active: #7ae84a;
   --color-nav: #c5d0da;
